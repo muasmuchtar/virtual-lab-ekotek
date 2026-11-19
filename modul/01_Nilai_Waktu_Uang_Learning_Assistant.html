@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Virtual Lab — Time Value of Money</title>
+<style>
+:root{
+  --bg:#07111f;--panel:#0d1a2b;--panel2:#11243a;--text:#eaf2ff;--muted:#9fb4cc;
+  --accent:#32c8ff;--accent2:#66e0b8;--warn:#ffb454;--danger:#ff6b6b;--ok:#65d88c;
+  --line:#27425f;--card:#0b1726;--white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#07111f,#0a1421 40%,#08101b);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.header{position:sticky;top:0;z-index:20;background:rgba(6,14,25,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:12px 16px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.title h1{font-size:20px;margin:0}.title small{color:var(--muted)}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid #35516e;background:#12263d;color:var(--text);padding:8px 10px;border-radius:9px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:#0d6f99;border-color:#159bd0}.btn.good{background:#14623b;border-color:#2fa56a}.btn.warn{background:#7b4c11;border-color:#bf7d22}
+.grid{display:grid;grid-template-columns:310px minmax(0,1fr) 330px;gap:12px;padding:12px}
+.panel{background:rgba(13,26,43,.94);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+.panel h2{font-size:15px;margin:0 0 10px;color:#cfe9ff}.panel h3{font-size:13px;margin:14px 0 8px;color:#bcd7ef}
+.controls label{display:block;font-size:12px;color:var(--muted);margin-top:9px}
+.controls input,.controls select,.controls textarea{width:100%;margin-top:4px;background:#081423;color:var(--text);border:1px solid #284864;border-radius:8px;padding:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.small{font-size:12px;color:var(--muted)}
+.status{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.pill{font-size:11px;border:1px solid var(--line);background:#0b1727;padding:5px 8px;border-radius:999px}
+.pill.ok{border-color:#2a7a4c;color:#8eedaa}.pill.warn{border-color:#8a5d22;color:#ffc879}.pill.bad{border-color:#7d3030;color:#ff9999}
+.canvas-wrap{background:#071522;border:1px solid #203c57;border-radius:12px;overflow:hidden}
+canvas{display:block;width:100%;height:auto}
+.stagebar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.stage{font-size:11px;text-align:center;padding:10px 8px;border:1px solid #284964;background:#0b1727;border-radius:8px;color:var(--text);cursor:pointer;transition:.18s;user-select:none}
+.stage:hover{border-color:var(--accent);background:#10263b;transform:translateY(-1px)}
+.stage.active{outline:2px solid var(--accent);color:#dff7ff;background:#123650}
+.stage:focus{outline:2px solid var(--accent2);outline-offset:2px}
+.stage-info{margin:0 0 9px;padding:10px 12px;border:1px solid #284964;background:#081725;border-radius:10px;min-height:66px}
+.stage-info b{color:#dff7ff}.stage-info .stage-desc{margin-top:5px;font-size:12px;color:var(--muted);line-height:1.45}
+.stage-info .stage-action{margin-top:6px;font-size:11px;color:#8ee7ff}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.card{background:var(--card);border:1px solid #29445f;border-radius:10px;padding:10px;min-height:74px}
+.card .k{font-size:11px;color:var(--muted)}.card .v{font-size:17px;font-weight:700;margin-top:5px;word-break:break-word}.card .s{font-size:10px;color:#9fb4cc;margin-top:3px}
+.calc{background:#06111d;border:1px solid #263f59;border-radius:10px;padding:10px;font-family:Consolas,monospace;font-size:12px;white-space:pre-wrap;max-height:420px;overflow:auto}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.tab{padding:7px 9px;border-radius:8px;border:1px solid #2e4b67;background:#0b1727;color:#dceeff}.tab.active{background:#124b68;border-color:#1a9ad0}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 12px 12px}
+.table-wrap{overflow:auto;max-height:260px;border:1px solid #29445f;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:7px;border-bottom:1px solid #20384f;text-align:left;white-space:nowrap}th{position:sticky;top:0;background:#102338}
+.quiz .q{padding:8px;border:1px solid #29445f;border-radius:9px;margin:7px 0;background:#091827}
+.footer{padding:10px 14px;color:var(--muted);font-size:11px;border-top:1px solid var(--line)}
+.hidden{display:none!important}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin:6px 0}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px;background:var(--accent)}
+.dot.g{background:var(--accent2)}.dot.w{background:var(--warn)}
+@media(max-width:1100px){.grid{grid-template-columns:280px 1fr}.right{grid-column:1/-1}.bottom{grid-template-columns:1fr}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.bottom{grid-template-columns:1fr}.header{position:relative}.cards{grid-template-columns:1fr 1fr}.stagebar{grid-template-columns:1fr 1fr}}
+@media print{body{background:white;color:black}.header,.controls,.footer,.noprint{display:none!important}.grid,.bottom{display:block;padding:0}.panel{border:1px solid #999;box-shadow:none;background:white;color:black;margin-bottom:10px}.calc,.card{background:white;color:black}canvas{border:1px solid #999}}
+</style>
+
+<style id="vlIntroStyle">
+#vlIntroOverlay{
+ position:fixed;inset:0;z-index:2147483646;overflow:auto;
+ background:
+ radial-gradient(circle at 72% 10%,rgba(53,214,255,.13),transparent 34%),
+ linear-gradient(145deg,#06111e,#0a1d31 54%,#06111e);
+ color:#edf7ff;font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+#vlIntroOverlay *{box-sizing:border-box}
+.vlIntroWrap{max-width:1080px;margin:0 auto;padding:34px 22px 44px}
+.vlIntroTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}
+.vlIntroBadge{display:inline-flex;align-items:center;gap:8px;border:1px solid #315a77;
+ background:#0a2237;border-radius:999px;padding:6px 10px;color:#9cddf6;font-size:12px;font-weight:700}
+.vlIntroTitle{font-size:clamp(27px,4vw,44px);line-height:1.08;margin:12px 0 8px;color:#fff}
+.vlIntroSub{color:#a9bfd1;font-size:14px;line-height:1.6;max-width:760px}
+.vlIntroTime{min-width:185px;border:1px solid #315a77;border-radius:14px;padding:13px 15px;background:#0a1c2d}
+.vlIntroTime small{display:block;color:#91a9bd;margin-bottom:4px}.vlIntroTime b{font-size:19px;color:#bff4ff}
+.vlIntroGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vlIntroCard{background:linear-gradient(180deg,#0c2236,#091827);border:1px solid #28465f;border-radius:14px;padding:17px}
+.vlIntroCard h2{margin:0 0 10px;font-size:15px;color:#bcecff}
+.vlIntroCard ul,.vlIntroCard ol{margin:0;padding-left:21px}.vlIntroCard li{margin:7px 0;color:#d8e6f2;line-height:1.5;font-size:13px}
+.vlIntroRules{grid-column:1/-1}
+.vlIntroFooter{margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.vlIntroNote{font-size:12px;color:#91a9bd;max-width:650px;line-height:1.5}
+#vlIntroStart{border:1px solid #38c9f5;background:linear-gradient(135deg,#0d799e,#2565ad);color:white;
+ border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(37,101,173,.24)}
+#vlIntroStart:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#vlIntroStart:focus-visible{outline:3px solid #9de9ff;outline-offset:3px}
+.vlIntroFlow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.vlIntroFlow span{border:1px solid #31516d;background:#0a1b2b;border-radius:999px;padding:5px 8px;font-size:11px;color:#cbe4f4}
+@media(max-width:720px){.vlIntroWrap{padding:22px 13px 32px}.vlIntroTop{display:block}.vlIntroTime{margin-top:14px}.vlIntroGrid{grid-template-columns:1fr}.vlIntroRules{grid-column:auto}}
+@media print{#vlIntroOverlay{display:none!important}}
+</style>
+
+</head>
+<body>
+
+<div id="vlIntroOverlay" role="dialog" aria-modal="true" aria-labelledby="vlIntroTitle">
+  <div class="vlIntroWrap">
+    <div class="vlIntroTop">
+      <div>
+        <div class="vlIntroBadge">MODUL 01 • VIRTUAL LAB EKONOMI TEKNIK</div>
+        <h1 class="vlIntroTitle" id="vlIntroTitle">Nilai Waktu Uang</h1>
+        <div class="vlIntroSub">Baca halaman pembuka ini sebelum memulai praktikum. Setelah siap, pilih <b>Mulai Praktikum</b> untuk masuk ke simulator dan mengikuti Learning Assistant.</div>
+      </div>
+      <div class="vlIntroTime"><small>Estimasi waktu</small><b>45–60 menit</b></div>
+    </div>
+
+    <div class="vlIntroGrid">
+      <section class="vlIntroCard">
+        <h2>Prerequisite Topik</h2>
+        <ul><li>Memahami operasi matematika dasar, persentase, pangkat, dan aljabar sederhana.</li><li>Memahami konsep arus kas masuk dan arus kas keluar.</li><li>Telah membaca Panduan Prasyarat Penggunaan Virtual Lab Ekonomi Teknik.</li></ul>
+      </section>
+
+      <section class="vlIntroCard">
+        <h2>Capaian Pembelajaran</h2>
+        <ol><li>Menjelaskan hubungan Present Worth (P), Future Worth (F), uniform series (A), tingkat bunga (i), dan periode (n).</li><li>Memilih faktor ekonomi teknik yang sesuai untuk memindahkan nilai uang antarwaktu.</li><li>Menginterpretasikan perubahan nilai ekuivalen akibat perubahan tingkat bunga dan periode.</li></ol>
+      </section>
+
+      <section class="vlIntroCard vlIntroRules">
+        <h2>Aturan Pengerjaan</h2>
+        <ol>
+          <li>Kerjakan modul ini secara berurutan dan fokus pada satu topik sebelum berpindah ke modul berikutnya.</li>
+          <li>Ikuti Learning Assistant dengan urutan istilah yang sama: Tujuan Belajar → Prediction Before Run → Atur Parameter → Jalankan Simulasi → Amati Hasil → Contextual Explanation → Checkpoint Quiz → Learning Summary.</li>
+          <li>Sebelum simulasi pertama, jawab Prediction Before Run. Jangan langsung menekan PLAY/RUN/AUTO ANALYZE tanpa membuat prediksi.</li>
+          <li>Ubah parameter secara terkontrol. Untuk mengamati sebab–akibat, prioritaskan perubahan satu parameter pada satu eksperimen.</li>
+          <li>Amati grafik, timeline, result card, perhitungan, dan indikator keputusan. Catat data eksperimen bila fitur Record Data tersedia.</li>
+          <li>Selesaikan Checkpoint Quiz dan baca Learning Summary sebelum mengakhiri modul.</li>
+        </ol>
+        <div class="vlIntroFlow">
+          <span>Tujuan Belajar</span><span>Prediction Before Run</span><span>Atur Parameter</span>
+          <span>Jalankan Simulasi</span><span>Amati Hasil</span><span>Contextual Explanation</span>
+          <span>Checkpoint Quiz</span><span>Learning Summary</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="vlIntroFooter">
+      <div class="vlIntroNote">Catatan: tombol <b>Lanjutkan tahap</b> pada Learning Assistant berarti melanjutkan tahap pembelajaran di dalam modul yang sama, bukan berpindah ke modul berikutnya.</div>
+      <button id="vlIntroStart" type="button">Mulai Praktikum</button>
+    </div>
+  </div>
+</div>
+<script id="vlIntroScript">
+(function(){
+  var btn=document.getElementById('vlIntroStart');
+  var ov=document.getElementById('vlIntroOverlay');
+  if(btn&&ov){
+    btn.addEventListener('click',function(){
+      ov.style.display='none';
+      document.body.style.overflow='';
+      var la=document.getElementById('vlEduOpen');
+      if(la) setTimeout(function(){ try{ la.focus(); }catch(e){} },120);
+    });
+    document.body.style.overflow='hidden';
+  }
+})();
+</script>
+
+
+<div class="header">
+  <div class="title"><h1 id="appTitle">Virtual Lab — Nilai Waktu Uang</h1><small id="subtitle">Engineering Economy Interactive Simulator</small></div>
+  <div class="header-actions">
+    <button class="btn" id="langBtn">ID / EN</button>
+    <select id="learningMode" class="btn"><option>BEGINNER</option><option selected>INTERMEDIATE</option><option>ADVANCED</option></select>
+    <button class="btn good" id="printBtn">Print Lab Report</button>
+  </div>
+</div>
+
+<div class="grid">
+  <aside class="panel controls">
+    <h2 id="controlTitle">Panel Kontrol</h2>
+    <label id="presetLbl">Preset
+      <select id="preset">
+        <option value="single">Machine Purchase — Single Payment</option>
+        <option value="uniformF">Replacement Fund — Uniform Series</option>
+        <option value="loan">Equipment Loan — Capital Recovery</option>
+        <option value="arith">Rising Maintenance — Arithmetic Gradient</option>
+        <option value="geom">Escalating Energy Cost — Geometric Gradient</option>
+        <option value="compound">Compounding Comparison</option>
+      </select>
+    </label>
+
+    <label id="modelLbl">Model
+      <select id="model">
+        <option value="single">Single Payment</option>
+        <option value="uniform">Uniform Series</option>
+        <option value="arith">Arithmetic Gradient</option>
+        <option value="geom">Geometric Gradient</option>
+        <option value="compound">Interest Compounding</option>
+      </select>
+    </label>
+
+    <div id="commonInputs">
+      <div class="row">
+        <label>i (%/period)<input id="i" type="number" step="0.1" value="10"></label>
+        <label>n (period)<input id="n" type="number" step="1" min="1" value="5"></label>
+      </div>
+    </div>
+
+    <div id="singleInputs">
+      <label id="singleModeLbl">Calculate
+        <select id="singleMode"><option value="F">F from P (F/P)</option><option value="P">P from F (P/F)</option></select>
+      </label>
+      <label>P <input id="P" type="number" value="100000000" step="1000000"></label>
+      <label>F <input id="F" type="number" value="0" step="1000000"></label>
+    </div>
+
+    <div id="uniformInputs" class="hidden">
+      <label>Uniform Series Mode
+        <select id="uniformMode">
+          <option value="FfromA">F from A (F/A)</option>
+          <option value="AfromF">A from F (A/F)</option>
+          <option value="PfromA">P from A (P/A)</option>
+          <option value="AfromP">A from P (A/P)</option>
+        </select>
+      </label>
+      <label>A <input id="A" type="number" value="50000000" step="1000000"></label>
+      <label>Target P/F <input id="targetUF" type="number" value="500000000" step="1000000"></label>
+    </div>
+
+    <div id="arithInputs" class="hidden">
+      <label>Base A1 (optional)<input id="baseA" type="number" value="0" step="1000000"></label>
+      <label>G / period<input id="G" type="number" value="5000000" step="100000"></label>
+    </div>
+
+    <div id="geomInputs" class="hidden">
+      <label>A1<input id="A1" type="number" value="20000000" step="100000"></label>
+      <label>g (%/period)<input id="g" type="number" value="5" step="0.1"></label>
+    </div>
+
+    <div id="compoundInputs" class="hidden">
+      <label>Nominal annual rate r (%)<input id="rnom" type="number" value="12" step="0.1"></label>
+      <label>Compounding frequency m/year
+        <select id="m"><option value="1">1 — Annual</option><option value="2">2 — Semiannual</option><option value="4">4 — Quarterly</option><option value="12" selected>12 — Monthly</option><option value="52">52 — Weekly</option><option value="365">365 — Daily</option></select>
+      </label>
+      <label>Principal P<input id="Pc" type="number" value="100000000" step="1000000"></label>
+      <label>Years t<input id="t" type="number" value="5" step="0.5"></label>
+    </div>
+
+    <h3>Timeline & Display</h3>
+    <div class="row">
+      <label>Focal Date<input id="focal" type="number" value="0" min="0" step="1"></label>
+      <label>Currency
+        <select id="currency"><option value="IDR">IDR</option><option value="GEN">Generic</option></select>
+      </label>
+    </div>
+    <label>Animation Speed<input id="speed" type="range" min="0.25" max="3" step="0.25" value="1"></label>
+
+    <div class="status">
+      <span id="validPill" class="pill ok">VALID</span>
+      <span id="ratePill" class="pill">Rate period matched</span>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" id="play">PLAY</button>
+      <button class="btn" id="pause">PAUSE</button>
+      <button class="btn" id="step">STEP</button>
+      <button class="btn" id="reset">RESET</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="forward">COMPOUND →</button>
+      <button class="btn" id="backward">← DISCOUNT</button>
+    </div>
+
+    <h3>Experiments</h3>
+    <div class="row">
+      <button class="btn" id="compareBtn">COMPARE</button>
+      <button class="btn" id="recordBtn">RECORD DATA</button>
+    </div>
+    <div class="row">
+      <button class="btn" id="exportBtn">EXPORT CSV</button>
+      <button class="btn" id="clearBtn">CLEAR DATA</button>
+    </div>
+  </aside>
+
+  <main class="panel">
+    <div class="stagebar noprint" role="navigation" aria-label="TVM learning stages">
+      <button type="button" class="stage active" id="st1" data-stage="0">1. REAL SYSTEM</button>
+      <button type="button" class="stage" id="st2" data-stage="1">2. CASH-FLOW MODEL</button>
+      <button type="button" class="stage" id="st3" data-stage="2">3. EQUIVALENT VALUE</button>
+      <button type="button" class="stage" id="st4" data-stage="3">4. INTERPRETATION</button>
+    </div>
+    <div class="stage-info" id="stageInfo" aria-live="polite"></div>
+    <div class="tabs noprint">
+      <button class="tab active" data-tab="timeline">Cash Flow</button>
+      <button class="tab" data-tab="graph">Graph</button>
+      <button class="tab" data-tab="compare">Compare</button>
+      <button class="tab" data-tab="challenge">Challenge</button>
+    </div>
+
+    <section id="timelineTab">
+      <div class="canvas-wrap"><canvas id="timeline" width="1000" height="420"></canvas></div>
+      <div class="legend"><span><i class="dot"></i>Cash flow</span><span><i class="dot g"></i>Equivalent transfer</span><span><i class="dot w"></i>Focal date</span></div>
+      <div class="row noprint" style="margin-top:8px">
+        <button class="btn" id="autoConvert">AUTO CONVERT</button>
+        <button class="btn" id="runN">RUN TO PERIOD n</button>
+      </div>
+    </section>
+
+    <section id="graphTab" class="hidden">
+      <div class="canvas-wrap"><canvas id="graph" width="1000" height="420"></canvas></div>
+      <p class="small" id="graphNote">Sensitivity graph updates from the same calculation engine.</p>
+    </section>
+
+    <section id="compareTab" class="hidden">
+      <div id="compareBox" class="calc"></div>
+    </section>
+
+    <section id="challengeTab" class="hidden quiz">
+      <h3>TRY TO SOLVE / COBA SELESAIKAN</h3>
+      <div class="q"><b>Q1.</b> P=100 juta, i=10%, n=5. Tentukan F.<br><input id="q1" type="number" placeholder="Jawaban"><button class="btn" onclick="checkQ(1)">Check</button><span id="q1f"></span></div>
+      <div class="q"><b>Q2.</b> F=500 juta, i=8%, n=5. Tentukan A (A/F).<br><input id="q2" type="number" placeholder="Jawaban"><button class="btn" onclick="checkQ(2)">Check</button><span id="q2f"></span></div>
+      <div class="q"><b>Q3.</b> Nominal 12% compounded monthly. Effective annual rate (%)?<br><input id="q3" type="number" step="0.001" placeholder="Jawaban %"><button class="btn" onclick="checkQ(3)">Check</button><span id="q3f"></span></div>
+      <button class="btn warn" id="solutionBtn">Show Solution</button>
+      <div id="solutions" class="calc hidden"></div>
+    </section>
+  </main>
+
+  <aside class="panel right">
+    <h2 id="resultTitle">Engineering Economy Cards</h2>
+    <div class="cards" id="cards"></div>
+    <h3>Step-by-Step Calculation</h3>
+    <div class="calc" id="calcPanel"></div>
+    <h3>Assumptions & Checks</h3>
+    <div class="small" id="assumptions"></div>
+  </aside>
+</div>
+
+<div class="bottom">
+  <section class="panel">
+    <h2>Experiment Data</h2>
+    <div class="table-wrap"><table id="dataTable"><thead><tr><th>ID</th><th>Model</th><th>i</th><th>n</th><th>Result</th><th>Factor/Rate</th></tr></thead><tbody></tbody></table></div>
+  </section>
+  <section class="panel">
+    <h2>Lab Worksheet</h2>
+    <label class="small">Tujuan / Objective<textarea id="wsObjective" rows="2" placeholder="Tuliskan tujuan eksperimen..."></textarea></label>
+    <label class="small">Prediksi / Prediction<textarea id="wsPrediction" rows="2" placeholder="Tuliskan prediksi..."></textarea></label>
+    <label class="small">Kesimpulan / Conclusion<textarea id="wsConclusion" rows="3" placeholder="Tuliskan kesimpulan..."></textarea></label>
+  </section>
+</div>
+
+<div class="footer">
+  Offline single-file laboratory. TVM model only; taxes, inflation, uncertainty, depreciation, NPV/IRR/MARR are outside this lab unless explicitly modeled.
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const state={lang:'id',running:false,animPeriod:0,records:[],tab:'timeline',stage:0,last:null};
+
+function fmt(x){
+  if(!Number.isFinite(x)) return 'N/A';
+  const cur=$('currency').value;
+  if(cur==='IDR') return 'Rp '+Math.round(x).toLocaleString('id-ID');
+  return x.toLocaleString(undefined,{maximumFractionDigits:2});
+}
+function pct(x){return (100*x).toFixed(4)+'%'}
+function num(id){return parseFloat($(id).value)}
+function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
+function near(a,b,t=1e-10){return Math.abs(a-b)<=t*Math.max(1,Math.abs(a),Math.abs(b))}
+
+function factors(i,n){
+  if(n<1 || !Number.isFinite(i) || 1+i<=0) return null;
+  if(Math.abs(i)<1e-12) return {FP:1,PF:1,PA:n,AP:1/n,FA:n,AF:1/n,AG:(n-1)/2};
+  const q=Math.pow(1+i,n);
+  return {
+    FP:q, PF:1/q,
+    PA:(q-1)/(i*q),
+    AP:(i*q)/(q-1),
+    FA:(q-1)/i,
+    AF:i/(q-1),
+    AG:1/i-n/(q-1)
+  };
+}
+function calcModel(){
+  let i=num('i')/100,n=Math.round(num('n')),model=$('model').value;
+  let valid=n>=1 && Number.isFinite(i) && (1+i)>0;
+  let warnings=[], cards=[], steps=[], result=NaN, factorText='', flows=[];
+  if(!valid){return {valid:false,warnings:['Invalid n or interest rate. Require n≥1 and 1+i>0.'],cards,steps,result,flows,model};}
+  const f=factors(i,n);
+  if(model==='single'){
+    let mode=$('singleMode').value,P=num('P'),F=num('F');
+    if(mode==='F'){result=P*f.FP; factorText='F/P = '+f.FP.toFixed(6); flows=[{t:0,v:-P},{t:n,v:result}];
+      steps=[`GIVEN: P=${fmt(P)}, i=${pct(i)}, n=${n}`,`FIND: F`,`F/P=(1+i)^n = ${f.FP.toFixed(8)}`,`F=P(F/P)`,`F=${fmt(P)} × ${f.FP.toFixed(8)} = ${fmt(result)}`,`CHECK: P/F × F/P = ${(f.PF*f.FP).toFixed(10)}`];
+      cards=[['P',fmt(P),'Present Worth'],['F',fmt(result),'Future Worth'],['F/P',f.FP.toFixed(6),'Accumulation factor'],['P/F',f.PF.toFixed(6),'Discount factor']];
+    }else{result=F*f.PF; factorText='P/F = '+f.PF.toFixed(6); flows=[{t:0,v:-result},{t:n,v:F}];
+      steps=[`GIVEN: F=${fmt(F)}, i=${pct(i)}, n=${n}`,`FIND: P`,`P/F=(1+i)^(-n) = ${f.PF.toFixed(8)}`,`P=F(P/F)`,`P=${fmt(F)} × ${f.PF.toFixed(8)} = ${fmt(result)}`];
+      cards=[['F',fmt(F),'Future Worth'],['P',fmt(result),'Present Worth'],['P/F',f.PF.toFixed(6),'Discount factor'],['F/P',f.FP.toFixed(6),'Accumulation factor']];
+    }
+  }else if(model==='uniform'){
+    let mode=$('uniformMode').value,A=num('A'),T=num('targetUF'), val, label;
+    flows=[];
+    for(let k=1;k<=n;k++) flows.push({t:k,v:-Math.abs(A)});
+    if(mode==='FfromA'){val=A*f.FA;label='F';factorText='F/A = '+f.FA.toFixed(6);result=val;flows.push({t:n,v:val});
+      steps=[`GIVEN: A=${fmt(A)}, i=${pct(i)}, n=${n}`,`F/A=[(1+i)^n-1]/i = ${f.FA.toFixed(8)}`,`F=A(F/A) = ${fmt(result)}`];
+    }else if(mode==='AfromF'){val=T*f.AF;label='A';factorText='A/F = '+f.AF.toFixed(6);result=val;flows=[];for(let k=1;k<=n;k++) flows.push({t:k,v:-val}); flows.push({t:n,v:T});
+      steps=[`GIVEN: F=${fmt(T)}, i=${pct(i)}, n=${n}`,`A/F=i/[(1+i)^n-1] = ${f.AF.toFixed(8)}`,`A=F(A/F) = ${fmt(result)}`];
+    }else if(mode==='PfromA'){val=A*f.PA;label='P';factorText='P/A = '+f.PA.toFixed(6);result=val;flows.unshift({t:0,v:val});
+      steps=[`GIVEN: A=${fmt(A)}, i=${pct(i)}, n=${n}`,`P/A=[(1+i)^n-1]/[i(1+i)^n] = ${f.PA.toFixed(8)}`,`P=A(P/A) = ${fmt(result)}`];
+    }else{val=T*f.AP;label='A';factorText='A/P = '+f.AP.toFixed(6);result=val;flows=[];flows.push({t:0,v:T});for(let k=1;k<=n;k++) flows.push({t:k,v:-val});
+      steps=[`GIVEN: P=${fmt(T)}, i=${pct(i)}, n=${n}`,`A/P=i(1+i)^n/[(1+i)^n-1] = ${f.AP.toFixed(8)}`,`A=P(A/P) = ${fmt(result)}`];
+    }
+    cards=[['A',fmt(mode.includes('Afrom')?result:A),'Uniform amount'],['Result '+label,fmt(result),'Equivalent value'],['P/A',f.PA.toFixed(6),'Capitalization factor'],['A/P',f.AP.toFixed(6),'Capital recovery'],['F/A',f.FA.toFixed(6),'Series accumulation'],['A/F',f.AF.toFixed(6),'Sinking fund']];
+  }else if(model==='arith'){
+    let G=num('G'),base=num('baseA');
+    let Agrad=G*f.AG, Pgrad=Agrad*f.PA, Pbase=base*f.PA, Ptot=Pgrad+Pbase;
+    result=Ptot; factorText='A/G = '+f.AG.toFixed(6);
+    for(let k=1;k<=n;k++) flows.push({t:k,v:-(base+(k-1)*G)});
+    steps=[`CONVENTION: gradient component = 0 at period 1, G at period 2, …, (n−1)G at period n`,
+      `G=${fmt(G)}, base A1=${fmt(base)}, i=${pct(i)}, n=${n}`,
+      `A/G = 1/i − n/[(1+i)^n−1] = ${f.AG.toFixed(8)}`,
+      `A_gradient = G(A/G) = ${fmt(Agrad)}`,
+      `P_gradient = A_gradient(P/A) = ${fmt(Pgrad)}`,
+      `P_base = A1(P/A) = ${fmt(Pbase)}`,
+      `TOTAL P = ${fmt(Ptot)}`];
+    cards=[['G',fmt(G),'Arithmetic increment'],['A/G',f.AG.toFixed(6),'Gradient factor'],['A_gradient',fmt(Agrad),'Annual equivalent gradient'],['P_gradient',fmt(Pgrad),'Present worth gradient'],['P_total',fmt(Ptot),'Including base series']];
+  }else if(model==='geom'){
+    let A1=num('A1'),g=num('g')/100, P;
+    if(g<=-1){return {valid:false,warnings:['Geometric growth rate requires g > -100%.'],cards,steps,result,flows,model};}
+    for(let k=1;k<=n;k++) flows.push({t:k,v:-A1*Math.pow(1+g,k-1)});
+    if(near(i,g,1e-9)){P=n*A1/(1+i);factorText='Special case i = g';}
+    else{P=A1*(1-Math.pow((1+g)/(1+i),n))/(i-g);factorText='Geometric gradient PW';}
+    result=P;
+    steps=[`A_t=A1(1+g)^(t−1)`,`A1=${fmt(A1)}, g=${pct(g)}, i=${pct(i)}, n=${n}`,
+      near(i,g,1e-9)?`i≈g → use stable limit: P=nA1/(1+i)`:`P=A1[1-((1+g)/(1+i))^n]/(i-g)`,
+      `P=${fmt(P)}`];
+    cards=[['A1',fmt(A1),'First payment at t=1'],['g',pct(g),'Geometric growth'],['i',pct(i),'Effective per period'],['P',fmt(P),'Present worth']];
+  }else{
+    let r=num('rnom')/100,m=parseInt($('m').value),P=num('Pc'),t=num('t');
+    if(m<1||t<0){return {valid:false,warnings:['Require m≥1 and t≥0.'],cards,steps,result,flows,model};}
+    let ip=r/m,ieff=Math.pow(1+ip,m)-1,Fdisc=P*Math.pow(1+ip,m*t),Fcont=P*Math.exp(r*t),ieffCont=Math.exp(r)-1;
+    result=Fdisc;factorText='i_eff = '+pct(ieff);
+    let N=Math.max(1,Math.round(t)); for(let k=0;k<=N;k++) flows.push({t:k,v:k===0?-P:(k===N?Fdisc:0)});
+    steps=[`r_nom=${pct(r)}, m=${m}/year`,`Periodic rate i_p=r_nom/m = ${pct(ip)}`,
+      `Effective annual i_eff=(1+r/m)^m−1 = ${pct(ieff)}`,
+      `Discrete F=P(1+r/m)^(mt) = ${fmt(Fdisc)}`,
+      `Continuous F=P e^(rt) = ${fmt(Fcont)}`,
+      `Continuous effective annual rate=e^r−1 = ${pct(ieffCont)}`];
+    cards=[['Nominal r',pct(r),'Annual nominal'],['Periodic i',pct(ip),`per compounding period`],['Effective annual',pct(ieff),'Discrete'],['F discrete',fmt(Fdisc),'After t years'],['F continuous',fmt(Fcont),'After t years'],['Continuous EAR',pct(ieffCont),'e^r−1']];
+  }
+  if(Math.abs(i)<1e-12) warnings.push('i = 0: limit formulas are being used.');
+  return {valid:true,warnings,cards,steps,result,factorText,flows,model,i,n,f};
+}
+
+function updateVisibility(){
+  const m=$('model').value;
+  ['single','uniform','arith','geom','compound'].forEach(x=>$(x+'Inputs').classList.toggle('hidden',x!==m));
+  $('commonInputs').classList.toggle('hidden',m==='compound');
+}
+function setPreset(v){
+  const preset=v||$('preset').value;
+  if(preset==='single'){ $('model').value='single';$('singleMode').value='F';$('P').value=100000000;$('i').value=10;$('n').value=5; }
+  if(preset==='uniformF'){ $('model').value='uniform';$('uniformMode').value='AfromF';$('targetUF').value=500000000;$('i').value=8;$('n').value=5; }
+  if(preset==='loan'){ $('model').value='uniform';$('uniformMode').value='AfromP';$('targetUF').value=300000000;$('i').value=9;$('n').value=6; }
+  if(preset==='arith'){ $('model').value='arith';$('G').value=5000000;$('baseA').value=0;$('i').value=10;$('n').value=6; }
+  if(preset==='geom'){ $('model').value='geom';$('A1').value=20000000;$('g').value=5;$('i').value=10;$('n').value=8; }
+  if(preset==='compound'){ $('model').value='compound';$('rnom').value=12;$('m').value=12;$('Pc').value=100000000;$('t').value=5; }
+  updateVisibility(); state.animPeriod=0; updateAll();
+}
+
+function renderCards(calc){
+  $('cards').innerHTML=calc.cards.map(c=>`<div class="card"><div class="k">${c[0]}</div><div class="v">${c[1]}</div><div class="s">${c[2]}</div></div>`).join('');
+  $('calcPanel').textContent=calc.steps.join('\n\n');
+  $('assumptions').innerHTML=(calc.warnings.length?'<b>Warnings:</b> '+calc.warnings.join(' | ')+'<br>':'')+
+   'Assumptions: end-of-period uniform series; effective i per analysis period unless stated otherwise; taxes/inflation/risk excluded; cash-flow equivalence depends on selected rate and focal date.';
+  $('validPill').textContent=calc.valid?'VALID':'INVALID INPUT';
+  $('validPill').className='pill '+(calc.valid?'ok':'bad');
+}
+
+function drawTimeline(calc){
+  const c=$('timeline'),ctx=c.getContext('2d'),W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#071522';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#173651';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=50){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  for(let y=0;y<H;y+=50){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+  const n=calc.model==='compound'?Math.max(1,Math.round(num('t'))):calc.n||1;
+  const left=70,right=W-55,base=245,dx=(right-left)/Math.max(1,n);
+  ctx.strokeStyle='#a8c6df';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(left,base);ctx.lineTo(right,base);ctx.stroke();
+  ctx.font='15px Arial';ctx.fillStyle='#cfe9ff';ctx.fillText('Cash-Flow Timeline',24,28);
+  ctx.font='12px Arial';
+  for(let k=0;k<=n;k++){let x=left+k*dx;ctx.strokeStyle='#8fa9bf';ctx.beginPath();ctx.moveTo(x,base-6);ctx.lineTo(x,base+6);ctx.stroke();ctx.fillStyle='#bcd0e2';ctx.fillText(String(k),x-4,base+24)}
+  const focal=clamp(Math.round(num('focal')||0),0,n),xf=left+focal*dx;
+  ctx.strokeStyle='#ffb454';ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.beginPath();ctx.moveTo(xf,55);ctx.lineTo(xf,H-35);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#ffca8a';ctx.fillText('FOCAL',xf-18,48);
+  const maxv=Math.max(1,...calc.flows.map(o=>Math.abs(o.v||0)));
+  for(const o of calc.flows){
+    if(o.t>n||!o.v) continue;
+    let x=left+o.t*dx,amp=45+95*Math.abs(o.v)/maxv, y2=o.v>0?base-amp:base+amp;
+    ctx.strokeStyle='#32c8ff';ctx.fillStyle='#32c8ff';ctx.lineWidth=3;
+    ctx.beginPath();ctx.moveTo(x,base);ctx.lineTo(x,y2);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x,y2);ctx.lineTo(x-6,y2+(o.v>0?9:-9));ctx.lineTo(x+6,y2+(o.v>0?9:-9));ctx.closePath();ctx.fill();
+    ctx.fillStyle='#dff7ff';ctx.font='11px Arial';ctx.fillText(fmt(Math.abs(o.v)),Math.max(4,x-40),o.v>0?y2-9:y2+18);
+  }
+  let cur=left+clamp(state.animPeriod,0,n)*dx;
+  ctx.strokeStyle='#66e0b8';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(cur,72);ctx.lineTo(cur,H-45);ctx.stroke();
+  ctx.fillStyle='#9df5d9';ctx.fillText('t = '+state.animPeriod.toFixed(2),cur-20,H-20);
+  ctx.fillStyle='#9fb4cc';ctx.fillText('Up = inflow (+), Down = outflow (−)',24,H-20);
+}
+
+function drawGraph(calc){
+  const c=$('graph'),ctx=c.getContext('2d'),W=c.width,H=c.height;
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#071522';ctx.fillRect(0,0,W,H);
+  const m=calc.model; let xs=[],ys=[], label='';
+  if(m==='single'){let P=num('P'),i=calc.i;for(let k=0;k<=Math.max(1,calc.n);k++){xs.push(k);ys.push(P*Math.pow(1+i,k))}label='Future value vs period';}
+  else if(m==='uniform'){let i=calc.i;for(let k=1;k<=Math.max(1,calc.n);k++){let f=factors(i,k);xs.push(k);ys.push(f.FA)}label='F/A factor vs n';}
+  else if(m==='arith'){let i=calc.i;for(let k=1;k<=Math.max(2,calc.n);k++){let f=factors(i,k);xs.push(k);ys.push(f.AG)}label='A/G factor vs n';}
+  else if(m==='geom'){let A1=num('A1'),i=calc.i,g=num('g')/100;for(let k=1;k<=Math.max(2,calc.n);k++){let P=near(i,g)?k*A1/(1+i):A1*(1-Math.pow((1+g)/(1+i),k))/(i-g);xs.push(k);ys.push(P)}label='Geometric-gradient PW vs n';}
+  else{let r=num('rnom')/100,P=num('Pc'),t=num('t'),mper=parseInt($('m').value);for(let k=0;k<=40;k++){let tt=t*k/40;xs.push(tt);ys.push(P*Math.pow(1+r/mper,mper*tt))}label='Discrete compounded value vs time';}
+  const L=70,R=W-40,T=50,B=H-55, ymin=Math.min(0,...ys),ymax=Math.max(1,...ys),xmin=Math.min(...xs),xmax=Math.max(...xs);
+  ctx.strokeStyle='#29455f';ctx.lineWidth=1;for(let j=0;j<6;j++){let y=T+(B-T)*j/5;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(R,y);ctx.stroke()}
+  ctx.strokeStyle='#a7c0d7';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(L,T);ctx.lineTo(L,B);ctx.lineTo(R,B);ctx.stroke();
+  ctx.strokeStyle='#32c8ff';ctx.lineWidth=3;ctx.beginPath();
+  ys.forEach((v,k)=>{let x=L+(R-L)*(xs[k]-xmin)/(xmax-xmin||1),y=B-(B-T)*(v-ymin)/(ymax-ymin||1);k?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.stroke();
+  ctx.fillStyle='#cfe9ff';ctx.font='15px Arial';ctx.fillText(label,24,27);
+  ctx.font='11px Arial';ctx.fillStyle='#9fb4cc';ctx.fillText('x: period/time',L,B+28);ctx.fillText('min '+(Number.isFinite(ymin)?ymin.toFixed(3):''),5,B);ctx.fillText('max '+(Number.isFinite(ymax)?ymax.toFixed(3):''),5,T+3);
+}
+
+function renderCompare(calc){
+  const i=calc.i||0.1,n=calc.n||5,f=factors(i,n);
+  let txt=`COMPARISON MODE\n\nInterest rate = ${pct(i)}, n = ${n}\n\n`;
+  if(f) txt += `Single Payment\nF/P = ${f.FP.toFixed(8)}\nP/F = ${f.PF.toFixed(8)}\nReciprocity = ${(f.FP*f.PF).toFixed(10)}\n\nUniform Series\nP/A = ${f.PA.toFixed(8)}\nA/P = ${f.AP.toFixed(8)}\nP/A × A/P = ${(f.PA*f.AP).toFixed(10)}\nF/A = ${f.FA.toFixed(8)}\nA/F = ${f.AF.toFixed(8)}\nF/A × A/F = ${(f.FA*f.AF).toFixed(10)}\n\nArithmetic Gradient\nA/G = ${f.AG.toFixed(8)}\n`;
+  const r=.12;txt+=`\nCompounding at nominal 12%:\nAnnual EAR = ${pct(Math.pow(1+r,1)-1)}\nMonthly EAR = ${pct(Math.pow(1+r/12,12)-1)}\nContinuous EAR = ${pct(Math.exp(r)-1)}\n`;
+  $('compareBox').textContent=txt;
+}
+
+function updateAll(){
+  updateVisibility();
+  const calc=calcModel();
+  state.last=calc;
+  renderCards(calc);
+  drawTimeline(calc);
+  drawGraph(calc);
+  renderCompare(calc);
+  const t=stageText(state.stage,calc);
+  if($('stageInfo')) $('stageInfo').innerHTML=`<b>${t.title}</b><div class="stage-desc">${t.desc}</div><div class="stage-action">${t.action}</div>`;
+}
+function setTab(name){
+  state.tab=name;
+  ['timeline','graph','compare','challenge'].forEach(x=>$(x+'Tab').classList.toggle('hidden',x!==name));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+}
+function animate(ts){
+  if(state.running){
+    const c=state.last||calcModel(), n=c.model==='compound'?Math.max(1,Math.round(num('t'))):c.n;
+    const speed=parseFloat($('speed').value); state.animPeriod += 0.018*speed;
+    if(state.animPeriod>n) state.animPeriod=0;
+    drawTimeline(c);
+  }
+  requestAnimationFrame(animate);
+}
+function record(){
+  const c=calcModel(),id=state.records.length+1;
+  state.records.push({id,model:c.model,i:c.i??'',n:c.n??'',result:c.result,factor:c.factorText});
+  redrawTable();
+}
+function redrawTable(){
+  const tb=$('dataTable').querySelector('tbody');tb.innerHTML=state.records.map(r=>`<tr><td>${r.id}</td><td>${r.model}</td><td>${r.i!==''?pct(r.i):'N/A'}</td><td>${r.n||'N/A'}</td><td>${fmt(r.result)}</td><td>${r.factor||''}</td></tr>`).join('');
+}
+function exportCSV(){
+  let rows=[['Trial ID','Model','i','n','Result','Factor/Rate']];
+  state.records.forEach(r=>rows.push([r.id,r.model,r.i,r.n,r.result,r.factor]));
+  let csv=rows.map(a=>a.map(v=>`"${String(v??'').replaceAll('"','""')}"`).join(',')).join('\n');
+  let blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='tvm_experiment_data.csv';a.click();URL.revokeObjectURL(url);
+}
+function stageText(stage, calc){
+  const modelNames={
+    single:'Single Payment',uniform:'Uniform Series',
+    agrad:'Arithmetic Gradient',ggrad:'Geometric Gradient',
+    compound:'Interest Compounding'
+  };
+  const model=modelNames[calc?.model]||'TVM Model';
+  const result=Number.isFinite(calc?.result)?fmt(calc.result):'—';
+
+  const id=[
+    {
+      title:'1. REAL SYSTEM — Identifikasi kasus nyata',
+      desc:`Tentukan situasi ekonomi teknik yang sedang dianalisis. Model aktif: ${model}. Kenali nilai yang diketahui, tingkat bunga, jumlah periode, serta nilai yang ingin dicari.`,
+      action:'Aksi: ubah preset atau input pada Panel Kontrol untuk merepresentasikan kasus nyata.'
+    },
+    {
+      title:'2. CASH-FLOW MODEL — Bentuk diagram arus kas',
+      desc:'Kas masuk/keluar ditempatkan pada timeline menurut periodenya. Arah panah dan posisi waktu harus benar sebelum faktor ekonomi teknik diterapkan.',
+      action:'Aksi: tampilan Cash Flow diaktifkan. Gunakan PLAY / STEP untuk mengikuti perpindahan nilai sepanjang waktu.'
+    },
+    {
+      title:'3. EQUIVALENT VALUE — Konversi ke nilai ekuivalen',
+      desc:`Mesin perhitungan menerapkan faktor TVM yang sesuai pada focal date. Hasil ekuivalen saat ini: ${result}. Semua nilai dibandingkan pada basis waktu yang sama.`,
+      action:'Aksi: perhatikan Engineering Economy Cards dan Step-by-Step Calculation di panel kanan.'
+    },
+    {
+      title:'4. INTERPRETATION — Maknai hasil untuk keputusan',
+      desc:`Hasil ${result} bukan sekadar angka. Interpretasikan apakah nilai tersebut adalah present worth, future worth, annual equivalent, gradient equivalent, atau hasil konversi tingkat bunga sesuai model ${model}.`,
+      action:'Aksi: gunakan Graph dan Compare untuk mengevaluasi sensitivitas dan alternatif.'
+    }
+  ];
+
+  const en=[
+    {
+      title:'1. REAL SYSTEM — Identify the real case',
+      desc:`Define the engineering-economy situation being studied. Active model: ${model}. Identify known values, interest rate, number of periods, and the required unknown.`,
+      action:'Action: change the preset or inputs in the Control Panel to represent the real case.'
+    },
+    {
+      title:'2. CASH-FLOW MODEL — Build the cash-flow diagram',
+      desc:'Place inflows and outflows on the timeline at the correct periods. Timing and arrow direction must be correct before applying engineering-economy factors.',
+      action:'Action: Cash Flow view is activated. Use PLAY / STEP to follow value movement through time.'
+    },
+    {
+      title:'3. EQUIVALENT VALUE — Convert to an equivalent value',
+      desc:`The calculation engine applies the appropriate TVM factor at the focal date. Current equivalent result: ${result}. Values are compared on the same time basis.`,
+      action:'Action: inspect the Engineering Economy Cards and Step-by-Step Calculation on the right.'
+    },
+    {
+      title:'4. INTERPRETATION — Interpret for decision making',
+      desc:`The result ${result} must be interpreted by model context: present worth, future worth, annual equivalent, gradient equivalent, or interest-rate conversion for ${model}.`,
+      action:'Action: use Graph and Compare to evaluate sensitivity and alternatives.'
+    }
+  ];
+  return (state.lang==='en'?en:id)[stage];
+}
+
+function setStage(stage){
+  stage=Math.max(0,Math.min(3,Number(stage)||0));
+  state.stage=stage;
+  document.querySelectorAll('.stage').forEach((e,k)=>{
+    e.classList.toggle('active',k===stage);
+    e.setAttribute('aria-current',k===stage?'step':'false');
+  });
+
+  const calc=state.last||calcModel();
+  const t=stageText(stage,calc);
+  $('stageInfo').innerHTML=`<b>${t.title}</b><div class="stage-desc">${t.desc}</div><div class="stage-action">${t.action}</div>`;
+
+  if(stage===0 || stage===1){
+    setTab('timeline');
+    state.animPeriod=stage===0?0:Math.min(1,calc?.n||1);
+    drawTimeline(calc);
+  }else if(stage===2){
+    setTab('timeline');
+    state.animPeriod=calc?.model==='compound'
+      ? Math.max(1,Math.round(num('t')))
+      : (calc?.n||1);
+    drawTimeline(calc);
+    $('calcPanel').scrollTop=0;
+  }else if(stage===3){
+    setTab('compare');
+  }
+}
+
+function autoConvert(){
+  setStage((state.stage+1)%4);
+}
+function switchLang(){
+  state.lang=state.lang==='id'?'en':'id';
+  if(state.lang==='en'){
+    $('appTitle').textContent='Virtual Lab — Time Value of Money';$('controlTitle').textContent='Control Panel';$('resultTitle').textContent='Engineering Economy Cards';$('presetLbl').childNodes[0].nodeValue='Preset ';$('modelLbl').childNodes[0].nodeValue='Model ';
+  }else{
+    $('appTitle').textContent='Virtual Lab — Nilai Waktu Uang';$('controlTitle').textContent='Panel Kontrol';$('resultTitle').textContent='Engineering Economy Cards';$('presetLbl').childNodes[0].nodeValue='Preset ';$('modelLbl').childNodes[0].nodeValue='Model ';
+  }
+  setStage(state.stage);
+}
+window.checkQ=function(q){
+  let ans=parseFloat($('q'+q).value),target=q===1?100000000*Math.pow(1.1,5):q===2?500000000*(.08/(Math.pow(1.08,5)-1)):(Math.pow(1+.12/12,12)-1)*100;
+  let rel=Math.abs(ans-target)/Math.max(1,Math.abs(target)),ok=rel<0.005;
+  $('q'+q+'f').textContent=ok?' ✓ Correct':' ✗ Try again';$('q'+q+'f').style.color=ok?'#65d88c':'#ff9999';
+}
+function solutions(){
+  let f1=100000000*Math.pow(1.1,5),a=500000000*(.08/(Math.pow(1.08,5)-1)),ear=(Math.pow(1+.12/12,12)-1)*100;
+  $('solutions').textContent=`Q1: F=P(1+i)^n = ${fmt(f1)}\nQ2: A=F(A/F) = ${fmt(a)}\nQ3: EAR=(1+0.12/12)^12−1 = ${ear.toFixed(4)}%`;
+  $('solutions').classList.remove('hidden');
+}
+
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',()=>{if(el.id==='preset')setPreset();else{state.animPeriod=0;updateAll()}}));
+$('model').addEventListener('change',()=>{updateVisibility();updateAll()});
+$('play').onclick=()=>state.running=true;$('pause').onclick=()=>state.running=false;
+$('step').onclick=()=>{const c=state.last||calcModel(),n=c.model==='compound'?Math.max(1,Math.round(num('t'))):c.n;state.animPeriod=(Math.floor(state.animPeriod)+1)%(n+1);drawTimeline(c)};
+$('reset').onclick=()=>{state.running=false;state.animPeriod=0;setPreset($('preset').value)};
+$('runN').onclick=()=>{const c=state.last||calcModel();state.animPeriod=c.model==='compound'?Math.max(1,Math.round(num('t'))):c.n;drawTimeline(c)};
+$('forward').onclick=()=>{state.animPeriod=Math.min((state.last?.n||num('t')||1),state.animPeriod+1);drawTimeline(state.last||calcModel())};
+$('backward').onclick=()=>{state.animPeriod=Math.max(0,state.animPeriod-1);drawTimeline(state.last||calcModel())};
+$('recordBtn').onclick=record;$('clearBtn').onclick=()=>{state.records=[];redrawTable()};$('exportBtn').onclick=exportCSV;
+$('printBtn').onclick=()=>window.print();$('langBtn').onclick=switchLang;$('autoConvert').onclick=autoConvert;
+$('compareBtn').onclick=()=>setTab('compare');$('solutionBtn').onclick=solutions;
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+document.querySelectorAll('.stage').forEach(b=>{
+  b.onclick=()=>setStage(Number(b.dataset.stage));
+  b.onkeydown=(e)=>{
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();setStage(Number(b.dataset.stage));}
+  };
+});
+setPreset('single');
+setStage(0);
+requestAnimationFrame(animate);
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Nilai Waktu Uang</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction Before Run</button><button class="vlEduTab" data-p="explain">Contextual Explanation</button><button class="vlEduTab" data-p="gloss">Interactive Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint Quiz</button><button class="vlEduTab" data-p="summary">Learning Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "tvm", "title": "Nilai Waktu Uang", "objective": "Memahami nilai ekuivalen uang pada waktu berbeda dan memilih faktor bunga yang tepat.", "prediction": "Jika tingkat bunga i dinaikkan sementara P dan n tetap, apa yang terjadi pada Future Worth (F)?", "predopts": ["F cenderung meningkat", "F cenderung menurun", "F selalu tetap"], "predans": 0, "explain": "Hubungkan selalu tiga unsur: posisi waktu arus kas, tingkat bunga per periode, dan faktor ekuivalensi. Nilai pada waktu berbeda tidak boleh dibandingkan langsung tanpa dipindahkan ke focal date yang sama.", "terms": {"P": "Present Worth — nilai ekuivalen pada waktu sekarang.", "F": "Future Worth — nilai ekuivalen pada waktu mendatang.", "A": "Uniform Series — arus kas periodik dengan nilai sama.", "i": "Suku bunga efektif per periode analisis.", "n": "Jumlah periode bunga.", "F/P": "Faktor single-payment compound amount untuk mengubah P menjadi F.", "P/F": "Faktor single-payment present worth untuk mengubah F menjadi P."}, "quiz": [["Untuk membandingkan dua arus kas pada waktu berbeda, langkah paling tepat adalah…", ["Menyamakan focal date", "Menjumlahkan langsung", "Mengabaikan i"], 0], ["Faktor P/F digunakan untuk…", ["Mengubah F menjadi P", "Mengubah P menjadi F", "Mengubah A menjadi F"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Tujuan Belajar','Baca Tujuan Belajar, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Prediction Before Run','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur Parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan Simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati Hasil','Perhatikan grafik, timeline, Result Card, dan nilai keputusan yang berubah.'],
+  ['6. Contextual Explanation','Buka Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Checkpoint Quiz','Kerjakan Checkpoint Quiz, kemudian buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide'){const finalStage=S.step>=steps.length-1; body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">${finalStage?'Selesaikan Pembelajaran':'Lanjutkan tahap'}</button>`;}
+   if(p==='next'){let i=Math.min(S.step,steps.length-1),finalStage=i>=steps.length-1;body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">${finalStage?'Selesaikan Pembelajaran':'Tandai selesai & lanjut'}</button><div class="vlEduCard"><h4>Apa yang harus saya lakukan?</h4><p>Atur Parameter dengan mengubah satu parameter, pilih Jalankan Simulasi, lalu Amati Hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Contextual Explanation/Interactive Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('guide');msg(`Tahap ${S.step+1} dari ${steps.length} telah dibuka. Anda masih berada di modul ini.`);}};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('next');}};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual Lab — Evaluasi Kelayakan Investasi Tunggal</title>
+<style>
+:root{--bg:#07111f;--panel:#0e1b2d;--panel2:#12243a;--line:#29445f;--txt:#eaf5ff;--muted:#9fb3c8;--cyan:#31d7ff;--blue:#3c8cff;--green:#4de3a2;--orange:#ffb44d;--red:#ff6b72}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 40% 0,#102945,#07111f 45%);color:var(--txt);font:14px/1.45 system-ui,Segoe UI,Arial,sans-serif}
+button,input,select,textarea{font:inherit}.header{position:sticky;top:0;z-index:10;background:#081524ee;border-bottom:1px solid var(--line);padding:12px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between;backdrop-filter:blur(10px)}
+.brand b{font-size:18px}.brand small{display:block;color:var(--muted)}.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+html{scroll-behavior:smooth}button,.btn{border:1px solid #35536f;background:#10263d;color:var(--txt);border-radius:8px;padding:8px 11px;cursor:pointer;transition:.18s ease}button:hover{border-color:var(--cyan);transform:translateY(-1px)}button:active{transform:translateY(0) scale(.98)}button.primary{background:#0a6884;border-color:#20c8ed}.lang.active{background:#16547a}.flash{box-shadow:0 0 0 2px #31d7ff88,0 0 20px #31d7ff44!important}
+.grid{display:grid;grid-template-columns:300px minmax(420px,1fr) 300px;gap:12px;padding:12px}.panel{background:linear-gradient(180deg,#0d1c2e,#0a1726);border:1px solid #233d57;border-radius:12px;padding:12px;box-shadow:0 12px 30px #0004}.panel h2,.panel h3{margin:0 0 10px}.panel h2{font-size:15px;color:#dff7ff}.panel h3{font-size:13px;color:var(--cyan);margin-top:14px}
+label{display:block;color:var(--muted);font-size:12px;margin:8px 0 4px}input,select,textarea{width:100%;background:#071522;border:1px solid #29445f;color:var(--txt);border-radius:7px;padding:7px}input:focus,select:focus,textarea:focus{outline:2px solid #31d7ff55}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.card{background:#0a2033;border:1px solid #29445f;border-radius:10px;padding:10px}.card .k{color:var(--muted);font-size:11px}.card .v{font-size:17px;font-weight:700;margin-top:3px}.good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--orange)}
+.stage{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.stage button{font-size:11px;padding:7px 4px}.stage button.on{border-color:var(--cyan);box-shadow:0 0 0 1px #31d7ff55 inset}
+canvas{width:100%;height:260px;background:#071522;border:1px solid #213c55;border-radius:10px}.chartTitle{display:flex;justify-content:space-between;align-items:center;margin:12px 0 6px}.chartTitle span{color:var(--muted);font-size:12px}
+.cfTable{width:100%;border-collapse:collapse}.cfTable th,.cfTable td{border-bottom:1px solid #1f3850;padding:5px;text-align:right}.cfTable th:first-child,.cfTable td:first-child{text-align:center}.cfTable input{padding:5px;text-align:right}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}.tab.on{background:#155d78}.hidden{display:none!important}
+.bottom{grid-column:1/-1;display:grid;grid-template-columns:1.15fr 1fr;gap:12px}.calc{max-height:390px;overflow:auto}.step{border-left:2px solid #2d6688;padding:5px 9px;margin:7px 0;background:#0a1928}.step b{color:var(--cyan)}
+.status{display:flex;gap:12px;flex-wrap:wrap;padding:8px 14px;border-top:1px solid var(--line);background:#07131f;color:var(--muted);font-size:12px}.pill{border:1px solid #31516c;border-radius:999px;padding:3px 8px}
+.notice{padding:9px;border-radius:8px;background:#18202a;border-left:3px solid var(--orange);font-size:12px;color:#d8e4ef}.decision{font-size:24px;font-weight:800}
+.small{font-size:11px;color:var(--muted)}.rowBtns{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+table.data{width:100%;border-collapse:collapse;font-size:12px}table.data th,table.data td{padding:6px;border-bottom:1px solid #203a52;text-align:left}
+#quizBox button{margin:4px}.answer{margin-top:7px;padding:7px;border-radius:7px;background:#0a2033}
+@media(max-width:1100px){.grid{grid-template-columns:280px 1fr}.right{grid-column:1/-1}.bottom{grid-template-columns:1fr}}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.bottom{grid-template-columns:1fr}.stage{grid-template-columns:1fr 1fr}.header{position:relative}.cards{grid-template-columns:1fr 1fr}}
+@media print{body{background:white;color:black}.header,.left .rowBtns,.toolbar,.status,#quizBox{display:none}.grid{display:block}.panel{box-shadow:none;border:1px solid #aaa;background:white;color:black;margin:8px}.card{background:white;color:black}canvas{border:1px solid #aaa}.small,label{color:#444}}
+</style>
+
+<style id="vlIntroStyle">
+#vlIntroOverlay{
+ position:fixed;inset:0;z-index:2147483646;overflow:auto;
+ background:
+ radial-gradient(circle at 72% 10%,rgba(53,214,255,.13),transparent 34%),
+ linear-gradient(145deg,#06111e,#0a1d31 54%,#06111e);
+ color:#edf7ff;font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+#vlIntroOverlay *{box-sizing:border-box}
+.vlIntroWrap{max-width:1080px;margin:0 auto;padding:34px 22px 44px}
+.vlIntroTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}
+.vlIntroBadge{display:inline-flex;align-items:center;gap:8px;border:1px solid #315a77;
+ background:#0a2237;border-radius:999px;padding:6px 10px;color:#9cddf6;font-size:12px;font-weight:700}
+.vlIntroTitle{font-size:clamp(27px,4vw,44px);line-height:1.08;margin:12px 0 8px;color:#fff}
+.vlIntroSub{color:#a9bfd1;font-size:14px;line-height:1.6;max-width:760px}
+.vlIntroTime{min-width:185px;border:1px solid #315a77;border-radius:14px;padding:13px 15px;background:#0a1c2d}
+.vlIntroTime small{display:block;color:#91a9bd;margin-bottom:4px}.vlIntroTime b{font-size:19px;color:#bff4ff}
+.vlIntroGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vlIntroCard{background:linear-gradient(180deg,#0c2236,#091827);border:1px solid #28465f;border-radius:14px;padding:17px}
+.vlIntroCard h2{margin:0 0 10px;font-size:15px;color:#bcecff}
+.vlIntroCard ul,.vlIntroCard ol{margin:0;padding-left:21px}.vlIntroCard li{margin:7px 0;color:#d8e6f2;line-height:1.5;font-size:13px}
+.vlIntroRules{grid-column:1/-1}
+.vlIntroFooter{margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.vlIntroNote{font-size:12px;color:#91a9bd;max-width:650px;line-height:1.5}
+#vlIntroStart{border:1px solid #38c9f5;background:linear-gradient(135deg,#0d799e,#2565ad);color:white;
+ border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(37,101,173,.24)}
+#vlIntroStart:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#vlIntroStart:focus-visible{outline:3px solid #9de9ff;outline-offset:3px}
+.vlIntroFlow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.vlIntroFlow span{border:1px solid #31516d;background:#0a1b2b;border-radius:999px;padding:5px 8px;font-size:11px;color:#cbe4f4}
+@media(max-width:720px){.vlIntroWrap{padding:22px 13px 32px}.vlIntroTop{display:block}.vlIntroTime{margin-top:14px}.vlIntroGrid{grid-template-columns:1fr}.vlIntroRules{grid-column:auto}}
+@media print{#vlIntroOverlay{display:none!important}}
+</style>
+
+</head>
+<body>
+
+<div id="vlIntroOverlay" role="dialog" aria-modal="true" aria-labelledby="vlIntroTitle">
+  <div class="vlIntroWrap">
+    <div class="vlIntroTop">
+      <div>
+        <div class="vlIntroBadge">MODUL 02 • VIRTUAL LAB EKONOMI TEKNIK</div>
+        <h1 class="vlIntroTitle" id="vlIntroTitle">Evaluasi Investasi Tunggal</h1>
+        <div class="vlIntroSub">Baca halaman pembuka ini sebelum memulai praktikum. Setelah siap, pilih <b>Mulai Praktikum</b> untuk masuk ke simulator dan mengikuti Learning Assistant.</div>
+      </div>
+      <div class="vlIntroTime"><small>Estimasi waktu</small><b>60–75 menit</b></div>
+    </div>
+
+    <div class="vlIntroGrid">
+      <section class="vlIntroCard">
+        <h2>Prerequisite Topik</h2>
+        <ul><li>Menguasai konsep Nilai Waktu Uang dan diagram arus kas.</li><li>Memahami MARR sebagai tingkat pengembalian minimum yang disyaratkan.</li><li>Telah menyelesaikan Modul 01 atau memahami konsep ekuivalensi nilai uang.</li></ul>
+      </section>
+
+      <section class="vlIntroCard">
+        <h2>Capaian Pembelajaran</h2>
+        <ol><li>Menghitung dan membandingkan PW, AW/EUAC, FW, Payback, IRR, dan MIRR/ERR.</li><li>Menentukan kelayakan satu proyek berdasarkan metode evaluasi yang dipilih.</li><li>Menjelaskan keterbatasan metode IRR dan perbedaan hasil antar-metode.</li></ol>
+      </section>
+
+      <section class="vlIntroCard vlIntroRules">
+        <h2>Aturan Pengerjaan</h2>
+        <ol>
+          <li>Kerjakan modul ini secara berurutan dan fokus pada satu topik sebelum berpindah ke modul berikutnya.</li>
+          <li>Ikuti Learning Assistant dengan urutan istilah yang sama: Tujuan Belajar → Prediction Before Run → Atur Parameter → Jalankan Simulasi → Amati Hasil → Contextual Explanation → Checkpoint Quiz → Learning Summary.</li>
+          <li>Sebelum simulasi pertama, jawab Prediction Before Run. Jangan langsung menekan PLAY/RUN/AUTO ANALYZE tanpa membuat prediksi.</li>
+          <li>Ubah parameter secara terkontrol. Untuk mengamati sebab–akibat, prioritaskan perubahan satu parameter pada satu eksperimen.</li>
+          <li>Amati grafik, timeline, result card, perhitungan, dan indikator keputusan. Catat data eksperimen bila fitur Record Data tersedia.</li>
+          <li>Selesaikan Checkpoint Quiz dan baca Learning Summary sebelum mengakhiri modul.</li>
+        </ol>
+        <div class="vlIntroFlow">
+          <span>Tujuan Belajar</span><span>Prediction Before Run</span><span>Atur Parameter</span>
+          <span>Jalankan Simulasi</span><span>Amati Hasil</span><span>Contextual Explanation</span>
+          <span>Checkpoint Quiz</span><span>Learning Summary</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="vlIntroFooter">
+      <div class="vlIntroNote">Catatan: tombol <b>Lanjutkan tahap</b> pada Learning Assistant berarti melanjutkan tahap pembelajaran di dalam modul yang sama, bukan berpindah ke modul berikutnya.</div>
+      <button id="vlIntroStart" type="button">Mulai Praktikum</button>
+    </div>
+  </div>
+</div>
+<script id="vlIntroScript">
+(function(){
+  var btn=document.getElementById('vlIntroStart');
+  var ov=document.getElementById('vlIntroOverlay');
+  if(btn&&ov){
+    btn.addEventListener('click',function(){
+      ov.style.display='none';
+      document.body.style.overflow='';
+      var la=document.getElementById('vlEduOpen');
+      if(la) setTimeout(function(){ try{ la.focus(); }catch(e){} },120);
+    });
+    document.body.style.overflow='hidden';
+  }
+})();
+</script>
+
+
+<header class="header">
+ <div class="brand"><b id="title">Virtual Lab — Evaluasi Kelayakan Investasi Tunggal</b><small id="subtitle">Engineering Economy • PW • AW/EUAC • FW • Payback • IRR • MIRR/ERR</small></div>
+ <div class="toolbar"><button class="lang active" id="idBtn">ID</button><button class="lang" id="enBtn">EN</button><button id="printBtn">Print Lab Report</button><button id="exportBtn">Export CSV</button></div>
+</header>
+
+<main class="grid">
+<section class="panel left">
+ <h2 data-t="controls">Panel Kontrol</h2>
+ <label data-t="preset">Preset</label><select id="preset"></select>
+ <label data-t="method">Metode Evaluasi</label>
+ <select id="method"><option>ALL</option><option>PW</option><option>AW/EUAC</option><option>FW</option><option>PAYBACK</option><option>IRR</option><option>MIRR/ERR</option></select>
+ <div class="two"><div><label>n (tahun)</label><input id="n" type="number" min="1" max="20"></div><div><label>MARR (%)</label><input id="marr" type="number" step=".1"></div></div>
+ <div class="two"><div><label data-t="finance">Finance rate (%)</label><input id="finance" type="number" step=".1"></div><div><label data-t="reinvest">Reinvestment (%)</label><input id="reinvest" type="number" step=".1"></div></div>
+ <label data-t="currency">Mata uang</label><select id="currency"><option value="IDR">IDR (Rp)</option><option value="GEN">Generic Unit</option></select>
+ <h3 data-t="cashflow">Cash-Flow Editor</h3>
+ <div id="cfEditor"></div>
+ <div class="rowBtns"><button id="addYear">+ Period</button><button id="removeYear">− Period</button></div>
+ <h3 data-t="simulation">Simulasi</h3>
+ <div class="rowBtns"><button id="play">▶ Play</button><button id="pause">Ⅱ Pause</button><button id="step">Step</button><button id="reset">Reset</button></div>
+ <div class="rowBtns"><button id="discount">Discount → t0</button><button id="compound">Compound → tn</button><button id="scan">Scan IRR</button></div>
+ <label data-t="speed">Kecepatan animasi</label><input id="speed" type="range" min="1" max="10" value="5">
+ <label data-t="scale">Skala visual cash flow</label><input id="scale" type="range" min="30" max="100" value="70">
+</section>
+
+<section class="panel center">
+ <div class="stage">
+   <button class="on" data-stage="0">1. REAL SYSTEM</button>
+   <button data-stage="1">2. CASH FLOW</button>
+   <button data-stage="2">3. METHOD</button>
+   <button data-stage="3">4. DECISION</button>
+ </div>
+ <div id="stageInfo" class="notice" style="margin-bottom:10px">Pilih tahap untuk melihat penjelasan proses evaluasi.</div>
+ <div class="rowBtns"><button class="primary" id="autoEval">AUTO EVALUATE</button><button id="showEq">SHOW EQUATIONS</button><button id="showNpv">SHOW NPV PROFILE</button><button id="compare">COMPARE METHODS</button></div>
+ <div class="chartTitle"><h2 data-t="timeline">Cash-Flow Timeline</h2><span id="cursorText">t = 0</span></div>
+ <canvas id="timeline" width="900" height="280"></canvas>
+ <div class="chartTitle"><h2 id="chartHeading">NPV / PW Profile</h2><span id="chartMeta"></span></div>
+ <canvas id="chart" width="900" height="300"></canvas>
+ <div id="chartSummary" class="small"></div>
+</section>
+
+<section class="panel right">
+ <h2 data-t="results">Hasil Evaluasi</h2>
+ <div id="decisionBox"></div>
+ <div class="cards" id="cards"></div>
+ <h3 data-t="validity">Validity & Method Limits</h3><div id="warnings" class="notice"></div>
+ <h3>Information Panel</h3><div id="info" class="small">Klik timeline/grafik atau ubah metode untuk melihat interpretasi.</div>
+</section>
+
+<section class="bottom">
+ <div class="panel">
+   <h2 data-t="calculation">Perhitungan Step-by-Step</h2>
+   <div id="equations" class="notice hidden"></div>
+   <div id="calc" class="calc"></div>
+ </div>
+ <div class="panel">
+   <h2 data-t="experiment">Eksperimen, Perbandingan & Worksheet</h2>
+   <div class="tabs"><button class="tab on" data-pane="comparison">Comparison</button><button class="tab" data-pane="records">Recorded Trials</button><button class="tab" data-pane="worksheet">Worksheet</button><button class="tab" data-pane="quiz">Challenge</button></div>
+   <div id="comparison" class="pane"></div>
+   <div id="records" class="pane hidden"><div class="rowBtns"><button id="record">Record Data</button><button id="clearRecords">Clear Data</button></div><div id="recordTable"></div></div>
+   <div id="worksheet" class="pane hidden"><label>Prediksi / Prediction</label><textarea id="wsPrediction" rows="3"></textarea><label>Perbandingan / Comparison</label><textarea id="wsCompare" rows="3"></textarea><label>Kesimpulan engineering / Engineering conclusion</label><textarea id="wsConclusion" rows="4"></textarea></div>
+   <div id="quiz" class="pane hidden"><div id="quizBox"></div></div>
+ </div>
+</section>
+</main>
+<footer class="status" id="status"></footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const presets=[
+ {name:"CNC Machine Investment",cf:[-500,150,150,150,150,200],marr:12,fin:10,reinv:12},
+ {name:"Robotic Automation Cell",cf:[-800,210,220,230,190,260],marr:11,fin:9,reinv:11},
+ {name:"Energy-Efficient Compressor",cf:[-420,120,125,130,135,190],marr:10,fin:9,reinv:10},
+ {name:"Tooling / Fixture Project",cf:[-600,160,160,80,160,250],marr:10,fin:9,reinv:10},
+ {name:"Nonconventional / Multiple IRR",cf:[-100,230,-132],marr:10,fin:8,reinv:10},
+ {name:"ERR/MIRR Financing Case",cf:[-500,160,-60,210,230,180],marr:12,fin:8,reinv:10}
+];
+let S={lang:"id",preset:0,method:"ALL",cf:[],marr:.12,finance:.10,reinvest:.12,cursor:0,timer:null,records:[],showNpv:true,stage:0};
+const tr={
+ id:{controls:"Panel Kontrol",preset:"Preset",method:"Metode Evaluasi",finance:"Finance rate (%)",reinvest:"Reinvestment (%)",currency:"Mata uang",cashflow:"Editor Arus Kas",simulation:"Simulasi",speed:"Kecepatan animasi",scale:"Skala visual arus kas",timeline:"Diagram Arus Kas",results:"Hasil Evaluasi",validity:"Validitas & Batas Metode",calculation:"Perhitungan Step-by-Step",experiment:"Eksperimen, Perbandingan & Worksheet"},
+ en:{controls:"Control Panel",preset:"Preset",method:"Evaluation Method",finance:"Finance rate (%)",reinvest:"Reinvestment (%)",currency:"Currency",cashflow:"Cash-Flow Editor",simulation:"Simulation",speed:"Animation speed",scale:"Cash-flow visual scale",timeline:"Cash-Flow Timeline",results:"Evaluation Results",validity:"Validity & Method Limits",calculation:"Step-by-Step Calculation",experiment:"Experiment, Comparison & Worksheet"}
+};
+function money(x){if(!isFinite(x))return "N/A"; if($("currency").value==="GEN") return x.toFixed(2)+" MU"; return "Rp"+(x*1e6).toLocaleString("id-ID",{maximumFractionDigits:0})}
+function pct(x){return isFinite(x)?(x*100).toFixed(2)+"%":"N/A"}
+function npv(rate,cf=S.cf){if(rate<=-1)return NaN;let s=0;for(let t=0;t<cf.length;t++)s+=cf[t]/Math.pow(1+rate,t);return s}
+function ap(i,n){if(n<=0)return NaN;if(Math.abs(i)<1e-12)return 1/n;let z=Math.pow(1+i,n);return i*z/(z-1)}
+function pw(){return npv(S.marr)}
+function aw(){return pw()*ap(S.marr,S.cf.length-1)}
+function fw(){let n=S.cf.length-1;return pw()*Math.pow(1+S.marr,n)}
+function payback(discounted=false){
+ let cum=S.cf[0]; if(cum>=0)return 0;
+ for(let t=1;t<S.cf.length;t++){let v=S.cf[t]/(discounted?Math.pow(1+S.marr,t):1),prev=cum;cum+=v;if(cum>=0){if(v<=0)return t;return (t-1)+(-prev/v)}}
+ return null
+}
+function signChanges(){let a=S.cf.filter(x=>Math.abs(x)>1e-12),c=0;for(let i=1;i<a.length;i++)if(Math.sign(a[i])!==Math.sign(a[i-1]))c++;return c}
+function bisect(a,b){let fa=npv(a),fb=npv(b);for(let k=0;k<100;k++){let m=(a+b)/2,fm=npv(m);if(Math.abs(fm)<1e-10)return m;if(fa*fm<=0){b=m;fb=fm}else{a=m;fa=fm}}return (a+b)/2}
+function allIRR(){
+ let roots=[], pts=[]; 
+ for(let r=-.99;r<=10;r+= r<1?.002:.02) pts.push(r);
+ for(let i=1;i<pts.length;i++){let a=pts[i-1],b=pts[i],fa=npv(a),fb=npv(b);if(isFinite(fa)&&isFinite(fb)){if(Math.abs(fa)<1e-7)roots.push(a);if(fa*fb<0)roots.push(bisect(a,b))}}
+ roots.sort((a,b)=>a-b); return roots.filter((r,i)=>i===0||Math.abs(r-roots[i-1])>1e-4)
+}
+function mirr(){
+ let n=S.cf.length-1,pvn=0,fvp=0;
+ S.cf.forEach((c,t)=>{if(c<0)pvn+=c/Math.pow(1+S.finance,t);else if(c>0)fvp+=c*Math.pow(1+S.reinvest,n-t)});
+ if(n<=0||pvn===0||fvp<=0)return NaN; return Math.pow(fvp/Math.abs(pvn),1/n)-1
+}
+function results(){let roots=allIRR();return {pw:pw(),aw:aw(),fw:fw(),pb:payback(false),dpb:payback(true),roots,mirr:mirr(),changes:signChanges()}}
+
+function flash(el){
+ if(!el) return;
+ el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+ setTimeout(()=>el.classList.remove("flash"),650);
+}
+function scrollToEl(el){
+ if(!el) return;
+ el.scrollIntoView({behavior:"smooth",block:"center"});
+ flash(el);
+}
+function stageText(k){
+ const r=results();
+ const id=[
+  `<b>1. REAL SYSTEM</b><br>Identifikasi investasi nyata: ${presets[S.preset].name}. Tentukan investasi awal, manfaat/pendapatan, biaya operasi, overhaul, salvage, dan horizon analisis.`,
+  `<b>2. CASH FLOW</b><br>Model arus kas aktif memiliki ${S.cf.length} titik waktu (t=0…${S.cf.length-1}). Klik panah pada timeline atau ubah angka pada Cash-Flow Editor untuk melihat dampaknya.`,
+  `<b>3. METHOD</b><br>Metode aktif: <b>${S.method}</b>. MARR=${pct(S.marr)}. PW=${money(r.pw)}, AW=${money(r.aw)}/yr, FW=${money(r.fw)}. IRR roots: ${r.roots.map(pct).join(", ")||"none"}.`,
+  `<b>4. DECISION</b><br>Decision berbasis PW pada MARR: <b>${r.pw>1e-8?"ACCEPT":r.pw<-1e-8?"REJECT":"BREAK-EVEN"}</b>. ${r.roots.length>1?"Multiple IRR terdeteksi; jangan memilih satu IRR secara arbitrer. Gunakan PW pada MARR dan/atau MIRR/ERR.":"Gunakan hasil metode bersama asumsi dan batas model."}`
+ ];
+ const en=[
+  `<b>1. REAL SYSTEM</b><br>Identify the real investment: ${presets[S.preset].name}. Define initial investment, benefits/revenue, operating cost, overhaul, salvage, and analysis horizon.`,
+  `<b>2. CASH FLOW</b><br>The active cash-flow model has ${S.cf.length} time points (t=0…${S.cf.length-1}). Click a timeline arrow or edit the Cash-Flow Editor to see the effect.`,
+  `<b>3. METHOD</b><br>Active method: <b>${S.method}</b>. MARR=${pct(S.marr)}. PW=${money(r.pw)}, AW=${money(r.aw)}/yr, FW=${money(r.fw)}. IRR roots: ${r.roots.map(pct).join(", ")||"none"}.`,
+  `<b>4. DECISION</b><br>PW-based decision at MARR: <b>${r.pw>1e-8?"ACCEPT":r.pw<-1e-8?"REJECT":"BREAK-EVEN"}</b>. ${r.roots.length>1?"Multiple IRRs detected; do not select one arbitrarily. Use PW at MARR and/or MIRR/ERR.":"Use the result together with model assumptions and limitations."}`
+ ];
+ return (S.lang==="id"?id:en)[k];
+}
+function activateStage(k,doScroll=false){
+ S.stage=Math.max(0,Math.min(3,k));
+ const bs=[...document.querySelectorAll(".stage button")];
+ bs.forEach((b,i)=>b.classList.toggle("on",i===S.stage));
+ $("stageInfo").innerHTML=stageText(S.stage);
+ $("info").innerHTML=stageText(S.stage);
+ if(S.stage===1){S.cursor=Math.min(S.cursor,S.cf.length-1);drawTimeline(); if(doScroll)scrollToEl($("timeline"));}
+ if(S.stage===2){if(S.method==="ALL") S.method="PW"; $("method").value=S.method;drawChart(); if(doScroll)scrollToEl($("chart"));}
+ if(S.stage===3){renderCards(); if(doScroll)scrollToEl($("decisionBox"));}
+ if(S.stage===0 && doScroll) scrollToEl($("stageInfo"));
+}
+function openPane(name){
+ const tab=document.querySelector(`.tab[data-pane="${name}"]`);
+ if(tab) tab.click();
+ const pane=$(name);
+ if(pane) setTimeout(()=>scrollToEl(pane),30);
+}
+
+function setPreset(i){let p=presets[i];S.preset=i;S.cf=[...p.cf];S.marr=p.marr/100;S.finance=p.fin/100;S.reinvest=p.reinv/100;S.cursor=0;syncInputs();render()}
+function syncInputs(){$("n").value=S.cf.length-1;$("marr").value=(S.marr*100).toFixed(2);$("finance").value=(S.finance*100).toFixed(2);$("reinvest").value=(S.reinvest*100).toFixed(2);$("method").value=S.method;buildEditor()}
+function buildEditor(){
+ let h='<table class="cfTable"><tr><th>t</th><th>CF (million)</th></tr>';
+ S.cf.forEach((v,i)=>h+=`<tr><td>${i}</td><td><input class="cfi" data-i="${i}" type="number" step="1" value="${v}"></td></tr>`);
+ $("cfEditor").innerHTML=h+"</table>";document.querySelectorAll(".cfi").forEach(e=>e.oninput=()=>{S.cf[+e.dataset.i]=+e.value||0;render(false)})
+}
+function drawTimeline(){
+ let c=$("timeline"),x=c.getContext("2d"),W=c.width,H=c.height;x.clearRect(0,0,W,H);x.fillStyle="#071522";x.fillRect(0,0,W,H);
+ let n=S.cf.length-1,pad=55,y=H/2,max=Math.max(1,...S.cf.map(Math.abs)),sc=+$("scale").value/100;
+ x.strokeStyle="#55728b";x.lineWidth=2;x.beginPath();x.moveTo(pad,y);x.lineTo(W-pad,y);x.stroke();
+ S.cf.forEach((v,t)=>{let px=pad+(W-2*pad)*(t/Math.max(1,n)),len=Math.min(100,Math.abs(v)/max*110*sc+15),ey=v>=0?y-len:y+len;
+  x.strokeStyle=t===S.cursor?"#31d7ff":v>=0?"#4de3a2":"#ff6b72";x.fillStyle=x.strokeStyle;x.lineWidth=t===S.cursor?4:2;x.beginPath();x.moveTo(px,y);x.lineTo(px,ey);x.stroke();
+  x.beginPath();x.moveTo(px,ey);x.lineTo(px-5,ey+(v>=0?8:-8));x.lineTo(px+5,ey+(v>=0?8:-8));x.closePath();x.fill();
+  x.font="13px sans-serif";x.textAlign="center";x.fillText("t="+t,px,y+18);x.font="11px sans-serif";x.fillText((v>=0?"+":"")+v.toFixed(0),px,v>=0?ey-8:ey+15)
+ });$("cursorText").textContent="t = "+S.cursor
+}
+function drawChart(){
+ let c=$("chart"),x=c.getContext("2d"),W=c.width,H=c.height;x.clearRect(0,0,W,H);x.fillStyle="#071522";x.fillRect(0,0,W,H);
+ let r=results(),mode=S.method==="PAYBACK"?"payback":"npv";$("chartHeading").textContent=mode==="npv"?"NPV / PW Profile":"Cumulative Cash Flow";
+ let pad=55; x.strokeStyle="#28465f";x.lineWidth=1;
+ if(mode==="npv"){
+  let xmin=-.5,xmax=1.5,pts=[];for(let k=0;k<=240;k++){let rr=xmin+(xmax-xmin)*k/240;pts.push([rr,npv(rr)])}
+  let vals=pts.map(p=>p[1]).filter(isFinite),mn=Math.min(...vals),mx=Math.max(...vals);if(mx===mn){mx++;mn--}
+  let yy=v=>H-pad-(v-mn)/(mx-mn)*(H-2*pad),xx=r=>pad+(r-xmin)/(xmax-xmin)*(W-2*pad);
+  let zy=yy(0);x.strokeStyle="#60778c";x.beginPath();x.moveTo(pad,zy);x.lineTo(W-pad,zy);x.stroke();
+  x.strokeStyle="#31d7ff";x.lineWidth=2;x.beginPath();pts.forEach((p,i)=>{let X=xx(p[0]),Y=yy(p[1]);i?x.lineTo(X,Y):x.moveTo(X,Y)});x.stroke();
+  r.roots.filter(q=>q>=xmin&&q<=xmax).forEach(q=>{x.fillStyle="#ffb44d";x.beginPath();x.arc(xx(q),yy(0),6,0,Math.PI*2);x.fill();x.fillText((q*100).toFixed(1)+"%",xx(q),yy(0)-10)});
+  let xm=xx(S.marr),ym=yy(npv(S.marr));x.fillStyle="#4de3a2";x.beginPath();x.arc(xm,ym,6,0,Math.PI*2);x.fill();
+  $("chartMeta").textContent=`MARR ${pct(S.marr)} • roots ${r.roots.length}`;$("chartSummary").textContent=`Sign changes: ${r.changes}. IRR roots found in search domain: ${r.roots.map(pct).join(", ")||"none"}.`
+ } else {
+  let und=[],disc=[],a=0,b=0;S.cf.forEach((v,t)=>{a+=v;b+=v/Math.pow(1+S.marr,t);und.push(a);disc.push(b)});let vals=[...und,...disc,0],mn=Math.min(...vals),mx=Math.max(...vals);if(mx===mn){mx++;mn--}
+  let yy=v=>H-pad-(v-mn)/(mx-mn)*(H-2*pad),xx=t=>pad+t/(S.cf.length-1)*(W-2*pad);x.strokeStyle="#60778c";x.beginPath();x.moveTo(pad,yy(0));x.lineTo(W-pad,yy(0));x.stroke();
+  [["#31d7ff",und],["#ffb44d",disc]].forEach(([col,a])=>{x.strokeStyle=col;x.lineWidth=2;x.beginPath();a.forEach((v,t)=>t?x.lineTo(xx(t),yy(v)):x.moveTo(xx(t),yy(v)));x.stroke()});
+  $("chartMeta").textContent=`PB ${r.pb==null?"N/A":r.pb.toFixed(2)} • DPB ${r.dpb==null?"N/A":r.dpb.toFixed(2)}`;$("chartSummary").textContent="Cyan: cumulative nominal. Orange: cumulative discounted."
+ }
+}
+function renderCards(){
+ let r=results(),decision=r.pw>1e-8?"ACCEPT":r.pw<-1e-8?"REJECT":"BREAK-EVEN",cl=decision==="ACCEPT"?"good":decision==="REJECT"?"bad":"warn";
+ $("decisionBox").innerHTML=`<div class="decision ${cl}">${decision}</div><div class="small">PW criterion @ MARR ${pct(S.marr)}</div>`;
+ let rootText=r.roots.length?r.roots.map(pct).join(", "):"N/A", irrStatus=r.roots.length>1?"MULTIPLE":r.roots.length===1?"UNIQUE":"NONE";
+ $("cards").innerHTML=[
+  ["PW / NPV",money(r.pw)],["AW",money(r.aw)+"/yr"],["FW",money(r.fw)],["Simple PB",r.pb==null?"Not recovered":r.pb.toFixed(2)+" yr"],
+  ["Discounted PB",r.dpb==null?"Not recovered":r.dpb.toFixed(2)+" yr"],["IRR ("+irrStatus+")",rootText],["MIRR / ERR*",pct(r.mirr)],["Sign changes",r.changes]
+ ].map(([k,v])=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+ let w=[];if(r.changes>1)w.push("Nonconventional cash flow: multiple IRR may exist; use PW at MARR and/or MIRR/ERR.");if(r.pb==null)w.push("Simple payback is not recovered within the analysis horizon.");if(r.dpb==null)w.push("Discounted payback is not recovered within the analysis horizon.");if(S.marr<=-1)w.push("Invalid MARR: discrete discount rate must be > −100%.");if(!w.length)w.push("Model valid for the current discrete annual-period assumptions.");
+ $("warnings").innerHTML=w.join("<br>")+"<br><span class='small'>*ERR shown using the implemented MIRR-style external finance/reinvestment framework.</span>";
+}
+function renderCalc(){
+ let r=results(),n=S.cf.length-1;
+ let rows=S.cf.map((v,t)=>`<tr><td>${t}</td><td>${money(v)}</td><td>${money(v/Math.pow(1+S.marr,t))}</td><td>${money(v*Math.pow(1+S.marr,n-t))}</td></tr>`).join("");
+ $("calc").innerHTML=`<div class="step"><b>GIVEN</b><br>n=${n}; MARR=${pct(S.marr)}; finance=${pct(S.finance)}; reinvest=${pct(S.reinvest)}</div>
+ <div class="step"><b>CASH-FLOW TABLE</b><table class="data"><tr><th>t</th><th>CF</th><th>PV contribution</th><th>FV contribution</th></tr>${rows}</table></div>
+ <div class="step"><b>PW</b><br>Σ CFₜ/(1+i)ᵗ = <b>${money(r.pw)}</b></div>
+ <div class="step"><b>AW / EUAC basis</b><br>AW = PW(A/P,i,n) = <b>${money(r.aw)}/yr</b></div>
+ <div class="step"><b>FW</b><br>PW(1+i)ⁿ = <b>${money(r.fw)}</b></div>
+ <div class="step"><b>PAYBACK</b><br>Simple = <b>${r.pb==null?"not recovered":r.pb.toFixed(3)+" yr"}</b>; Discounted = <b>${r.dpb==null?"not recovered":r.dpb.toFixed(3)+" yr"}</b></div>
+ <div class="step"><b>IRR ROOT SCAN</b><br>Sign changes = ${r.changes}; roots = <b>${r.roots.map(pct).join(", ")||"none found"}</b>. Each reported root satisfies NPV≈0 numerically.</div>
+ <div class="step"><b>MIRR / ERR*</b><br>Negative CF discounted at ${pct(S.finance)}; positive CF compounded at ${pct(S.reinvest)} → <b>${pct(r.mirr)}</b></div>
+ <div class="step"><b>INTERPRETATION</b><br>${r.pw>=0?"Investment meets the PW criterion at the selected MARR.":"Investment does not meet the PW criterion at the selected MARR."}</div>`;
+ $("equations").innerHTML="PW = Σ CFₜ/(1+i)ᵗ &nbsp; | &nbsp; AW = PW(A/P,i,n) &nbsp; | &nbsp; FW = PW(1+i)ⁿ &nbsp; | &nbsp; NPV(IRR)=0 &nbsp; | &nbsp; MIRR=(FV⁺/|PV⁻|)^(1/n)−1";
+}
+function renderComparison(){
+ let r=results(),d=r.pw>=0?"Accept":"Reject";
+ $("comparison").innerHTML=`<table class="data"><tr><th>Method</th><th>Result</th><th>Decision / meaning</th></tr>
+ <tr><td>PW</td><td>${money(r.pw)}</td><td>${d} @ MARR</td></tr><tr><td>AW</td><td>${money(r.aw)}/yr</td><td>${d}; equivalent to PW</td></tr>
+ <tr><td>FW</td><td>${money(r.fw)}</td><td>${d}; equivalent to PW</td></tr><tr><td>Simple Payback</td><td>${r.pb==null?"N/A":r.pb.toFixed(2)+" yr"}</td><td>Recovery speed; not value creation</td></tr>
+ <tr><td>Discounted Payback</td><td>${r.dpb==null?"N/A":r.dpb.toFixed(2)+" yr"}</td><td>Discounted recovery</td></tr>
+ <tr><td>IRR</td><td>${r.roots.map(pct).join(", ")||"N/A"}</td><td>${r.roots.length>1?"Multiple: do not select arbitrarily":r.roots.length===1?(r.roots[0]>=S.marr?"≥ MARR":"< MARR"):"No root found"}</td></tr>
+ <tr><td>MIRR/ERR*</td><td>${pct(r.mirr)}</td><td>${r.mirr>=S.marr?"≥ MARR":"< MARR"}</td></tr></table>`;
+}
+function renderRecords(){let h='<table class="data"><tr><th>#</th><th>Preset</th><th>PW</th><th>IRR</th><th>MIRR</th></tr>';S.records.forEach((q,i)=>h+=`<tr><td>${i+1}</td><td>${q.preset}</td><td>${q.pw}</td><td>${q.irr}</td><td>${q.mirr}</td></tr>`);$("recordTable").innerHTML=h+"</table>"}
+function renderStatus(){let r=results();$("status").innerHTML=`<span class="pill">MODEL: VALID</span><span class="pill">METHOD: ${S.method}</span><span class="pill">MARR: ${pct(S.marr)}</span><span class="pill">PERIOD: ${S.cursor}/${S.cf.length-1}</span><span class="pill">IRR: ${r.roots.length>1?"MULTIPLE":r.roots.length===1?"UNIQUE":"NONE"}</span><span class="pill">PW: ${money(r.pw)}</span>`}
+function render(rebuild=true){if(rebuild)buildEditor();drawTimeline();drawChart();renderCards();renderCalc();renderComparison();renderRecords();renderStatus();if($("stageInfo"))$("stageInfo").innerHTML=stageText(S.stage)}
+function applyLang(){document.querySelectorAll("[data-t]").forEach(e=>e.textContent=tr[S.lang][e.dataset.t]);$("idBtn").classList.toggle("active",S.lang==="id");$("enBtn").classList.toggle("active",S.lang==="en");if($("stageInfo"))$("stageInfo").innerHTML=stageText(S.stage)}
+function exportCSV(){let r=results(),rows=[["period","cash_flow"],...S.cf.map((v,i)=>[i,v]),[],["MARR",S.marr],["PW",r.pw],["AW",r.aw],["FW",r.fw],["simple_payback",r.pb],["discounted_payback",r.dpb],["IRR_roots",r.roots.join("|")],["MIRR",r.mirr]];let blob=new Blob([rows.map(a=>a.join(",")).join("\n")],{type:"text/csv"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="investment_evaluation.csv";a.click();URL.revokeObjectURL(a.href)}
+function quiz(){let qs=[["PW > 0 pada MARR berarti?","Memenuhi kriteria PW"],["Apa definisi IRR?","Rate yang membuat NPV/PW = 0"],["Jika multiple IRR ditemukan?","Gunakan PW pada MARR dan/atau MIRR/ERR"],["Payback terutama mengukur?","Kecepatan recovery investasi"]];$("quizBox").innerHTML=qs.map((q,i)=>`<div class="card"><b>Q${i+1}. ${q[0]}</b><div><button onclick="this.nextElementSibling.classList.remove('hidden')">Show answer</button><div class="answer hidden">${q[1]}</div></div></div>`).join("")}
+presets.forEach((p,i)=>$("preset").add(new Option(p.name,i)));
+$("preset").onchange=e=>{setPreset(+e.target.value);activateStage(0,false)};
+$("method").onchange=e=>{S.method=e.target.value;render(false);activateStage(2,false);$("info").innerHTML=stageText(2)};
+$("marr").oninput=e=>{S.marr=(+e.target.value||0)/100;render(false)};$("finance").oninput=e=>{S.finance=(+e.target.value||0)/100;render(false)};$("reinvest").oninput=e=>{S.reinvest=(+e.target.value||0)/100;render(false)};
+$("n").onchange=e=>{let n=Math.max(1,Math.min(20,+e.target.value||1));while(S.cf.length<n+1)S.cf.push(0);while(S.cf.length>n+1)S.cf.pop();S.cursor=Math.min(S.cursor,n);render()};
+$("addYear").onclick=()=>{if(S.cf.length<21){S.cf.push(0);syncInputs();render()}};$("removeYear").onclick=()=>{if(S.cf.length>2){S.cf.pop();S.cursor=Math.min(S.cursor,S.cf.length-1);syncInputs();render()}};
+$("play").onclick=()=>{clearInterval(S.timer);S.timer=setInterval(()=>{S.cursor=(S.cursor+1)%S.cf.length;drawTimeline();renderStatus()},1100-(+$("speed").value*90))};$("pause").onclick=()=>clearInterval(S.timer);$("step").onclick=()=>{S.cursor=(S.cursor+1)%S.cf.length;drawTimeline();renderStatus()};$("reset").onclick=()=>setPreset(S.preset);
+$("discount").onclick=()=>{S.method="PW";syncInputs();render();activateStage(2,false);scrollToEl($("calc"))};
+$("compound").onclick=()=>{S.method="FW";syncInputs();render();activateStage(2,false);scrollToEl($("calc"))};
+$("scan").onclick=()=>{S.method="IRR";syncInputs();render();activateStage(2,false);scrollToEl($("chart"))};
+document.querySelectorAll(".stage button").forEach(b=>{
+ b.onclick=()=>activateStage(+b.dataset.stage,true);
+});
+$("autoEval").onclick=()=>{
+ clearInterval(S.timer);S.cursor=0;let k=0;
+ activateStage(0,false);
+ $("stageInfo").innerHTML=(S.lang==="id"?"Evaluasi otomatis berjalan…":"Auto evaluation running…");
+ S.timer=setInterval(()=>{
+   activateStage(k,false);
+   S.cursor=Math.min(k,S.cf.length-1);
+   drawTimeline();renderStatus();
+   k++;
+   if(k>=4){
+     clearInterval(S.timer);
+     S.stage=3;
+     activateStage(3,false);
+     $("stageInfo").innerHTML=stageText(3)+(S.lang==="id"?"<br><b>Auto Evaluate selesai.</b>":"<br><b>Auto Evaluate completed.</b>");
+     scrollToEl($("decisionBox"));
+   }
+ },650);
+};
+$("showEq").onclick=()=>{
+ const e=$("equations"),isHidden=e.classList.contains("hidden");
+ e.classList.toggle("hidden");
+ $("showEq").textContent=isHidden?"HIDE EQUATIONS":"SHOW EQUATIONS";
+ if(isHidden){renderCalc();scrollToEl(e)}else{scrollToEl($("calc"))}
+};
+$("showNpv").onclick=()=>{
+ S.method="IRR";$("method").value="IRR";S.showNpv=true;render(false);
+ $("info").innerHTML=(S.lang==="id"
+   ?`NPV/PW Profile ditampilkan. Marker akar IRR: ${results().roots.map(pct).join(", ")||"tidak ditemukan dalam domain pencarian"}.`
+   :`NPV/PW Profile is shown. IRR root markers: ${results().roots.map(pct).join(", ")||"none found in the search domain"}.`);
+ scrollToEl($("chart"));
+};
+$("compare").onclick=()=>{renderComparison();openPane("comparison")};
+$("record").onclick=()=>{let r=results();S.records.push({preset:presets[S.preset].name,pw:money(r.pw),irr:r.roots.map(pct).join("|")||"N/A",mirr:pct(r.mirr)});renderRecords()};$("clearRecords").onclick=()=>{S.records=[];renderRecords()};
+$("exportBtn").onclick=exportCSV;$("printBtn").onclick=()=>window.print();$("currency").onchange=()=>render(false);$("scale").oninput=drawTimeline;
+$("idBtn").onclick=()=>{S.lang="id";applyLang()};$("enBtn").onclick=()=>{S.lang="en";applyLang()};
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));document.querySelectorAll(".pane").forEach(x=>x.classList.add("hidden"));b.classList.add("on");$(b.dataset.pane).classList.remove("hidden")});
+$("timeline").onclick=e=>{let r=$("timeline").getBoundingClientRect(),n=S.cf.length-1;S.cursor=Math.max(0,Math.min(n,Math.round((e.clientX-r.left)/r.width*n)));drawTimeline();renderStatus();$("info").textContent=`CF_${S.cursor} = ${money(S.cf[S.cursor])}. ${S.cf[S.cursor]>=0?"Inflow":"Outflow"} pada akhir periode ${S.cursor}.`};
+quiz();setPreset(0);applyLang();activateStage(0,false);
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Evaluasi Investasi Tunggal</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction Before Run</button><button class="vlEduTab" data-p="explain">Contextual Explanation</button><button class="vlEduTab" data-p="gloss">Interactive Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint Quiz</button><button class="vlEduTab" data-p="summary">Learning Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "single", "title": "Evaluasi Investasi Tunggal", "objective": "Mengevaluasi kelayakan satu investasi dengan PW, AW/EUAC, FW, Payback, IRR, dan MIRR/ERR.", "prediction": "Jika MARR meningkat sementara arus kas proyek tetap, apa kecenderungan Present Worth proyek?", "predopts": ["Menurun", "Meningkat", "Selalu nol"], "predans": 0, "explain": "Keputusan investasi tidak hanya melihat besar arus kas, tetapi juga kapan arus kas terjadi. PW/AW/FW memakai MARR sebagai tingkat pembanding; IRR dibandingkan terhadap MARR dengan tetap memperhatikan pola arus kas.", "terms": {"MARR": "Minimum Attractive Rate of Return — tingkat pengembalian minimum yang disyaratkan.", "PW": "Present Worth — nilai kini bersih arus kas proyek.", "AW": "Annual Worth — nilai tahunan ekuivalen.", "EUAC": "Equivalent Uniform Annual Cost — biaya tahunan ekuivalen.", "IRR": "Internal Rate of Return — tingkat bunga yang membuat PW = 0.", "MIRR": "Modified IRR — ukuran return dengan asumsi finance/reinvestment rate yang eksplisit.", "Payback": "Waktu yang dibutuhkan untuk mengembalikan investasi awal."}, "quiz": [["Proyek independen umumnya layak menurut PW bila…", ["PW ≥ 0 pada MARR", "PW selalu negatif", "IRR = 0"], 0], ["IRR didefinisikan sebagai tingkat bunga yang membuat…", ["PW = 0", "FW selalu maksimum", "Payback = 1"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Tujuan Belajar','Baca Tujuan Belajar, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Prediction Before Run','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur Parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan Simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati Hasil','Perhatikan grafik, timeline, Result Card, dan nilai keputusan yang berubah.'],
+  ['6. Contextual Explanation','Buka Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Checkpoint Quiz','Kerjakan Checkpoint Quiz, kemudian buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide'){const finalStage=S.step>=steps.length-1; body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">${finalStage?'Selesaikan Pembelajaran':'Lanjutkan tahap'}</button>`;}
+   if(p==='next'){let i=Math.min(S.step,steps.length-1),finalStage=i>=steps.length-1;body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">${finalStage?'Selesaikan Pembelajaran':'Tandai selesai & lanjut'}</button><div class="vlEduCard"><h4>Apa yang harus saya lakukan?</h4><p>Atur Parameter dengan mengubah satu parameter, pilih Jalankan Simulasi, lalu Amati Hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Contextual Explanation/Interactive Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('guide');msg(`Tahap ${S.step+1} dari ${steps.length} telah dibuka. Anda masih berada di modul ini.`);}};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('next');}};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>

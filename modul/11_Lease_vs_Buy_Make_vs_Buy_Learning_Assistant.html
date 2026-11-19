@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Engineering Sourcing & Asset Decision Studio</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1b2a;--panel2:#13283d;--text:#eef6ff;--muted:#9db1c5;--accent:#31c4f3;--accent2:#6ee7b7;--warn:#f59e0b;--bad:#ef4444;--line:#29445f;--card:#102238}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#06101d,#0b1726);color:var(--text)}
+header{position:sticky;top:0;z-index:10;background:rgba(7,17,31,.96);border-bottom:1px solid #223b55;padding:14px 18px;backdrop-filter:blur(8px)}
+.header-row{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.title{font-weight:800;font-size:20px}.subtitle{color:var(--muted);font-size:12px}
+.controls-top{display:flex;gap:8px;flex-wrap:wrap}.btn,.stage{background:#0f2941;color:#fff;border:1px solid #315675;border-radius:8px;padding:9px 12px;cursor:pointer;font-weight:700}.btn:hover,.stage:hover{background:#153754}.btn.primary{background:#0b6b8e;border-color:#1ca8d3}.btn.good{background:#136c53;border-color:#26a77f}.btn.warn{background:#7a4b08;border-color:#c27b13}.btn.danger{background:#762d2d;border-color:#b44a4a}.btn:disabled{opacity:.45;cursor:not-allowed}
+.stagebar{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px}.stage.active{background:#155b7a;border-color:#31c4f3;box-shadow:0 0 0 1px #31c4f3 inset}.stage-detail{margin:10px 0 0;padding:11px 14px;border:1px solid #315675;border-radius:10px;background:#0d2236;color:#dcecff;min-height:44px;display:flex;align-items:center;gap:10px}.stage-detail strong{color:#56d2ff}.stage-flash{animation:stageFlash .55s ease}@keyframes stageFlash{0%{box-shadow:0 0 0 0 rgba(49,196,243,.75)}100%{box-shadow:0 0 0 12px rgba(49,196,243,0)}}
+main{padding:14px;max-width:1600px;margin:auto}.grid{display:grid;grid-template-columns:minmax(280px,340px) minmax(420px,1fr) minmax(260px,340px);gap:14px}.panel{background:linear-gradient(180deg,var(--panel),#0b1726);border:1px solid #203a54;border-radius:12px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.2)}.panel h3{margin:0 0 10px;font-size:15px}.panel h4{margin:14px 0 8px;color:#cfeaff}.hint{color:var(--muted);font-size:12px;line-height:1.45}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:flex;flex-direction:column;gap:4px}.field label{font-size:11px;color:#c8d8e8}.field input,.field select,.field textarea{width:100%;background:#081522;color:#fff;border:1px solid #2a4862;border-radius:7px;padding:8px}.field input:focus,.field select:focus{outline:1px solid #31c4f3}.span2{grid-column:1/-1}.button-wrap{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.card{background:var(--card);border:1px solid #28435c;border-radius:10px;padding:10px;min-height:72px}.card .k{font-size:11px;color:#a9bfd2}.card .v{font-size:18px;font-weight:800;margin-top:4px;word-break:break-word}.badge{display:inline-flex;border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.ok{background:#134c3b;color:#a7f3d0}.warning{background:#5c3d08;color:#fde68a}.error{background:#5f2323;color:#fecaca}.neutral{background:#1d3f5c;color:#bae6fd}
+canvas{width:100%;height:350px;background:#07131f;border:1px solid #24425c;border-radius:10px}.chart-title{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:2px 0 8px}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#cbd7e3}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}.info{background:#091827;border:1px solid #24425c;border-radius:10px;padding:10px;min-height:95px;font-size:12px;line-height:1.45;color:#d5e5f3}.table-wrap{overflow:auto;max-height:310px;border:1px solid #233f58;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:11px}th,td{padding:7px 8px;border-bottom:1px solid #213a52;white-space:nowrap;text-align:right}th:first-child,td:first-child{text-align:left}th{position:sticky;top:0;background:#10243a;color:#dff5ff}.bottom-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:14px;margin-top:14px}.statusbar{margin-top:14px;background:#081522;border:1px solid #24425c;border-radius:10px;padding:9px 11px;display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#c7d8e8}.toast{position:fixed;right:18px;bottom:18px;background:#0f2941;border:1px solid #3b6787;color:white;padding:12px 14px;border-radius:10px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;z-index:30}.toast.show{opacity:1;transform:none}
+.mode-switch{display:flex;gap:6px;margin-bottom:10px}.mode-switch button{flex:1}.hidden{display:none!important}.mono{font-family:Consolas,monospace}.small{font-size:11px}.formula{background:#081522;border-left:3px solid #31c4f3;padding:8px;border-radius:6px;font-family:Consolas,monospace;font-size:11px;overflow:auto}.worksheet textarea{min-height:90px}.quiz{margin-top:8px}.quiz .q{padding:8px;border:1px solid #27435d;border-radius:8px;margin-bottom:7px}.quiz button{margin-top:5px}
+@media(max-width:1150px){.grid{grid-template-columns:300px 1fr}.rightcol{grid-column:1/-1}.cards{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.bottom-grid{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}canvas{height:300px}.form-grid{grid-template-columns:1fr}.span2{grid-column:auto}}
+@media print{header,.leftcol,.button-wrap,.stagebar,.toast{display:none!important}body{background:#fff;color:#111}.panel,.card,.info{background:#fff;color:#111;border-color:#ccc;box-shadow:none}main{max-width:none}.grid{grid-template-columns:1fr}.rightcol{grid-column:auto}canvas{border-color:#999}.bottom-grid{grid-template-columns:1fr}.hint,.subtitle,.card .k{color:#444}}
+</style>
+
+<style id="vlIntroStyle">
+#vlIntroOverlay{
+ position:fixed;inset:0;z-index:2147483646;overflow:auto;
+ background:
+ radial-gradient(circle at 72% 10%,rgba(53,214,255,.13),transparent 34%),
+ linear-gradient(145deg,#06111e,#0a1d31 54%,#06111e);
+ color:#edf7ff;font-family:Inter,Segoe UI,Arial,sans-serif;
+}
+#vlIntroOverlay *{box-sizing:border-box}
+.vlIntroWrap{max-width:1080px;margin:0 auto;padding:34px 22px 44px}
+.vlIntroTop{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}
+.vlIntroBadge{display:inline-flex;align-items:center;gap:8px;border:1px solid #315a77;
+ background:#0a2237;border-radius:999px;padding:6px 10px;color:#9cddf6;font-size:12px;font-weight:700}
+.vlIntroTitle{font-size:clamp(27px,4vw,44px);line-height:1.08;margin:12px 0 8px;color:#fff}
+.vlIntroSub{color:#a9bfd1;font-size:14px;line-height:1.6;max-width:760px}
+.vlIntroTime{min-width:185px;border:1px solid #315a77;border-radius:14px;padding:13px 15px;background:#0a1c2d}
+.vlIntroTime small{display:block;color:#91a9bd;margin-bottom:4px}.vlIntroTime b{font-size:19px;color:#bff4ff}
+.vlIntroGrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.vlIntroCard{background:linear-gradient(180deg,#0c2236,#091827);border:1px solid #28465f;border-radius:14px;padding:17px}
+.vlIntroCard h2{margin:0 0 10px;font-size:15px;color:#bcecff}
+.vlIntroCard ul,.vlIntroCard ol{margin:0;padding-left:21px}.vlIntroCard li{margin:7px 0;color:#d8e6f2;line-height:1.5;font-size:13px}
+.vlIntroRules{grid-column:1/-1}
+.vlIntroFooter{margin-top:17px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.vlIntroNote{font-size:12px;color:#91a9bd;max-width:650px;line-height:1.5}
+#vlIntroStart{border:1px solid #38c9f5;background:linear-gradient(135deg,#0d799e,#2565ad);color:white;
+ border-radius:10px;padding:12px 22px;font-size:14px;font-weight:800;cursor:pointer;box-shadow:0 10px 30px rgba(37,101,173,.24)}
+#vlIntroStart:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#vlIntroStart:focus-visible{outline:3px solid #9de9ff;outline-offset:3px}
+.vlIntroFlow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.vlIntroFlow span{border:1px solid #31516d;background:#0a1b2b;border-radius:999px;padding:5px 8px;font-size:11px;color:#cbe4f4}
+@media(max-width:720px){.vlIntroWrap{padding:22px 13px 32px}.vlIntroTop{display:block}.vlIntroTime{margin-top:14px}.vlIntroGrid{grid-template-columns:1fr}.vlIntroRules{grid-column:auto}}
+@media print{#vlIntroOverlay{display:none!important}}
+</style>
+
+</head>
+<body>
+
+<div id="vlIntroOverlay" role="dialog" aria-modal="true" aria-labelledby="vlIntroTitle">
+  <div class="vlIntroWrap">
+    <div class="vlIntroTop">
+      <div>
+        <div class="vlIntroBadge">MODUL 11 • VIRTUAL LAB EKONOMI TEKNIK</div>
+        <h1 class="vlIntroTitle" id="vlIntroTitle">Lease vs Buy / Make vs Buy</h1>
+        <div class="vlIntroSub">Baca halaman pembuka ini sebelum memulai praktikum. Setelah siap, pilih <b>Mulai Praktikum</b> untuk masuk ke simulator dan mengikuti Learning Assistant.</div>
+      </div>
+      <div class="vlIntroTime"><small>Estimasi waktu</small><b>60–75 menit</b></div>
+    </div>
+
+    <div class="vlIntroGrid">
+      <section class="vlIntroCard">
+        <h2>Prerequisite Topik</h2>
+        <ul><li>Memahami PW/AW dan biaya relevan.</li><li>Memahami biaya tetap, biaya variabel, nilai sisa, dan horizon studi.</li><li>Mampu membandingkan dua alternatif keputusan ekonomi.</li></ul>
+      </section>
+
+      <section class="vlIntroCard">
+        <h2>Capaian Pembelajaran</h2>
+        <ol><li>Membandingkan biaya ekonomi lease dan buy untuk aset.</li><li>Membandingkan alternatif make dan outsourcing/buy berdasarkan volume.</li><li>Menentukan break-even dan menginterpretasikan keputusan sourcing atau kepemilikan aset.</li></ol>
+      </section>
+
+      <section class="vlIntroCard vlIntroRules">
+        <h2>Aturan Pengerjaan</h2>
+        <ol>
+          <li>Kerjakan modul ini secara berurutan dan fokus pada satu topik sebelum berpindah ke modul berikutnya.</li>
+          <li>Ikuti Learning Assistant dengan urutan istilah yang sama: Tujuan Belajar → Prediction Before Run → Atur Parameter → Jalankan Simulasi → Amati Hasil → Contextual Explanation → Checkpoint Quiz → Learning Summary.</li>
+          <li>Sebelum simulasi pertama, jawab Prediction Before Run. Jangan langsung menekan PLAY/RUN/AUTO ANALYZE tanpa membuat prediksi.</li>
+          <li>Ubah parameter secara terkontrol. Untuk mengamati sebab–akibat, prioritaskan perubahan satu parameter pada satu eksperimen.</li>
+          <li>Amati grafik, timeline, result card, perhitungan, dan indikator keputusan. Catat data eksperimen bila fitur Record Data tersedia.</li>
+          <li>Selesaikan Checkpoint Quiz dan baca Learning Summary sebelum mengakhiri modul.</li>
+        </ol>
+        <div class="vlIntroFlow">
+          <span>Tujuan Belajar</span><span>Prediction Before Run</span><span>Atur Parameter</span>
+          <span>Jalankan Simulasi</span><span>Amati Hasil</span><span>Contextual Explanation</span>
+          <span>Checkpoint Quiz</span><span>Learning Summary</span>
+        </div>
+      </section>
+    </div>
+
+    <div class="vlIntroFooter">
+      <div class="vlIntroNote">Catatan: tombol <b>Lanjutkan tahap</b> pada Learning Assistant berarti melanjutkan tahap pembelajaran di dalam modul yang sama, bukan berpindah ke modul berikutnya.</div>
+      <button id="vlIntroStart" type="button">Mulai Praktikum</button>
+    </div>
+  </div>
+</div>
+<script id="vlIntroScript">
+(function(){
+  var btn=document.getElementById('vlIntroStart');
+  var ov=document.getElementById('vlIntroOverlay');
+  if(btn&&ov){
+    btn.addEventListener('click',function(){
+      ov.style.display='none';
+      document.body.style.overflow='';
+      var la=document.getElementById('vlEduOpen');
+      if(la) setTimeout(function(){ try{ la.focus(); }catch(e){} },120);
+    });
+    document.body.style.overflow='hidden';
+  }
+})();
+</script>
+
+
+<header>
+  <div class="header-row">
+    <div><div class="title" data-i18n="title">Engineering Sourcing & Asset Decision Studio</div><div class="subtitle" data-i18n="subtitle">Lease vs Buy / Make vs Buy — Engineering Economy Virtual Lab</div></div>
+    <div class="controls-top">
+      <select id="preset" class="btn" aria-label="Preset">
+        <option value="cnc">CNC Machine</option><option value="short">Short Project</option><option value="highutil">High Utilization</option><option value="make">Make Component</option><option value="outsource">Outsource Component</option><option value="capacity">Capacity Constraint</option>
+      </select>
+      <button class="btn primary" id="autoRun">AUTO RUN</button>
+      <button class="btn" id="langBtn">ID</button>
+    </div>
+  </div>
+  <div class="stagebar" id="stagebar">
+    <button class="stage active" data-stage="1">1. ALTERNATIVES</button><button class="stage" data-stage="2">2. CASH FLOW</button><button class="stage" data-stage="3">3. PW/AW</button><button class="stage" data-stage="4">4. BREAK-EVEN</button><button class="stage" data-stage="5">5. DECISION</button><button class="stage" data-stage="6">6. INTERPRETATION</button>
+  </div>
+  <div class="stage-detail" id="stageDetail"><strong>STAGE 1</strong><span>Define the alternatives and edit the case inputs.</span></div>
+</header>
+<main>
+<div class="grid">
+  <section class="panel leftcol">
+    <div class="mode-switch"><button class="btn primary" id="modeLease">LEASE vs BUY</button><button class="btn" id="modeMake">MAKE vs BUY</button></div>
+    <h3 data-i18n="inputs">Case Inputs</h3>
+    <div id="leaseInputs" class="form-grid">
+      <div class="field"><label data-i18n="marr">MARR (%)</label><input id="marr" type="number" step="0.1" value="10"></div>
+      <div class="field"><label data-i18n="years">Study Period (years)</label><input id="years" type="number" min="1" step="1" value="5"></div>
+      <div class="field"><label>Purchase Price</label><input id="purchase" type="number" value="1200000000"></div>
+      <div class="field"><label>Installation</label><input id="install" type="number" value="80000000"></div>
+      <div class="field"><label>Annual O&amp;M</label><input id="om" type="number" value="90000000"></div>
+      <div class="field"><label>Salvage Value</label><input id="salvage" type="number" value="300000000"></div>
+      <div class="field"><label>Lease Upfront</label><input id="leaseUpfront" type="number" value="30000000"></div>
+      <div class="field"><label>Lease Payment / year</label><input id="leasePay" type="number" value="320000000"></div>
+      <div class="field"><label>Lease Escalation (%)</label><input id="leaseEsc" type="number" step="0.1" value="0"></div>
+      <div class="field"><label>Lease O&amp;M / year</label><input id="leaseOM" type="number" value="0"></div>
+      <div class="field"><label>End Lease Fee</label><input id="endFee" type="number" value="0"></div>
+      <div class="field"><label>Payment Timing</label><select id="timing"><option value="end">End of Year</option><option value="begin">Beginning of Year</option></select></div>
+    </div>
+    <div id="makeInputs" class="form-grid hidden">
+      <div class="field"><label>Annual Demand Q</label><input id="demand" type="number" value="20000"></div>
+      <div class="field"><label>Capacity</label><input id="capacity" type="number" value="30000"></div>
+      <div class="field"><label>Make Fixed Cost</label><input id="makeFixed" type="number" value="300000000"></div>
+      <div class="field"><label>Make Variable / unit</label><input id="makeVar" type="number" value="42000"></div>
+      <div class="field"><label>Outsource Fixed Cost</label><input id="buyFixed" type="number" value="50000000"></div>
+      <div class="field"><label>Supplier Price / unit</label><input id="buyVar" type="number" value="54000"></div>
+      <div class="field"><label>Freight + Inspection / unit</label><input id="freight" type="number" value="3000"></div>
+      <div class="field"><label>MOQ</label><input id="moq" type="number" value="5000"></div>
+      <div class="field"><label>Volume Min</label><input id="qMin" type="number" value="0"></div>
+      <div class="field"><label>Volume Max</label><input id="qMax" type="number" value="50000"></div>
+      <div class="field"><label>Volume Step</label><input id="qStep" type="number" value="1000"></div>
+      <div class="field"><label>Opportunity Cost / unit</label><input id="opp" type="number" value="0"></div>
+    </div>
+    <div class="button-wrap">
+      <button class="btn primary" id="recalc">RECALCULATE</button><button class="btn" id="build">BUILD CURVES</button><button class="btn" id="findBE">FIND BREAK-EVEN</button><button class="btn" id="jumpBE">JUMP TO BREAK-EVEN</button><button class="btn" id="jumpDemand">JUMP TO DEMAND</button>
+    </div>
+    <h4 data-i18n="animation">Animation</h4>
+    <div class="button-wrap"><button class="btn good" id="play">PLAY</button><button class="btn" id="pause">PAUSE</button><button class="btn" id="step">STEP</button><button class="btn danger" id="reset">RESET</button></div>
+    <div class="field" style="margin-top:8px"><label>Animation Speed</label><input id="speed" type="range" min="1" max="10" value="5"></div>
+    <h4>Relevant Cost Logic</h4>
+    <div class="hint" id="costLogic">Sunk costs are excluded from differential decisions. Unavoidable fixed overhead should not be treated as avoidable cost.</div>
+  </section>
+
+  <section class="panel centercol">
+    <div class="chart-title"><h3 id="chartHeading">Lease vs Buy — Cumulative Present Cost</h3><div class="legend" id="legend"></div></div>
+    <canvas id="chart" width="1100" height="500"></canvas>
+    <div class="button-wrap"><button class="btn" id="lowBtn">RUN TO LOW</button><button class="btn" id="currentBtn">RUN TO CURRENT</button><button class="btn" id="highBtn">RUN TO HIGH</button></div>
+    <h4>Engineering Calculation</h4>
+    <div class="formula" id="formulaBox"></div>
+    <h4>Interactive Information Panel</h4>
+    <div class="info" id="infoPanel">Click a curve point, result card, or use the stage buttons to inspect the decision logic.</div>
+  </section>
+
+  <section class="panel rightcol">
+    <h3 data-i18n="results">Result Cards</h3>
+    <div class="cards" id="cards"></div>
+    <h4>Decision Status</h4><div id="decisionBox" class="info"></div>
+    <h4>Validation</h4><div id="validationBox" class="info"></div>
+  </section>
+</div>
+
+<div class="bottom-grid">
+  <section class="panel">
+    <h3>Experiment History</h3>
+    <div class="button-wrap"><button class="btn good" id="record">RECORD DATA</button><button class="btn danger" id="clear">CLEAR DATA</button><button class="btn" id="export">EXPORT CSV</button><button class="btn" id="exportCurve">EXPORT CURVE CSV</button><button class="btn" id="print">PRINT REPORT</button></div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Mode</th><th>MARR</th><th>Years/Q</th><th>Cost A</th><th>Cost B</th><th>Break-even</th><th>Decision</th></tr></thead><tbody id="recordsBody"></tbody></table></div>
+  </section>
+  <section class="panel worksheet">
+    <h3>Lab Worksheet & Challenge</h3>
+    <div class="field"><label>Student conclusion</label><textarea id="worksheet" placeholder="Write your engineering-economic conclusion here..."></textarea></div>
+    <div class="quiz">
+      <div class="q"><b>Q1.</b> Sunk cost in a differential decision should be:<br><button class="btn small quizBtn" data-answer="wrong">Included</button> <button class="btn small quizBtn" data-answer="right">Excluded</button><div class="hint quizFeedback"></div></div>
+      <div class="q"><b>Q2.</b> Break-even volume means:<br><button class="btn small quizBtn" data-answer="right">Both total relevant costs are equal</button> <button class="btn small quizBtn" data-answer="wrong">Demand is zero</button><div class="hint quizFeedback"></div></div>
+    </div>
+  </section>
+</div>
+<div class="statusbar" id="statusbar"></div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);const fmt=n=>new Intl.NumberFormat('id-ID',{maximumFractionDigits:0}).format(Number.isFinite(n)?n:0);const pct=n=>(n*100).toFixed(2)+'%';
+const state={mode:'lease',lang:'EN',stage:1,records:[],animation:null,marker:null,curve:[],last:null};
+const dict={EN:{title:'Engineering Sourcing & Asset Decision Studio',subtitle:'Lease vs Buy / Make vs Buy — Engineering Economy Virtual Lab',inputs:'Case Inputs',results:'Result Cards',marr:'MARR (%)',years:'Study Period (years)',animation:'Animation'},ID:{title:'Studio Keputusan Sumber Daya & Aset Teknik',subtitle:'Lease vs Buy / Make vs Buy — Laboratorium Virtual Ekonomi Teknik',inputs:'Input Kasus',results:'Kartu Hasil',marr:'MARR (%)',years:'Periode Studi (tahun)',animation:'Animasi'}};
+function num(id){return parseFloat($(id).value)||0}function annuityFactor(i,n){if(Math.abs(i)<1e-12)return n;return (1-Math.pow(1+i,-n))/i}function capitalRecovery(i,n){if(Math.abs(i)<1e-12)return 1/n;return i*Math.pow(1+i,n)/(Math.pow(1+i,n)-1)}
+function validateLease(){const i=num('marr')/100,n=num('years');const errs=[];if(n<=0||!Number.isFinite(n))errs.push('Study period must be > 0');if(i<=-1)errs.push('MARR must be > -100%');['purchase','install','om','salvage','leaseUpfront','leasePay','leaseOM','endFee'].forEach(id=>{if(!Number.isFinite(num(id)))errs.push(id+' invalid')});return errs}
+function leaseCalc(){const i=num('marr')/100,n=Math.max(1,Math.round(num('years'))),P=num('purchase'),inst=num('install'),om=num('om'),salv=num('salvage'),up=num('leaseUpfront'),lp=num('leasePay'),esc=num('leaseEsc')/100,lom=num('leaseOM'),fee=num('endFee'),begin=$('timing').value==='begin';let pwBuy=P+inst,pwLease=up;const rows=[];rows.push({t:0,buy:P+inst,lease:up,pvBuy:P+inst,pvLease:up,cBuy:P+inst,cLease:up});let cBuy=P+inst,cLease=up;for(let t=1;t<=n;t++){let leasePayment=lp*Math.pow(1+esc,t-1);let leaseTime=begin?t-1:t;let buyCF=om-(t===n?salv:0);let leaseCF=leasePayment+lom+(t===n?fee:0);let pvB=buyCF/Math.pow(1+i,t),pvL=leaseCF/Math.pow(1+i,leaseTime);pwBuy+=pvB;pwLease+=pvL;cBuy+=pvB;cLease+=pvL;rows.push({t,buy:buyCF,lease:leaseCF,pvBuy:pvB,pvLease:pvL,cBuy,cLease})}
+const awBuy=pwBuy*capitalRecovery(i,n),awLease=pwLease*capitalRecovery(i,n),delta=pwLease-pwBuy;
+const factor=Array.from({length:n},(_,k)=>1/Math.pow(1+i,begin?k:k+1)).reduce((a,b)=>a+b,0);const escalFactor=Array.from({length:n},(_,k)=>Math.pow(1+esc,k)/Math.pow(1+i,begin?k:k+1)).reduce((a,b)=>a+b,0);const otherLeasePV=up+lom*factor+fee/Math.pow(1+i,n);const beLease=escalFactor>0?(pwBuy-otherLeasePV)/escalFactor:NaN;
+let beHorizon=null;for(let y=1;y<=50;y++){const old=$('years').value;$('years').value=y;const tmp=leaseCalcNoBE();$('years').value=old;if(Math.abs(tmp.pwLease-tmp.pwBuy)/Math.max(1,tmp.pwBuy)<0.01){beHorizon=y;break}}
+return {i,n,pwBuy,pwLease,awBuy,awLease,delta,rows,beLease,beHorizon,decision:delta<0?'LEASE':'BUY',valid:validateLease()}}
+function leaseCalcNoBE(){const i=num('marr')/100,n=Math.max(1,Math.round(num('years'))),P=num('purchase'),inst=num('install'),om=num('om'),salv=num('salvage'),up=num('leaseUpfront'),lp=num('leasePay'),esc=num('leaseEsc')/100,lom=num('leaseOM'),fee=num('endFee'),begin=$('timing').value==='begin';let pwBuy=P+inst,pwLease=up;for(let t=1;t<=n;t++){pwBuy+=(om-(t===n?salv:0))/Math.pow(1+i,t);pwLease+=(lp*Math.pow(1+esc,t-1)+lom+(t===n?fee:0))/Math.pow(1+i,begin?t-1:t)}return{pwBuy,pwLease}}
+function makeCost(q){return num('makeFixed')+(num('makeVar')+num('opp'))*q}function buyCost(q){return num('buyFixed')+(num('buyVar')+num('freight'))*q}
+function makeCalc(){const Q=num('demand'),cap=num('capacity'),moq=num('moq'),fm=num('makeFixed'),vm=num('makeVar')+num('opp'),fb=num('buyFixed'),vb=num('buyVar')+num('freight');const cm=makeCost(Q),cb=buyCost(Q);let qbe=NaN;if(Math.abs(vm-vb)>1e-12)qbe=(fb-fm)/(vm-vb);const capOK=Q<=cap||cap<=0,moqOK=Q>=moq||Q===0;let decision;if(!capOK&&moqOK)decision='OUTSOURCE';else if(!moqOK&&capOK)decision='MAKE';else decision=cm<=cb?'MAKE':'OUTSOURCE';const qmin=num('qMin'),qmax=num('qMax'),step=Math.max(1,num('qStep'));const curve=[];for(let q=qmin;q<=qmax+1e-9;q+=step)curve.push({q,make:makeCost(q),buy:buyCost(q),delta:buyCost(q)-makeCost(q)});return{Q,cap,moq,fm,vm,fb,vb,cm,cb,qbe,capOK,moqOK,decision,curve,valid:(qmax>qmin&&step>0)?[]:['Invalid volume range']}}
+function update(){state.last=state.mode==='lease'?leaseCalc():makeCalc();buildCards();draw();updateDecision();updateFormula();updateStatus();}
+function card(k,v,clickText){return `<div class="card" data-info="${clickText||k}"><div class="k">${k}</div><div class="v">${v}</div></div>`}
+function buildCards(){const r=state.last;let html='';if(state.mode==='lease'){html+=card('PW Buy','Rp '+fmt(r.pwBuy),'Present Worth of buying');html+=card('PW Lease','Rp '+fmt(r.pwLease),'Present Worth of leasing');html+=card('AW / EAC Buy','Rp '+fmt(r.awBuy));html+=card('AW / EAC Lease','Rp '+fmt(r.awLease));html+=card('ΔPW (Lease−Buy)','Rp '+fmt(r.delta));html+=card('Break-even Lease','Rp '+fmt(r.beLease)+'/yr');html+=card('Break-even Horizon',r.beHorizon? r.beHorizon+' yr':'No near-equivalence');html+=card('Economic Choice',r.decision)}else{html+=card('Cost Make @ Q','Rp '+fmt(r.cm));html+=card('Cost Outsource @ Q','Rp '+fmt(r.cb));html+=card('ΔCost (Buy−Make)','Rp '+fmt(r.cb-r.cm));html+=card('Break-even Q',Number.isFinite(r.qbe)?fmt(r.qbe)+' units':'None');html+=card('Capacity',r.capOK?'OK':'EXCEEDED');html+=card('MOQ',r.moqOK?'OK':'VIOLATION');html+=card('Current Demand',fmt(r.Q)+' units');html+=card('Economic Choice',r.decision)}$('cards').innerHTML=html;document.querySelectorAll('.card').forEach(c=>c.onclick=()=>{$('infoPanel').textContent=c.dataset.info+': '+c.querySelector('.v').textContent})}
+function updateDecision(){const r=state.last;if(state.mode==='lease'){$('decisionBox').innerHTML=`<span class="badge ${r.decision==='LEASE'?'ok':'neutral'}">${r.decision}</span><br><br>${r.decision==='LEASE'?'Lease has the lower equivalent present cost under the current assumptions.':'Buying has the lower equivalent present cost under the current assumptions.'}<br>ΔPW = Rp ${fmt(r.delta)}.`;$('validationBox').innerHTML=r.valid.length?`<span class="badge error">INVALID</span><br>${r.valid.join('<br>')}`:`<span class="badge ok">VALID</span><br>PW schedule, AW conversion, and break-even lease payment are calculated from the same engine.`}else{$('decisionBox').innerHTML=`<span class="badge ${r.decision==='MAKE'?'ok':'neutral'}">${r.decision}</span><br><br>At Q = ${fmt(r.Q)}, Make = Rp ${fmt(r.cm)} and Outsource = Rp ${fmt(r.cb)}.`;$('validationBox').innerHTML=`<span class="badge ${r.capOK&&r.moqOK?'ok':'warning'}">${r.capOK&&r.moqOK?'VALID':'WARNING'}</span><br>Capacity: ${r.capOK?'OK':'EXCEEDED'}<br>MOQ: ${r.moqOK?'OK':'VIOLATION'}<br>${Number.isFinite(r.qbe)?'Break-even substitution residual ≈ Rp '+fmt(makeCost(r.qbe)-buyCost(r.qbe)):'No finite linear crossover.'}`}}
+function updateFormula(){const r=state.last;if(state.mode==='lease'){$('formulaBox').textContent=`PW_buy = Purchase + Installation + Σ O&M_t/(1+i)^t − Salvage/(1+i)^N\nPW_lease = Upfront + Σ Lease_t/(1+i)^t + terminal fees PV\nCurrent: PW_buy = Rp ${fmt(r.pwBuy)} | PW_lease = Rp ${fmt(r.pwLease)}\nAW = PW × (A/P, i, N)`}else{$('formulaBox').textContent=`TC_make(Q) = F_make + v_make × Q\nTC_buy(Q) = F_buy + v_buy × Q\nQ* = (F_buy − F_make)/(v_make − v_buy)\nCurrent Q* = ${Number.isFinite(r.qbe)?fmt(r.qbe):'No finite crossover'}`}}
+function canvasCtx(){const c=$('chart'),dpr=window.devicePixelRatio||1,rect=c.getBoundingClientRect();c.width=Math.max(600,Math.floor(rect.width*dpr));c.height=Math.floor(350*dpr);const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return{x,w:rect.width,h:350}}
+function axes(x,w,h,xlab,ylab){x.strokeStyle='#335a78';x.lineWidth=1;x.beginPath();x.moveTo(58,18);x.lineTo(58,h-42);x.lineTo(w-18,h-42);x.stroke();x.fillStyle='#bcd0e2';x.font='11px Arial';x.fillText(ylab,8,18);x.fillText(xlab,w-90,h-12)}
+function draw(){const {x,w,h}=canvasCtx();x.clearRect(0,0,w,h);if(state.mode==='lease')drawLease(x,w,h);else drawMake(x,w,h)}
+function drawLease(x,w,h){const r=state.last,rows=r.rows,max=Math.max(...rows.map(a=>Math.max(a.cBuy,a.cLease)),1),xs=t=>58+(w-80)*(t/r.n),ys=v=>h-42-(h-70)*(v/max);axes(x,w,h,'Year','Present cost');for(let g=0;g<=4;g++){const y=h-42-(h-70)*g/4;x.strokeStyle='#142c42';x.beginPath();x.moveTo(58,y);x.lineTo(w-18,y);x.stroke();x.fillStyle='#7992aa';x.fillText(fmt(max*g/4),4,y+3)}function line(key,color){x.strokeStyle=color;x.lineWidth=2.5;x.beginPath();rows.forEach((a,i)=>{const xx=xs(a.t),yy=ys(a[key]);i?x.lineTo(xx,yy):x.moveTo(xx,yy)});x.stroke();rows.forEach(a=>{x.fillStyle=color;x.beginPath();x.arc(xs(a.t),ys(a[key]),3,0,Math.PI*2);x.fill()})}line('cBuy','#31c4f3');line('cLease','#6ee7b7');$('legend').innerHTML='<span><i class="dot" style="background:#31c4f3"></i>Buy cumulative PW</span><span><i class="dot" style="background:#6ee7b7"></i>Lease cumulative PW</span>'; $('chartHeading').textContent='Lease vs Buy — Cumulative Present Cost';let m=state.marker;if(m!=null){let t=Math.max(0,Math.min(r.n,m));x.strokeStyle='#f59e0b';x.beginPath();x.moveTo(xs(t),18);x.lineTo(xs(t),h-42);x.stroke();x.fillStyle='#f59e0b';x.fillText('t='+t,xs(t)+4,30)}}
+function drawMake(x,w,h){const r=state.last,curve=r.curve,qmin=curve[0]?.q||0,qmax=curve[curve.length-1]?.q||1,max=Math.max(...curve.map(a=>Math.max(a.make,a.buy)),1),xs=q=>58+(w-80)*((q-qmin)/(qmax-qmin||1)),ys=v=>h-42-(h-70)*(v/max);axes(x,w,h,'Volume Q','Total relevant cost');for(let g=0;g<=4;g++){const y=h-42-(h-70)*g/4;x.strokeStyle='#142c42';x.beginPath();x.moveTo(58,y);x.lineTo(w-18,y);x.stroke();x.fillStyle='#7992aa';x.fillText(fmt(max*g/4),4,y+3)}function line(key,color){x.strokeStyle=color;x.lineWidth=2.5;x.beginPath();curve.forEach((a,i)=>{const xx=xs(a.q),yy=ys(a[key]);i?x.lineTo(xx,yy):x.moveTo(xx,yy)});x.stroke()}line('make','#31c4f3');line('buy','#6ee7b7');if(Number.isFinite(r.qbe)&&r.qbe>=qmin&&r.qbe<=qmax){x.strokeStyle='#f59e0b';x.beginPath();x.moveTo(xs(r.qbe),18);x.lineTo(xs(r.qbe),h-42);x.stroke();x.fillStyle='#f59e0b';x.fillText('Q* '+fmt(r.qbe),xs(r.qbe)+4,30)}x.strokeStyle='#ef4444';x.setLineDash([5,5]);x.beginPath();x.moveTo(xs(r.cap),18);x.lineTo(xs(r.cap),h-42);x.stroke();x.setLineDash([]);let marker=state.marker!=null?state.marker:r.Q;if(marker>=qmin&&marker<=qmax){x.fillStyle='#f8fafc';x.beginPath();x.arc(xs(marker),ys(makeCost(marker)),5,0,Math.PI*2);x.fill();x.beginPath();x.arc(xs(marker),ys(buyCost(marker)),5,0,Math.PI*2);x.fill()}$('legend').innerHTML='<span><i class="dot" style="background:#31c4f3"></i>Make</span><span><i class="dot" style="background:#6ee7b7"></i>Outsource</span><span><i class="dot" style="background:#ef4444"></i>Capacity</span>'; $('chartHeading').textContent='Make vs Buy — Total Relevant Cost vs Volume'}
+function notify(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function setMode(m){state.mode=m;state.marker=null;$('leaseInputs').classList.toggle('hidden',m!=='lease');$('makeInputs').classList.toggle('hidden',m!=='make');$('modeLease').classList.toggle('primary',m==='lease');$('modeMake').classList.toggle('primary',m==='make');$('jumpDemand').disabled=m!=='make';update()}
+function applyPreset(p){const set=(id,v)=>$(id).value=v;if(p==='cnc'){setMode('lease');set('purchase',1200000000);set('install',80000000);set('om',90000000);set('salvage',300000000);set('years',5);set('marr',10);set('leaseUpfront',30000000);set('leasePay',320000000);set('leaseEsc',0);set('leaseOM',0)}if(p==='short'){setMode('lease');set('years',2);set('leasePay',300000000);set('salvage',650000000)}if(p==='highutil'){setMode('lease');set('years',8);set('leasePay',340000000);set('salvage',220000000)}if(p==='make'){setMode('make');set('demand',20000);set('makeFixed',300000000);set('makeVar',42000);set('buyFixed',50000000);set('buyVar',54000);set('freight',3000);set('capacity',30000);set('moq',5000)}if(p==='outsource'){setMode('make');set('demand',8000);set('makeFixed',380000000);set('makeVar',46000);set('buyFixed',30000000);set('buyVar',51000);set('freight',2500)}if(p==='capacity'){setMode('make');set('demand',42000);set('capacity',30000);set('makeFixed',280000000);set('makeVar',40000);set('buyVar',56000);set('freight',2500)}update();notify('Preset applied')}
+function record(){const r=state.last;const id=state.records.length+1;const rec=state.mode==='lease'?{id,mode:'Lease vs Buy',x:num('years')+' yr',a:r.pwBuy,b:r.pwLease,be:r.beLease,decision:r.decision,marr:num('marr')}:{id,mode:'Make vs Buy',x:fmt(r.Q)+' Q',a:r.cm,b:r.cb,be:r.qbe,decision:r.decision,marr:'—'};state.records.push(rec);renderRecords();notify('Experiment recorded')}
+function renderRecords(){const b=$('recordsBody');b.innerHTML=state.records.length?state.records.map(r=>`<tr><td>${r.id}</td><td>${r.mode}</td><td>${r.marr}</td><td>${r.x}</td><td>${fmt(r.a)}</td><td>${fmt(r.b)}</td><td>${Number.isFinite(r.be)?fmt(r.be):'—'}</td><td>${r.decision}</td></tr>`).join(''):`<tr><td colspan="8" style="text-align:center;color:#8ea5b9">No saved experiment records yet</td></tr>`}
+function exportCSV(){if(!state.records.length){notify('No saved experiment records yet');return}const head='ID,Mode,MARR,Years_or_Q,Cost_A,Cost_B,BreakEven,Decision\n';const rows=state.records.map(r=>[r.id,r.mode,r.marr,r.x,r.a,r.b,r.be,r.decision].join(',')).join('\n');download('lease_make_buy_experiments.csv',head+rows)}
+function exportCurve(){const r=state.last;let csv='';if(state.mode==='lease'){csv='Year,Buy_Cumulative_PW,Lease_Cumulative_PW\n'+r.rows.map(a=>[a.t,a.cBuy,a.cLease].join(',')).join('\n')}else{csv='Q,Make_Cost,Outsource_Cost,Delta_Buy_minus_Make\n'+r.curve.map(a=>[a.q,a.make,a.buy,a.delta].join(',')).join('\n')}download(state.mode==='lease'?'lease_buy_cashflow.csv':'make_buy_curve.csv',csv)}
+function download(name,text){const blob=new Blob([text],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function updateStatus(){const r=state.last;$('statusbar').innerHTML=state.mode==='lease'?`<span>MODE: LEASE vs BUY</span><span>PW BUY: Rp ${fmt(r.pwBuy)}</span><span>PW LEASE: Rp ${fmt(r.pwLease)}</span><span>ΔPW: Rp ${fmt(r.delta)}</span><span>DECISION: ${r.decision}</span><span>RECORDS: ${state.records.length}</span>`:`<span>MODE: MAKE vs BUY</span><span>Q: ${fmt(r.Q)}</span><span>MAKE: Rp ${fmt(r.cm)}</span><span>OUTSOURCE: Rp ${fmt(r.cb)}</span><span>Q*: ${Number.isFinite(r.qbe)?fmt(r.qbe):'—'}</span><span>DECISION: ${r.decision}</span><span>RECORDS: ${state.records.length}</span>`}
+function animate(){clearInterval(state.animation);const speed=1100-num('speed')*90;if(state.mode==='lease'){state.marker=0;state.animation=setInterval(()=>{state.marker++;if(state.marker>state.last.n){clearInterval(state.animation);state.animation=null;state.marker=state.last.n}draw();updateStatus()},speed)}else{state.marker=num('qMin');const step=Math.max(1,num('qStep'));state.animation=setInterval(()=>{state.marker+=step;if(state.marker>num('qMax')){clearInterval(state.animation);state.animation=null;state.marker=num('qMax')}draw();updateStatus()},Math.max(60,speed/2))}}
+function oneStep(){if(state.mode==='lease'){state.marker=state.marker==null?0:Math.min(state.last.n,state.marker+1)}else{state.marker=state.marker==null?num('qMin'):Math.min(num('qMax'),state.marker+Math.max(1,num('qStep')))}draw()}
+function jumpBreakEven(){const r=state.last;if(state.mode==='lease'){if(!Number.isFinite(r.beLease)){notify('No break-even lease payment found');return}$('leasePay').value=r.beLease;update();notify('Moved lease payment to break-even')}else{if(!Number.isFinite(r.qbe)){notify('No finite break-even volume');return}if(r.qbe<num('qMin'))$('qMin').value=Math.floor(r.qbe);if(r.qbe>num('qMax'))$('qMax').value=Math.ceil(r.qbe*1.1);state.marker=r.qbe;update();draw();notify('Moved marker to break-even volume')}}
+function jumpDemand(){if(state.mode!=='make'){notify('Available in Make vs Buy mode');return}const q=num('demand');if(q<num('qMin'))$('qMin').value=Math.max(0,q);if(q>num('qMax'))$('qMax').value=Math.ceil(q*1.1);state.marker=q;update();draw();notify('Marker moved to current demand')}
+function setStage(n){
+  state.stage=n;
+  document.querySelectorAll('.stage').forEach(b=>b.classList.toggle('active',+b.dataset.stage===n));
+  update();
+  const r=state.last;
+  const en={
+    1:'Define the alternatives and edit the case inputs. Lease-vs-Buy uses asset ownership and rental cash flows; Make-vs-Buy uses internal and supplier relevant costs.',
+    2:state.mode==='lease'?`Cash flows rebuilt for years 0–${r.n}. Buy and Lease cumulative present costs are now shown on the chart.`:`Cost functions rebuilt over the selected demand range. Make and Outsource curves are now shown on the chart.`,
+    3:state.mode==='lease'?`PW Buy = Rp ${fmt(r.pwBuy)}; PW Lease = Rp ${fmt(r.pwLease)}; AW/EAC Buy = Rp ${fmt(r.awBuy)}; AW/EAC Lease = Rp ${fmt(r.awLease)}.`:`At Q = ${fmt(r.Q)}, Make = Rp ${fmt(r.cm)} and Outsource = Rp ${fmt(r.cb)}.`,
+    4:state.mode==='lease'?`Break-even annual lease payment = Rp ${fmt(r.beLease)}. Current lease payment = Rp ${fmt(num('leasePay'))}.`:`Break-even volume Q* = ${Number.isFinite(r.qbe)?fmt(r.qbe)+' units':'no finite crossover'}.`,
+    5:state.mode==='lease'?`Economic decision: ${r.decision}. Lower equivalent present cost is selected under the current assumptions.`:`Economic decision at Q = ${fmt(r.Q)}: ${r.decision}. Capacity = ${r.capOK?'OK':'EXCEEDED'}; MOQ = ${r.moqOK?'OK':'VIOLATION'}.`,
+    6:state.mode==='lease'?`Interpretation: compare ownership flexibility, utilization, residual-value risk, maintenance responsibility, and contract terms in addition to the numerical ${r.decision} result.`:`Interpretation: combine the ${r.decision} cost result with capacity, supplier reliability, quality, lead time, IP, and strategic manufacturing considerations.`
+  };
+  const id={
+    1:'Definisikan alternatif dan ubah input kasus. Lease-vs-Buy memakai arus kas kepemilikan dan sewa; Make-vs-Buy memakai biaya relevan internal dan pemasok.',
+    2:state.mode==='lease'?`Arus kas tahun 0–${r.n} telah dibangun ulang. Grafik sekarang menampilkan biaya kini kumulatif Buy dan Lease.`:`Fungsi biaya telah dibangun ulang pada rentang demand. Grafik sekarang menampilkan kurva Make dan Outsource.`,
+    3:state.mode==='lease'?`PW Buy = Rp ${fmt(r.pwBuy)}; PW Lease = Rp ${fmt(r.pwLease)}; AW/EAC Buy = Rp ${fmt(r.awBuy)}; AW/EAC Lease = Rp ${fmt(r.awLease)}.`:`Pada Q = ${fmt(r.Q)}, Make = Rp ${fmt(r.cm)} dan Outsource = Rp ${fmt(r.cb)}.`,
+    4:state.mode==='lease'?`Biaya sewa tahunan break-even = Rp ${fmt(r.beLease)}. Biaya sewa saat ini = Rp ${fmt(num('leasePay'))}.`:`Volume break-even Q* = ${Number.isFinite(r.qbe)?fmt(r.qbe)+' unit':'tidak ada crossover hingga'}.`,
+    5:state.mode==='lease'?`Keputusan ekonomi: ${r.decision}. Alternatif dengan equivalent present cost lebih rendah dipilih pada asumsi saat ini.`:`Keputusan ekonomi pada Q = ${fmt(r.Q)}: ${r.decision}. Kapasitas = ${r.capOK?'OK':'TERLAMPAUI'}; MOQ = ${r.moqOK?'OK':'MELANGGAR'}.`,
+    6:state.mode==='lease'?`Interpretasi: pertimbangkan fleksibilitas kepemilikan, utilisasi, risiko nilai sisa, tanggung jawab maintenance, dan syarat kontrak selain hasil numerik ${r.decision}.`:`Interpretasi: gabungkan hasil biaya ${r.decision} dengan kapasitas, keandalan pemasok, kualitas, lead time, IP, dan pertimbangan strategis manufaktur.`
+  };
+  const text=(state.lang==='ID'?id:en)[n];
+  $('infoPanel').textContent=text;
+  $('stageDetail').innerHTML=`<strong>${state.lang==='ID'?'TAHAP':'STAGE'} ${n}</strong><span>${text}</span>`;
+  $('stageDetail').classList.remove('stage-flash'); void $('stageDetail').offsetWidth; $('stageDetail').classList.add('stage-flash');
+  if(n===1){document.querySelector('.leftcol').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n===2){state.marker=state.mode==='lease'?0:num('qMin');draw();document.querySelector('.centercol').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n===3){document.querySelector('.rightcol').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n===4){if(state.mode==='make'&&Number.isFinite(r.qbe)){if(r.qbe<num('qMin'))$('qMin').value=Math.floor(r.qbe);if(r.qbe>num('qMax'))$('qMax').value=Math.ceil(r.qbe*1.1);state.marker=r.qbe;update();draw();}document.querySelector('.centercol').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n===5){document.querySelector('.rightcol').scrollIntoView({behavior:'smooth',block:'start'});}
+  if(n===6){$('infoPanel').scrollIntoView({behavior:'smooth',block:'center'});}
+  notify((state.lang==='ID'?'Tahap ':'Stage ')+n+' aktif');
+}
+function translate(){state.lang=state.lang==='EN'?'ID':'EN';$('langBtn').textContent=state.lang==='EN'?'ID':'EN';document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(dict[state.lang][k])el.textContent=dict[state.lang][k]});notify(state.lang==='ID'?'Bahasa Indonesia aktif':'English active')}
+$('modeLease').onclick=()=>setMode('lease');$('modeMake').onclick=()=>setMode('make');$('recalc').onclick=update;$('build').onclick=()=>{update();notify('Curves rebuilt from current inputs')};$('findBE').onclick=()=>{update();const r=state.last;notify(state.mode==='lease'?'Break-even lease = Rp '+fmt(r.beLease):'Break-even Q = '+(Number.isFinite(r.qbe)?fmt(r.qbe):'none'))};$('jumpBE').onclick=jumpBreakEven;$('jumpDemand').onclick=jumpDemand;$('play').onclick=animate;$('pause').onclick=()=>{clearInterval(state.animation);state.animation=null;notify('Animation paused')};$('step').onclick=oneStep;$('reset').onclick=()=>{clearInterval(state.animation);state.animation=null;state.marker=null;applyPreset('cnc');$('preset').value='cnc';notify('Reset to default')};$('record').onclick=record;$('clear').onclick=()=>{if(!state.records.length){notify('No saved experiment records yet');return}if(confirm('Clear all experiment records?')){state.records=[];renderRecords();updateStatus();notify('Experiment data cleared')}};$('export').onclick=exportCSV;$('exportCurve').onclick=exportCurve;$('print').onclick=()=>window.print();$('preset').onchange=e=>applyPreset(e.target.value);$('autoRun').onclick=()=>{update();setStage(2);setTimeout(()=>setStage(3),250);setTimeout(()=>setStage(4),500);setTimeout(()=>setStage(5),750);setTimeout(()=>setStage(6),1000);notify('Auto analysis completed')};$('langBtn').onclick=translate;document.querySelectorAll('.stage').forEach(b=>b.onclick=()=>setStage(+b.dataset.stage));
+$('lowBtn').onclick=()=>{state.marker=state.mode==='lease'?0:num('qMin');draw()};$('currentBtn').onclick=()=>{state.marker=state.mode==='lease'?state.last.n:num('demand');draw()};$('highBtn').onclick=()=>{state.marker=state.mode==='lease'?state.last.n:num('qMax');draw()};
+document.querySelectorAll('input,select').forEach(el=>{if(!['preset','speed'].includes(el.id))el.addEventListener('change',update)});document.querySelectorAll('.quizBtn').forEach(b=>b.onclick=()=>{const f=b.parentElement.querySelector('.quizFeedback');f.textContent=b.dataset.answer==='right'?'Correct.':'Not correct. Reconsider relevant-cost logic.'});
+window.addEventListener('resize',draw);renderRecords();setMode('lease');setStage(1);
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Lease vs Buy / Make vs Buy</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction Before Run</button><button class="vlEduTab" data-p="explain">Contextual Explanation</button><button class="vlEduTab" data-p="gloss">Interactive Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint Quiz</button><button class="vlEduTab" data-p="summary">Learning Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "lease", "title": "Lease vs Buy / Make vs Buy", "objective": "Membandingkan lease vs buy dan make vs buy berdasarkan relevant cash flow dan break-even.", "prediction": "Pada make vs buy, jika demand jauh meningkat dan make memiliki fixed cost tinggi tetapi variable cost lebih rendah, opsi make dapat menjadi…", "predopts": ["Lebih menarik setelah crossover", "Selalu lebih buruk", "Tidak dipengaruhi volume"], "predans": 0, "explain": "Lease vs buy harus dibandingkan pada basis waktu dan layanan yang sama. Make vs buy memerlukan relevant cost, kapasitas, dan volume. Fixed cost dan variable cost menciptakan crossover volume.", "terms": {"Lease": "Memperoleh hak penggunaan aset melalui pembayaran sewa.", "Buy": "Membeli aset dan menanggung cash flow kepemilikan.", "Make": "Memproduksi sendiri.", "Buy/Outsource": "Membeli dari pemasok eksternal.", "Relevant Cost": "Biaya yang berubah karena pilihan keputusan.", "Crossover Volume": "Volume saat total relevant cost dua pilihan sama."}, "quiz": [["Pada make vs buy, crossover menunjukkan…", ["Volume saat total relevant cost sama", "Umur aset", "Nilai pajak"], 0], ["Perbandingan lease vs buy sebaiknya…", ["Menggunakan basis layanan dan waktu yang konsisten", "Hanya melihat pembayaran pertama", "Mengabaikan salvage"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Tujuan Belajar','Baca Tujuan Belajar, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Prediction Before Run','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur Parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan Simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati Hasil','Perhatikan grafik, timeline, Result Card, dan nilai keputusan yang berubah.'],
+  ['6. Contextual Explanation','Buka Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Checkpoint Quiz','Kerjakan Checkpoint Quiz, kemudian buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide'){const finalStage=S.step>=steps.length-1; body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">${finalStage?'Selesaikan Pembelajaran':'Lanjutkan tahap'}</button>`;}
+   if(p==='next'){let i=Math.min(S.step,steps.length-1),finalStage=i>=steps.length-1;body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">${finalStage?'Selesaikan Pembelajaran':'Tandai selesai & lanjut'}</button><div class="vlEduCard"><h4>Apa yang harus saya lakukan?</h4><p>Atur Parameter dengan mengubah satu parameter, pilih Jalankan Simulasi, lalu Amati Hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Contextual Explanation/Interactive Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('guide');msg(`Tahap ${S.step+1} dari ${steps.length} telah dibuka. Anda masih berada di modul ini.`);}};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{if(S.step>=steps.length-1){S.step=steps.length;openPane('summary');msg('Pembelajaran selesai. Learning Summary ditampilkan.');}else{S.step=Math.min(steps.length-1,S.step+1);render('next');}};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>
