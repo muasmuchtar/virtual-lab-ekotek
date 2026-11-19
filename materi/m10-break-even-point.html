@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Break Even Point & Target Income — Materi Pertemuan 12</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>
+  :root{
+    --paper:#F7F3EA;
+    --paper-alt:#FBF9F4;
+    --navy:#0F2338;
+    --navy-alt:#152C45;
+    --gold:#C08A2E;
+    --gold-soft:#EBD9B4;
+    --teal:#2C6E68;
+    --brick:#A2483B;
+    --ink:#1C2530;
+    --ink-soft:#5A6572;
+    --line:#E1D8C2;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    font-size:16px; line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Source Serif 4', Georgia, serif; font-weight:600; color:var(--navy); margin:0 0 .5em;}
+  h1{font-size:2rem; font-weight:700;}
+  h2{font-size:1.5rem;}
+  h3{font-size:1.15rem; color:var(--teal);}
+  p{max-width:70ch;}
+  code, .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--teal);}
+
+  .shell{display:flex; min-height:100vh;}
+  .sidebar{
+    width:280px; flex:0 0 280px;
+    background:var(--navy); color:#C9D6E3;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    padding:28px 0 40px;
+  }
+  .brand{padding:0 24px 20px; border-bottom:1px solid rgba(255,255,255,.1); margin-bottom:14px;}
+  .brand .kicker{font-size:.72rem; letter-spacing:.04em; color:var(--gold-soft); margin-bottom:4px;}
+  .brand h1{color:#fff; font-size:1.25rem; margin:0;}
+  .brand .sub{font-size:.82rem; color:#8FA3B5; margin-top:6px;}
+
+  .nav-group-label{
+    padding:18px 24px 6px; font-size:.72rem; color:#7E93A6;
+    text-transform:uppercase; letter-spacing:.06em;
+  }
+  .nav-btn{
+    display:block; width:100%; text-align:left; background:none; border:none;
+    color:#C9D6E3; font-family:inherit; font-size:.92rem;
+    padding:9px 24px; cursor:pointer; border-left:3px solid transparent;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,.05); color:#fff;}
+  .nav-btn.active{
+    background:var(--navy-alt); color:#fff; border-left-color:var(--gold);
+    font-weight:500;
+  }
+
+  main{flex:1; min-width:0; padding:48px 56px 80px;}
+  .content-wrap{max-width:820px; margin:0 auto;}
+
+  section{display:none;}
+  section.visible{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0;} to{opacity:1;}}
+
+  .eyebrow{color:var(--gold); font-size:.82rem; font-weight:600; margin-bottom:6px;}
+  .lede{color:var(--ink-soft); font-size:1.05rem;}
+
+  .card{
+    background:var(--paper-alt); border:1px solid var(--line);
+    border-radius:4px; padding:22px 26px; margin:20px 0;
+  }
+  .card.formula{background:var(--navy); color:#EAF1F7; overflow-x:auto;}
+  .card.formula .katex{color:#EAF1F7;}
+  .card.formula-light{background:#EFE7D3; border-color:var(--gold-soft);}
+  .card.result{border-left:4px solid var(--teal);}
+  .card.negative-result{border-left:4px solid var(--brick);}
+  .card.definition{border-left:4px solid var(--gold);}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  .grid-2 .card, .grid-3 .card{margin:0;}
+
+  .stat-line{display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px dashed var(--line); font-size:.95rem;}
+  .stat-line:last-child{border-bottom:none;}
+  .stat-line .label{color:var(--ink-soft);}
+  .stat-line .value{font-family:'IBM Plex Mono', monospace; font-weight:500;}
+
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:18px 0;}
+  table{min-width:480px; width:100%; border-collapse:collapse; font-size:.92rem;}
+  th, td{padding:9px 14px; text-align:right; border-bottom:1px solid var(--line);}
+  th:first-child, td:first-child{text-align:left;}
+  thead th{background:var(--navy); color:#fff; font-weight:500; font-size:.82rem;}
+  tbody tr:nth-child(even){background:#F1EBDC;}
+  tr.highlight td{background:var(--gold-soft); font-weight:600;}
+
+  .badge{
+    display:inline-block; font-size:.72rem; font-weight:600; letter-spacing:.03em;
+    padding:3px 10px; border-radius:20px; margin-right:6px;
+  }
+  .badge.up{background:#F1DEDA; color:var(--brick);}
+  .badge.down{background:#DCEAE8; color:var(--teal);}
+
+  .step{display:flex; gap:14px; margin:16px 0; align-items:flex-start;}
+  .step .num{
+    flex:0 0 28px; height:28px; border-radius:50%; background:var(--navy); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:.82rem; font-weight:600;
+  }
+  .step .body{padding-top:2px;}
+
+  .callout{
+    border:1px solid var(--gold-soft); background:#FBF3E1; padding:16px 20px;
+    border-radius:4px; font-size:.93rem; color:#5C4A20; margin:18px 0;
+  }
+  .callout.teal{border-color:#BFDAD7; background:#EAF4F2; color:#1E4C48;}
+
+  .page-nav{display:flex; justify-content:space-between; margin-top:44px; padding-top:20px; border-top:1px solid var(--line);}
+  .page-nav button{
+    background:none; border:1px solid var(--line); border-radius:4px; padding:10px 16px;
+    font-family:'Inter'; font-size:.88rem; cursor:pointer; color:var(--navy);
+  }
+  .page-nav button:hover{background:var(--paper);}
+
+  .mobile-topbar{display:none;}
+  .hamburger-btn{
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+    width:36px; height:36px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2); border-radius:4px; cursor:pointer; padding:0; flex:0 0 auto;
+  }
+  .hamburger-btn span{display:block; width:16px; height:1.5px; background:#dbe4ec;}
+  .sidebar-overlay{display:none;}
+
+  @media(max-width:880px){
+    .shell{display:block;}
+    .mobile-topbar{
+      display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:40;
+      background:var(--navy); padding:13px 16px; color:#fff; font-weight:600;
+    }
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:82%; max-width:300px;
+      transform:translateX(-100%); transition:transform .28s ease;
+      box-shadow:2px 0 28px rgba(0,0,0,0.35);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{
+      position:fixed; inset:0; background:rgba(9,15,19,0.5); z-index:55;
+    }
+    .sidebar-overlay.show{display:block;}
+    main{width:100%; min-width:0; padding:24px 18px 60px;}
+    .grid-2, .grid-3{grid-template-columns:1fr;}
+    h1{font-size:1.55rem;}
+    h2{font-size:1.28rem;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="mobile-topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka menu navigasi">
+      <span></span><span></span><span></span>
+    </button>
+    <div>BEP & Target Income</div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="kicker">PERTEMUAN 12 · MANAJEMEN KEUANGAN</div>
+      <h1>Break Even Point & Target Income</h1>
+      <div class="sub">Dasbor belajar interaktif</div>
+    </div>
+
+    <div class="nav-group-label">Bagian 1 — Break Even Point</div>
+    <button class="nav-btn active" data-target="overview">1. Ringkasan & Definisi BEP</button>
+    <button class="nav-btn" data-target="rumus-bep">2. Rumus Umum BEP</button>
+    <button class="nav-btn" data-target="kasus-bep">3. Studi Kasus: Rawhide Corp</button>
+
+    <div class="nav-group-label">Bagian 2 — Target Income</div>
+    <button class="nav-btn" data-target="target-definisi">4. Definisi & Rumus</button>
+    <button class="nav-btn" data-target="kasus-target">5. Studi Kasus Target Income</button>
+
+    <div class="nav-group-label">Bagian 3 — Sensitivity Analysis</div>
+    <button class="nav-btn" data-target="sensitivity-intro">6. Apa itu Sensitivity Analysis</button>
+    <button class="nav-btn" data-target="skenario-fixed">7. Skenario: Fixed Cost Naik</button>
+    <button class="nav-btn" data-target="skenario-variable">8. Skenario: Variable Cost Naik</button>
+    <button class="nav-btn" data-target="skenario-price">9. Skenario: Harga Jual Naik</button>
+
+    <div class="nav-group-label">Penutup</div>
+    <button class="nav-btn" data-target="referensi">10. Rangkuman & Referensi</button>
+  </aside>
+
+  <main id="mainArea">
+    <div class="content-wrap">
+
+      <!-- ============ 1. OVERVIEW ============ -->
+      <section id="view-overview" class="visible">
+        <div class="eyebrow">BAGIAN 1 · KONSEP DASAR</div>
+        <h1>Beberapa Definisi Break Even Point (BEP)</h1>
+        <p class="lede">BEP punya dua definisi yang sering muncul berdampingan. Keduanya sebenarnya menyatakan hal yang persis sama, hanya dari sudut pandang berbeda.</p>
+
+        <div class="card definition">
+          <h3>Definisi 1 — Berbasis Laba</h3>
+          <p><strong>Breakeven Point</strong> adalah volume kegiatan di mana jumlah pendapatan (total revenue) sama dengan jumlah biaya (total cost), atau dengan kata lain keuntungan sama dengan nol.</p>
+        </div>
+
+        <div class="card definition">
+          <h3>Definisi 2 — Berbasis Margin Kontribusi</h3>
+          <p><strong>Breakeven Point</strong> juga bisa didefinisikan sebagai titik di mana margin kontribusi (contribution margin) sama dengan biaya tetap (fixed costs).</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — mengapa kedua definisi ini setara:</strong> Profit = Total Revenue − Total Variable Cost − Fixed Cost. Bila Total Revenue dikurangi Total Variable Cost, hasilnya adalah <em>margin kontribusi</em> (contribution margin) — bagian pendapatan yang tersisa setelah menutup biaya variabel, yang tersedia untuk menutup biaya tetap lalu menghasilkan laba. Jadi persamaan "Profit = 0" otomatis sama dengan "Margin Kontribusi = Fixed Cost", karena begitu margin kontribusi persis menutup fixed cost, tidak ada sisa untuk laba maupun rugi. Kedua definisi ini adalah dua cara membaca persamaan aljabar yang sama.
+        </div>
+
+        <h2>Pertanyaan yang sering muncul terkait BEP</h2>
+        <div class="card">
+          <p style="margin:0; font-style:italic;">"Berapa banyak pelanggan yang dibutuhkan untuk mencapai titik impas?"</p>
+        </div>
+        <p>Pertanyaan ini adalah inti dari seluruh perhitungan BEP — bukan sekadar konsep teoretis, tapi angka konkret yang bisa langsung dipakai untuk menyusun target penjualan.</p>
+
+        <div class="page-nav">
+          <button onclick="goTo('overview')" disabled style="visibility:hidden;">←</button>
+          <button onclick="goTo('rumus-bep')">Rumus Umum BEP →</button>
+        </div>
+      </section>
+
+      <!-- ============ 2. RUMUS BEP ============ -->
+      <section id="view-rumus-bep">
+        <div class="eyebrow">BAGIAN 1 · RUMUS</div>
+        <h1>Rumus Umum BEP</h1>
+        <p class="lede">Rumus ini adalah titik tolak seluruh perhitungan di dasbor ini — baik untuk mencari BEP, target income, maupun analisis sensitivitas.</p>
+
+        <div class="card formula" id="f-bep-1"></div>
+
+        <div class="callout teal">
+          Satuan mata uang pada rumus boleh diganti sesuai kebutuhan (Rupiah, Dolar, atau lainnya) — yang penting strukturnya tetap sama: <span class="mono">Pendapatan − Biaya Variabel − Biaya Tetap = 0</span>.
+        </div>
+
+        <h2>Dijabarkan secara terperinci</h2>
+        <p>Karena "sales revenue" dan "variable costs" sebenarnya bergantung pada jumlah unit yang terjual, rumus di atas bisa dipecah lebih rinci dengan mengalikan harga dan biaya per unit dengan jumlah unit (dilambangkan <span class="mono">X</span>):</p>
+
+        <div class="card formula" id="f-bep-2"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Notasi</th><th>Arti</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">Sales price</td><td>Harga jual per unit</td></tr>
+              <tr><td class="mono">Variable costs</td><td>Biaya variabel per unit</td></tr>
+              <tr><td class="mono">Fixed costs</td><td>Total biaya tetap (tidak berubah meski volume berubah)</td></tr>
+              <tr><td class="mono">X (Units)</td><td>Jumlah unit yang terjual — inilah yang dicari saat menghitung BEP</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — istilah kunci di balik rumus ini:</strong> selisih <span class="mono">Sales price − Variable cost</span> disebut <strong>margin kontribusi per unit (contribution margin per unit)</strong> — inilah kontribusi setiap unit yang terjual terhadap penutupan biaya tetap. Rumus BEP pada dasarnya menjawab: <em>berapa unit yang dibutuhkan agar total margin kontribusi persis menyamai fixed cost?</em> Ini menghubungkan kembali ke dua definisi BEP di bagian sebelumnya.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('overview')">← Ringkasan & Definisi BEP</button>
+          <button onclick="goTo('kasus-bep')">Studi Kasus: Rawhide Corp →</button>
+        </div>
+      </section>
+
+      <!-- ============ 3. KASUS BEP ============ -->
+      <section id="view-kasus-bep">
+        <div class="eyebrow">BAGIAN 1 · STUDI KASUS</div>
+        <h1>Studi Kasus: Rawhide Corporation</h1>
+        <p class="lede">Berapa unit sarung tangan yang harus dijual Rawhide Corporation agar mencapai titik impas (breakeven)?</p>
+
+        <div class="card">
+          <h3>Parameter (asumsi)</h3>
+          <div class="stat-line"><span class="label">Harga jual per sarung tangan</span><span class="value">$200</span></div>
+          <div class="stat-line"><span class="label">Biaya variabel per sarung tangan</span><span class="value">$110</span></div>
+          <div class="stat-line"><span class="label">Biaya tetap total</span><span class="value">$63,000</span></div>
+        </div>
+        <p style="font-size:.88rem; color:var(--ink-soft); font-style:italic; margin-top:-10px;">Catatan: nilai mata uang di atas adalah asumsi ilustratif dari materi sumber, bukan data riil perusahaan tertentu.</p>
+
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body">
+            <p>Masukkan seluruh parameter ke rumus umum yang sudah dijabarkan:</p>
+            <div class="card formula" id="f-kasus-1"></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body">
+            <p>Sederhanakan suku yang mengandung X (ini adalah margin kontribusi per unit: $200 − $110 = $90):</p>
+            <div class="card formula" id="f-kasus-2"></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">3</div>
+          <div class="body">
+            <p>Pindahkan fixed cost ke ruas kanan, lalu bagi kedua ruas dengan $90:</p>
+            <div class="card formula" id="f-kasus-3"></div>
+          </div>
+        </div>
+
+        <div class="card result">
+          <h3>Kesimpulan</h3>
+          <p style="margin:0;">Perusahaan pembuat sarung tangan tersebut harus menjual sebanyak <strong>700 sarung tangan</strong> agar BEP tercapai.</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — verifikasi &amp; BEP dalam nilai penjualan:</strong> mari verifikasi: 700 unit × margin kontribusi $90 = $63,000 — persis sama dengan fixed cost, sesuai definisi kedua BEP di awal. Kita juga bisa menyatakan BEP dalam nilai rupiah/dolar penjualan, bukan hanya unit: <span class="mono">Rasio margin kontribusi (CM ratio) = $90 / $200 = 45%</span>, sehingga <span class="mono">BEP dalam $ = Fixed Cost / CM ratio = $63,000 / 0.45 = $140,000</span>. Cek silang: 700 unit × $200 = $140,000 — konsisten. BEP dalam nilai penjualan ini berguna ketika perusahaan menjual banyak produk berbeda dan sulit menjumlahkan "unit" secara langsung.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('rumus-bep')">← Rumus Umum BEP</button>
+          <button onclick="goTo('target-definisi')">Definisi & Rumus Target Income →</button>
+        </div>
+      </section>
+
+      <!-- ============ 4. TARGET INCOME DEFINISI ============ -->
+      <section id="view-target-definisi">
+        <div class="eyebrow">BAGIAN 2 · KONSEP DASAR</div>
+        <h1>Target Income</h1>
+
+        <div class="card definition">
+          <h3>Definisi</h3>
+          <p><strong>Target Income</strong> adalah jumlah pendapatan/pemasukan yang harus dihasilkan agar tujuan pengelolaan produksi (atau tujuan manajemen) tercapai.</p>
+        </div>
+
+        <div class="callout teal">
+          <strong>Analisis tambahan — Target Income sebagai perluasan BEP:</strong> BEP sebenarnya adalah kasus khusus dari Target Income, yaitu ketika target laba yang diinginkan adalah nol. Karena itu rumusnya sangat mirip — bedanya hanya ruas kanan persamaan tidak lagi $0, melainkan angka laba yang ingin dicapai. Ini berarti seluruh teknik aljabar yang dipakai untuk BEP bisa langsung dipakai ulang untuk Target Income, tinggal mengganti satu angka.
+        </div>
+
+        <div class="card formula" id="f-target-formula"></div>
+
+        <div class="page-nav">
+          <button onclick="goTo('kasus-bep')">← Studi Kasus: Rawhide Corp</button>
+          <button onclick="goTo('kasus-target')">Studi Kasus Target Income →</button>
+        </div>
+      </section>
+
+      <!-- ============ 5. KASUS TARGET INCOME ============ -->
+      <section id="view-kasus-target">
+        <div class="eyebrow">BAGIAN 2 · STUDI KASUS</div>
+        <h1>Studi Kasus: Mencapai Target Income $36,000</h1>
+        <p class="lede">Berapa unit sarung tangan yang harus dijual Rawhide Corporation untuk mencapai target pendapatan sebesar $36,000?</p>
+
+        <div class="step">
+          <div class="num">1</div>
+          <div class="body">
+            <p>Gunakan rumus yang sama seperti BEP, tapi ganti ruas kanan dari $0 menjadi $36,000:</p>
+            <div class="card formula" id="f-target-1"></div>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="num">2</div>
+          <div class="body">
+            <p>Sederhanakan dan selesaikan seperti sebelumnya:</p>
+            <div class="card formula" id="f-target-2"></div>
+          </div>
+        </div>
+
+        <div class="card result">
+          <h3>Kesimpulan</h3>
+          <p style="margin:0;">Perusahaan pembuat sarung tangan tersebut harus menjual sebanyak <strong>1,100 sarung tangan</strong> agar dapat mencapai target pendapatan sebesar $36,000.</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — cara cepat tanpa mengulang aljabar dari nol:</strong> karena kita sudah tahu margin kontribusi per unit adalah $90 (dari perhitungan BEP), unit tambahan yang dibutuhkan untuk mencapai target laba $36,000 secara langsung adalah <span class="mono">$36,000 / $90 = 400 unit</span>. Ditambah 700 unit BEP, totalnya persis 1,100 unit — cocok dengan hasil di atas. Pola ini berlaku umum: <span class="mono">Unit untuk Target Income = (Fixed Cost + Target Income) / Margin Kontribusi per unit</span>.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('target-definisi')">← Definisi & Rumus Target Income</button>
+          <button onclick="goTo('sensitivity-intro')">Apa itu Sensitivity Analysis →</button>
+        </div>
+      </section>
+
+      <!-- ============ 6. SENSITIVITY INTRO ============ -->
+      <section id="view-sensitivity-intro">
+        <div class="eyebrow">BAGIAN 3 · KONSEP</div>
+        <h1>Sensitivity Analysis</h1>
+
+        <div class="card definition">
+          <h3>Definisi</h3>
+          <p>Analisis ini dimaksudkan untuk melihat pengaruh terjadinya perubahan pada salah satu item pemasukan atau pengeluaran — <span class="mono">fixed cost</span>, <span class="mono">variable cost</span>, <span class="mono">sales price</span>, atau <span class="mono">target income</span> — terhadap jumlah unit yang harus terjual.</p>
+        </div>
+
+        <p>Tiga skenario berikut akan menguji satu per satu variabel dari studi kasus Rawhide Corporation ($200 harga jual, $110 biaya variabel, $63,000 biaya tetap, target income $36,000), sambil menjaga variabel lain tetap konstan.</p>
+
+        <div class="callout teal">
+          <strong>Mengapa analisis ini penting:</strong> di dunia nyata, harga bahan baku, upah tenaga kerja, sewa, dan harga jual jarang benar-benar tetap. Sensitivity analysis membantu manajemen memahami <em>seberapa besar</em> volume penjualan yang dibutuhkan berubah ketika salah satu asumsi berubah — sehingga keputusan bisa disiapkan lebih awal, bukan bereaksi setelah target meleset.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('kasus-target')">← Studi Kasus Target Income</button>
+          <button onclick="goTo('skenario-fixed')">Skenario: Fixed Cost Naik →</button>
+        </div>
+      </section>
+
+      <!-- ============ 7. SKENARIO FIXED COST ============ -->
+      <section id="view-skenario-fixed">
+        <div class="eyebrow">BAGIAN 3 · SKENARIO 1</div>
+        <h1>Bagaimana Jika Fixed Cost Naik?</h1>
+        <p class="lede">Pertanyaan: bagaimana seandainya fixed cost meningkat dari $63,000 ke $81,000, sementara variabel lain (harga jual, biaya variabel, target income) tetap sama?</p>
+
+        <div class="card formula" id="f-fixed-1"></div>
+        <div class="card formula" id="f-fixed-2"></div>
+
+        <div class="card result">
+          <h3>Kesimpulan</h3>
+          <p style="margin:0;">Perusahaan harus menjual sebanyak <strong>1,300 sarung tangan</strong> (naik dari 1,100) agar tetap mencapai target pendapatan $36,000.</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — dampak terhadap BEP murni:</strong> kenaikan fixed cost ini juga menggeser BEP itu sendiri (bukan hanya target income). Dengan margin kontribusi tetap $90/unit, BEP baru menjadi <span class="mono">$81,000 / $90 = 900 unit</span> — naik dari 700 unit sebelumnya. <strong>Pola umum: setiap kenaikan fixed cost akan menaikkan BEP maupun jumlah unit target income secara linear</strong>, sebesar (kenaikan fixed cost) ÷ (margin kontribusi per unit). Di sini: $18,000 kenaikan ÷ $90 = 200 unit tambahan — cocok dengan kenaikan dari 1,100 ke 1,300 unit.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('sensitivity-intro')">← Apa itu Sensitivity Analysis</button>
+          <button onclick="goTo('skenario-variable')">Skenario: Variable Cost Naik →</button>
+        </div>
+      </section>
+
+      <!-- ============ 8. SKENARIO VARIABLE COST ============ -->
+      <section id="view-skenario-variable">
+        <div class="eyebrow">BAGIAN 3 · SKENARIO 2</div>
+        <h1>Bagaimana Jika Variable Cost Naik?</h1>
+        <p class="lede">Pertanyaan: bagaimana seandainya biaya variabel meningkat dari $110 ke $134 per sarung tangan (fixed cost kembali ke $63,000, target income tetap $36,000)?</p>
+
+        <div class="card formula" id="f-variable-1"></div>
+
+        <div class="card result">
+          <h3>Kesimpulan</h3>
+          <p style="margin:0;">Perusahaan harus menjual sebanyak <strong>1,500 sarung tangan</strong> agar dapat mencapai target pendapatan sebesar $36,000.</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — mengapa kenaikan di sini paling "menyakitkan":</strong> kenaikan variable cost dari $110 ke $134 (naik $24) mengecilkan margin kontribusi per unit dari $90 menjadi $66 — turun 26,7%. Karena margin kontribusi ada di penyebut rumus (unit = kebutuhan pendapatan ÷ margin kontribusi), penurunan margin kontribusi punya efek <em>berlipat</em>, bukan sekadar penjumlahan seperti pada kasus fixed cost. Unit yang dibutuhkan naik dari 1.100 menjadi 1.500 — kenaikan 36%, jauh lebih besar secara proporsional dibanding kenaikan biaya variabelnya sendiri. Ini menjelaskan mengapa manajemen biasanya jauh lebih sensitif terhadap kenaikan biaya variabel (misalnya harga bahan baku) dibanding kenaikan biaya tetap dengan besaran nominal yang sama.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('skenario-fixed')">← Skenario: Fixed Cost Naik</button>
+          <button onclick="goTo('skenario-price')">Skenario: Harga Jual Naik →</button>
+        </div>
+      </section>
+
+      <!-- ============ 9. SKENARIO HARGA JUAL ============ -->
+      <section id="view-skenario-price">
+        <div class="eyebrow">BAGIAN 3 · SKENARIO 3</div>
+        <h1>Bagaimana Jika Harga Jual Naik?</h1>
+        <p class="lede">Pertanyaan: bagaimana seandainya harga jual dinaikkan dari $200 ke $230 per sarung tangan (variable cost kembali ke $110, fixed cost $63,000, target income $36,000)?</p>
+
+        <div class="card definition">
+          <h3>Prinsip Umum</h3>
+          <p style="margin:0;">Jika semua variabel lain tetap konstan, kenaikan harga jual akan <strong>menurunkan</strong> volume penjualan yang dibutuhkan untuk mencapai target pendapatan.</p>
+        </div>
+
+        <div class="card formula" id="f-price-1"></div>
+
+        <div class="card result">
+          <h3>Kesimpulan</h3>
+          <p style="margin:0;">Perusahaan hanya perlu menjual sebanyak <strong>825 sarung tangan</strong> (turun dari 1,100) agar dapat mencapai target pendapatan sebesar $36,000.</p>
+        </div>
+
+        <div class="callout">
+          <strong>Analisis tambahan — satu-satunya skenario yang bergerak berlawanan arah:</strong> perhatikan bahwa dari tiga skenario yang diuji, hanya kenaikan harga jual yang <em>menurunkan</em> kebutuhan volume (825, turun dari 1.100), sementara kenaikan fixed cost dan variable cost sama-sama <em>menaikkan</em> kebutuhan volume. Ini masuk akal karena harga jual berada di sisi "pemasukan" margin kontribusi (menambah), sedangkan fixed cost dan variable cost berada di sisi "pengeluaran" (mengurangi). Namun kenaikan harga di dunia nyata jarang berdiri sendiri — biasanya diikuti penurunan permintaan (elastisitas harga), sesuatu yang tidak ditangkap oleh model CVP (cost-volume-profit) sederhana ini.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('skenario-variable')">← Skenario: Variable Cost Naik</button>
+          <button onclick="goTo('referensi')">Rangkuman & Referensi →</button>
+        </div>
+      </section>
+
+      <!-- ============ 10. REFERENSI ============ -->
+      <section id="view-referensi">
+        <div class="eyebrow">PENUTUP</div>
+        <h1>Rangkuman & Referensi</h1>
+
+        <h2>Tabel ringkasan seluruh skenario</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Skenario</th><th>Harga Jual</th><th>Var. Cost</th><th>Fixed Cost</th><th>Margin Kontribusi</th><th>Unit Target Income $36,000</th></tr></thead>
+            <tbody>
+              <tr class="highlight"><td>Basis (awal)</td><td>$200</td><td>$110</td><td>$63,000</td><td>$90</td><td>1,100</td></tr>
+              <tr><td>Fixed cost naik</td><td>$200</td><td>$110</td><td>$81,000</td><td>$90</td><td>1,300</td></tr>
+              <tr><td>Variable cost naik</td><td>$200</td><td>$134</td><td>$63,000</td><td>$66</td><td>1,500</td></tr>
+              <tr><td>Harga jual naik</td><td>$230</td><td>$110</td><td>$63,000</td><td>$120</td><td>825</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <strong>Peringkat sensitivitas (dari yang paling besar dampaknya):</strong> dibandingkan dari basis 1.100 unit — kenaikan variable cost menggeser kebutuhan volume sebesar +400 unit (+36%), kenaikan fixed cost sebesar +200 unit (+18%), sedangkan kenaikan harga jual justru −275 unit (−25%). Variable cost per unit adalah pengungkit (leverage) paling kuat dalam model ini karena ia memengaruhi margin kontribusi di penyebut rumus, bukan hanya angka di pembilang.
+        </div>
+
+        <h2>Keterbatasan model CVP (Cost-Volume-Profit) yang perlu diwaspadai</h2>
+        <div class="callout teal">
+          <ol style="margin:0; padding-left:18px;">
+            <li><strong>Asumsi linearitas</strong> — harga jual dan biaya variabel per unit dianggap konstan berapa pun jumlah unit terjual, padahal di dunia nyata sering ada diskon volume atau skala ekonomi.</li>
+            <li><strong>Klasifikasi biaya yang jelas</strong> — model mengasumsikan setiap biaya bisa dipisah tegas menjadi "tetap" atau "variabel", padahal banyak biaya bersifat semi-variabel (mixed cost).</li>
+            <li><strong>Berlaku pada relevant range tertentu</strong> — hubungan harga/biaya yang diasumsikan hanya valid dalam rentang volume tertentu; di luar rentang itu (misalnya perlu menyewa gudang baru), fixed cost bisa melompat.</li>
+            <li><strong>Mengabaikan elastisitas permintaan</strong> — seperti dibahas di skenario kenaikan harga, model ini tidak memperhitungkan bahwa harga lebih tinggi biasanya menekan volume permintaan.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h3>Sumber utama</h3>
+          <p style="margin:0;">Materi ini dikembangkan dari slide <em>Pertemuan 12 — Break Even Point (Rev.2)</em>, dengan studi kasus ilustratif "Rawhide Corporation" (produsen sarung tangan).</p>
+        </div>
+
+        <div class="callout teal">
+          Ada bagian yang masih membingungkan, atau ingin mencoba skenario sensitivitas dengan angka Anda sendiri? Tanyakan langsung — saya bisa membantu menghitung ulang dengan parameter berbeda.
+        </div>
+
+        <div class="page-nav">
+          <button onclick="goTo('skenario-price')">← Skenario: Harga Jual Naik</button>
+          <button onclick="goTo('overview')">Kembali ke Ringkasan →</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function r(id, tex, displayMode){
+    katex.render(tex, document.getElementById(id), {throwOnError:false, displayMode: displayMode !== false});
+  }
+
+  r('f-bep-1', "\\text{Sales revenue} - \\text{Variable costs} - \\text{Fixed costs} = \\$0");
+
+  r('f-bep-2', "(\\text{Sales price}\\times\\text{Units})-(\\text{Variable costs}\\times\\text{Units})-\\text{Fixed costs}=\\$0 \\\\[6pt] (\\text{Sales price}\\times X)-(\\text{Variable costs}\\times X)-\\text{Fixed costs}=\\$0");
+
+  r('f-target-formula', "\\text{Sales revenue} - \\text{Variable costs} - \\text{Fixed costs} = \\text{Target income}");
+
+  r('f-kasus-1', "(\\$200\\times X)-(\\$110\\times X)-\\$63{,}000=\\$0");
+  r('f-kasus-2', "\\$90X-\\$63{,}000=\\$0");
+  r('f-kasus-3', "\\$90X=\\$63{,}000 \\ \\Longrightarrow\\ X=\\frac{\\$63{,}000}{\\$90}=700\\ \\text{units}");
+
+  r('f-target-1', "\\$200X-\\$110X-\\$63{,}000=\\$36{,}000");
+  r('f-target-2', "\\$90X-\\$63{,}000=\\$36{,}000\\ \\Longrightarrow\\ \\$90X=\\$99{,}000\\ \\Longrightarrow\\ X=\\frac{\\$99{,}000}{\\$90}=1{,}100\\ \\text{units}");
+
+  r('f-fixed-1', "\\text{Sales revenue} - \\text{Variable costs} - \\text{Fixed costs} = \\text{Target income} \\\\[6pt] \\$200X-\\$110X-\\$81{,}000=\\$36{,}000");
+  r('f-fixed-2', "\\$90X-\\$81{,}000=\\$36{,}000\\ \\Longrightarrow\\ \\$90X=\\$117{,}000\\ \\Longrightarrow\\ X=\\frac{\\$117{,}000}{90}=1{,}300\\ \\text{gloves}");
+
+  r('f-variable-1', "\\$200X-\\$134X-\\$63{,}000=\\$36{,}000 \\\\[6pt] \\$66X-\\$63{,}000=\\$36{,}000\\ \\Longrightarrow\\ \\$66X=\\$99{,}000\\ \\Longrightarrow\\ X=\\frac{\\$99{,}000}{66}=1{,}500\\ \\text{gloves}");
+
+  r('f-price-1', "\\$230X-\\$110X-\\$63{,}000=\\$36{,}000 \\\\[6pt] \\$120X-\\$63{,}000=\\$36{,}000\\ \\Longrightarrow\\ \\$120X=\\$99{,}000\\ \\Longrightarrow\\ X=\\frac{\\$99{,}000}{\\$120}=825\\ \\text{gloves}");
+
+  const sidebarEl = document.getElementById('sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+  function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); }
+  function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+
+  hamburgerBtn.addEventListener('click', ()=>{
+    sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlayEl.addEventListener('click', closeSidebar);
+
+  function goTo(target){
+    document.querySelectorAll('main > .content-wrap > section').forEach(s=>s.classList.remove('visible'));
+    document.getElementById('view-'+target).classList.add('visible');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.target===target));
+    document.getElementById('mainArea').scrollTo({top:0, behavior:'smooth'});
+    closeSidebar();
+  }
+
+  document.querySelectorAll('.nav-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> goTo(btn.dataset.target));
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analisis Manfaat Biaya & Ekonomi Sektor Publik</title>
+<style>
+  :root{
+    --navy-900:#0c1e2e;
+    --navy-800:#12293d;
+    --navy-700:#16344b;
+    --blue-600:#1f6fb2;
+    --blue-500:#2f8fd6;
+    --blue-100:#e7f2fb;
+    --yellow-400:#f4c73f;
+    --yellow-500:#e8b514;
+    --ink-900:#12222f;
+    --ink-600:#3c5468;
+    --ink-400:#6a8299;
+    --paper:#f7fafc;
+    --card:#ffffff;
+    --line:#dbe6ef;
+    --good:#1c8a5b;
+    --bad:#c0392b;
+    --radius:14px;
+    --shadow: 0 10px 30px rgba(12,30,46,0.08);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background:var(--paper);
+    color:var(--ink-900);
+    line-height:1.55;
+  }
+  h1,h2,h3,h4{font-family:inherit; font-weight:800; color:var(--navy-900); margin:0 0 .5em;}
+  p{margin:0 0 1em;}
+  a{color:var(--blue-600);}
+  .eyebrow{
+    text-transform:uppercase; letter-spacing:.08em; font-size:.72rem;
+    font-weight:700; color:var(--blue-600); margin-bottom:.35em; display:block;
+  }
+
+  /* ================= LAYOUT ================= */
+  .shell{display:flex; min-height:100vh;}
+
+  .sidebar{
+    width:278px; flex:0 0 278px;
+    background:linear-gradient(180deg,var(--navy-900) 0%, var(--navy-800) 100%);
+    color:#dbe4ec;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    padding:26px 0 30px;
+  }
+  .brand{
+    padding:0 22px 20px; border-bottom:1px solid rgba(255,255,255,0.09); margin-bottom:14px;
+  }
+  .brand .tag{
+    display:inline-block; background:var(--yellow-400); color:var(--navy-900);
+    font-size:.65rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase;
+    padding:3px 9px; border-radius:20px; margin-bottom:10px;
+  }
+  .brand h1{
+    color:#fff; font-size:1.08rem; line-height:1.35; margin:0;
+  }
+  .brand p{color:#9db4c6; font-size:.78rem; margin:8px 0 0;}
+
+  nav.nav-groups{padding:6px 12px;}
+  .nav-section-label{
+    font-size:.68rem; text-transform:uppercase; letter-spacing:.07em; color:#7d97ac;
+    padding:16px 10px 6px;
+  }
+  .nav-btn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:transparent; border:none; color:#c6d5e2; font-size:.88rem;
+    padding:10px 10px; border-radius:9px; cursor:pointer; margin-bottom:2px;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-btn .num{
+    flex:0 0 22px; height:22px; border-radius:6px; background:rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#a9bfd1;
+  }
+  .nav-btn:hover{background:rgba(255,255,255,0.06); color:#fff;}
+  .nav-btn.active{background:var(--blue-600); color:#fff;}
+  .nav-btn.active .num{background:rgba(255,255,255,0.22); color:#fff;}
+
+  main{flex:1; min-width:0; padding:44px 52px 90px;}
+  .view{max-width:920px; margin:0 auto;}
+  .view-header{margin-bottom:30px;}
+  .view-header h2{font-size:1.9rem;}
+  .lead{color:var(--ink-600); font-size:1.02rem; max-width:70ch;}
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:24px 26px; box-shadow:var(--shadow); margin-bottom:22px;
+  }
+  .card h3{font-size:1.1rem; color:var(--navy-800); margin-bottom:.6em;}
+  .card h3 .chip{
+    display:inline-block; background:var(--blue-100); color:var(--blue-600); font-size:.68rem;
+    font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:3px 9px; border-radius:20px;
+    vertical-align:middle; margin-right:8px;
+  }
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+
+  .stat-box{
+    background:var(--navy-900); color:#fff; border-radius:var(--radius); padding:20px 22px;
+  }
+  .stat-box .k{font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#9db4c6;}
+  .stat-box .v{font-size:1.7rem; font-weight:800; margin-top:4px;}
+  .stat-box.good{background:linear-gradient(135deg,#134e33,#0d3323);}
+  .stat-box.bad{background:linear-gradient(135deg,#5c1e1e,#3d1414);}
+  .stat-box.neutral{background:linear-gradient(135deg,var(--blue-600),#154a72);}
+
+  /* formula block */
+  .formula{
+    background:var(--navy-900); color:#eaf3fb; border-radius:12px; padding:20px 24px;
+    font-size:1.1rem; text-align:center; overflow-x:auto; margin:14px 0;
+  }
+  .formula .frac{display:inline-flex; flex-direction:column; vertical-align:middle; margin:0 6px; text-align:center;}
+  .formula .frac .num{border-bottom:1.5px solid #eaf3fb; padding:0 8px 3px;}
+  .formula .frac .den{padding:3px 8px 0;}
+  .formula .eq-tag{float:right; color:var(--yellow-400); font-size:.8rem; font-weight:700;}
+  .formula-caption{font-size:.82rem; color:var(--ink-400); text-align:center; margin-top:-6px; margin-bottom:18px;}
+
+  table{width:100%; border-collapse:collapse; font-size:.92rem;}
+  thead th{
+    text-align:left; background:var(--blue-100); color:var(--navy-800); font-size:.75rem;
+    text-transform:uppercase; letter-spacing:.04em; padding:10px 12px; border-bottom:2px solid var(--line);
+  }
+  tbody td{padding:11px 12px; border-bottom:1px solid var(--line); vertical-align:top;}
+  tbody tr:last-child td{border-bottom:none;}
+  .tag-pub{color:var(--blue-600); font-weight:700;}
+  .tag-priv{color:#8a5a12; font-weight:700;}
+
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; border-radius:10px;}
+
+  ul.tick, ol.steps{margin:0 0 1em; padding-left:0; list-style:none;}
+  ul.tick li{position:relative; padding-left:26px; margin-bottom:8px;}
+  ul.tick li::before{content:"✓"; position:absolute; left:0; top:0; color:var(--good); font-weight:800;}
+
+  ol.steps{counter-reset:step;}
+  ol.steps li{
+    counter-increment:step; position:relative; padding:14px 16px 14px 52px; margin-bottom:10px;
+    background:var(--blue-100); border-radius:10px;
+  }
+  ol.steps li::before{
+    content:counter(step); position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    width:26px; height:26px; border-radius:50%; background:var(--blue-600); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.85rem;
+  }
+
+  .badge-list{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px;}
+  .badge{background:var(--blue-100); color:var(--blue-600); font-size:.82rem; font-weight:600; padding:6px 12px; border-radius:20px;}
+
+  .note{
+    border-left:4px solid var(--yellow-500); background:#fff9e8; padding:14px 16px; border-radius:8px;
+    font-size:.92rem; color:#6b5416; margin:14px 0;
+  }
+  .verdict{
+    display:flex; align-items:center; gap:12px; padding:16px 18px; border-radius:12px; font-weight:700;
+  }
+  .verdict.bad{background:#fdecea; color:var(--bad);}
+  .verdict.bad .icon{font-size:1.4rem;}
+
+  /* calculator */
+  .calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:14px;}
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{font-size:.78rem; font-weight:700; color:var(--ink-600); text-transform:uppercase; letter-spacing:.03em;}
+  .field input{
+    padding:9px 11px; border:1.5px solid var(--line); border-radius:8px; font-size:.95rem; width:100%;
+  }
+  .field input:focus{outline:none; border-color:var(--blue-500);}
+  .calc-result{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
+  .result-box{border-radius:12px; padding:16px 18px; border:2px solid var(--line);}
+  .result-box .label{font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-400); margin-bottom:4px;}
+  .result-box .num{font-size:1.6rem; font-weight:800;}
+  .result-box.pass{border-color:var(--good); background:#f0faf5;}
+  .result-box.fail{border-color:var(--bad); background:#fdf2f1;}
+  .result-box.pass .num{color:var(--good);}
+  .result-box.fail .num{color:var(--bad);}
+  .result-box .verdict-text{font-size:.8rem; margin-top:4px; color:var(--ink-600);}
+
+  .cf-diagram{display:flex; justify-content:space-between; align-items:flex-end; height:130px; margin:20px 0 6px; gap:8px;}
+  .cf-bar-wrap{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%;}
+  .cf-bar{width:60%; background:linear-gradient(180deg,var(--blue-500),var(--blue-600)); border-radius:6px 6px 0 0;}
+  .cf-label{font-size:.78rem; color:var(--ink-600); margin-top:6px; font-weight:700;}
+  .cf-year{font-size:.72rem; color:var(--ink-400); margin-top:2px;}
+
+  .footer-note{font-size:.82rem; color:var(--ink-400); text-align:center; margin-top:40px;}
+
+  /* ---------- topbar & hamburger: hidden on desktop ---------- */
+  .mobile-topbar{display:none;}
+  .hamburger-btn{
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+    width:38px; height:38px; background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer; padding:0; flex:0 0 auto;
+  }
+  .hamburger-btn span{display:block; width:17px; height:2px; background:#dbe4ec; border-radius:2px;}
+  .sidebar-overlay{display:none;}
+
+  /* ================= MOBILE ================= */
+  @media(max-width:880px){
+    .shell{display:block;}
+    .mobile-topbar{
+      display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:40;
+      background:var(--navy-900); padding:14px 18px;
+    }
+    .mobile-topbar .mt-title{color:#fff; font-weight:800; font-size:.95rem;}
+    .mobile-topbar .mt-sub{color:#9db4c6; font-size:.7rem;}
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:82%; max-width:300px;
+      transform:translateX(-100%); transition:transform .28s ease;
+      box-shadow:2px 0 28px rgba(0,0,0,0.35);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{
+      position:fixed; inset:0; background:rgba(9,15,19,0.55); z-index:55;
+    }
+    .sidebar-overlay.show{display:block;}
+    main{width:100%; min-width:0; padding:24px 16px 70px;}
+    .view-header h2{font-size:1.5rem;}
+    .grid-2, .grid-3, .calc-grid, .calc-result{grid-template-columns:1fr;}
+    .card{padding:18px;}
+    .formula{font-size:.92rem; padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="mobile-topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka menu navigasi">
+      <span></span><span></span><span></span>
+    </button>
+    <div>
+      <div class="mt-title">Analisis Manfaat Biaya</div>
+      <div class="mt-sub">Ekonomi Sektor Publik</div>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="tag">Pertemuan 13</span>
+      <h1>Benefit/Cost Analysis &amp; Public Sector Economics</h1>
+      <p>Analisis Manfaat Biaya dan Ekonomi Sektor Publik</p>
+    </div>
+    <nav class="nav-groups">
+      <div class="nav-section-label">Konsep</div>
+      <button class="nav-btn active" data-target="ringkasan"><span class="num">1</span> Ringkasan Materi</button>
+      <button class="nav-btn" data-target="sektor-publik"><span class="num">2</span> Proyek Sektor Publik</button>
+      <button class="nav-btn" data-target="perbandingan"><span class="num">3</span> Publik vs Swasta</button>
+      <button class="nav-btn" data-target="pengertian"><span class="num">4</span> Cost, Benefit, Disbenefit</button>
+
+      <div class="nav-section-label">Metode B/C</div>
+      <button class="nav-btn" data-target="rumus"><span class="num">5</span> Rasio B/C &amp; Aturan Keputusan</button>
+      <button class="nav-btn" data-target="kalkulator"><span class="num">6</span> Kalkulator B/C Interaktif</button>
+
+      <div class="nav-section-label">Studi Kasus</div>
+      <button class="nav-btn" data-target="kasus"><span class="num">7</span> Kasus Yayasan Afram</button>
+      <button class="nav-btn" data-target="penyelesaian"><span class="num">8</span> Penyelesaian &amp; Perhitungan</button>
+    </nav>
+  </aside>
+
+  <main id="mainArea">
+
+    <!-- ============ 1. RINGKASAN ============ -->
+    <section id="view-ringkasan" class="view">
+      <div class="view-header">
+        <span class="eyebrow">Analisis Mendalam</span>
+        <h2>Benefit/Cost Analysis and Public Sector Economics</h2>
+        <p class="lead">Materi ini memperkenalkan bagaimana pertimbangan ekonomi diterapkan pada proyek-proyek publik dan sektor layanan pemerintahan — dari definisi, perbedaan dengan sektor swasta, hingga metode kuantitatif Rasio Manfaat Biaya (B/C).</p>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:22px;">
+        <div class="stat-box neutral">
+          <div class="k">Fokus Utama</div>
+          <div class="v" style="font-size:1.1rem;">Rasio B/C</div>
+        </div>
+        <div class="stat-box neutral">
+          <div class="k">Alat Ekivalensi</div>
+          <div class="v" style="font-size:1.1rem;">PW · AW · FW</div>
+        </div>
+        <div class="stat-box neutral">
+          <div class="k">Tujuan</div>
+          <div class="v" style="font-size:1.1rem;">Objektivitas Evaluasi</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Konteks</span>Mengapa Rasio B/C Penting?</h3>
+        <p>Proyek publik berarti pemilik dan penggunanya (penerima manfaat) adalah setiap warga negara dan satuan kerja pemerintahan — baik di tingkat desa, kota, maupun provinsi. Karena tidak berorientasi laba, pemerintah membutuhkan mekanisme pendanaan modal dan operasi, termasuk melalui <strong>Kemitraan Publik dan Swasta (KPS)</strong> untuk proyek infrastruktur besar seperti jalan poros, pembangkit listrik, dan bendungan.</p>
+        <p>Rasio Manfaat Biaya (B/C) menjadi alat objektivitas dalam analisis ekonomi atas evaluasi sektor publik — tujuannya mengurangi pengaruh politik dan kepentingan lain dalam pengambilan keputusan. Jika dihitung dengan benar, metode B/C akan selalu memilih alternatif yang sama seperti metode nilai ekivalen PW, AW, dan FW.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Alur Belajar</span>Peta Materi</h3>
+        <ol class="steps">
+          <li><strong>Definisi &amp; contoh</strong> — memahami apa itu proyek sektor publik dan bentuk riilnya.</li>
+          <li><strong>Perbandingan karakteristik</strong> — sektor publik vs swasta pada 6 dimensi kunci.</li>
+          <li><strong>Konsep dasar</strong> — Cost, Benefit, dan Disbenefit sebagai komponen rasio B/C.</li>
+          <li><strong>Rumus &amp; aturan keputusan</strong> — B/C konvensional dan B/C termodifikasi.</li>
+          <li><strong>Studi kasus nyata</strong> — evaluasi proposal hibah Yayasan Afram dengan suku bunga 6%.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ 2. SEKTOR PUBLIK ============ -->
+    <section id="view-sektor-publik" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 2</span>
+        <h2>Proyek-Proyek Sektor Publik</h2>
+        <p class="lead">Produk, layanan, atau sistem yang digunakan, didanai, dan dimiliki oleh warga negara dari level pemerintahan apa pun.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Definisi</span>Tujuan Utama</h3>
+        <p>Tujuan utama proyek sektor publik adalah <strong>menyediakan layanan bagi warga negara untuk kebaikan umum</strong>, tanpa memperhatikan keuntungan semata. Layanan yang dimaksud mencakup layanan kesehatan publik, lembaga peradilan, keamanan, dan transportasi — semuanya dimiliki publik dan memerlukan evaluasi ekonomi yang cermat sebelum dijalankan.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Contoh Riil</span>Bentuk Proyek Sektor Publik</h3>
+        <div class="badge-list">
+          <span class="badge">🏥 Rumah Sakit &amp; Klinik</span>
+          <span class="badge">🌳 Taman Kota &amp; Rekreasi</span>
+          <span class="badge">🚰 PDAM, PLN, Sanitasi</span>
+          <span class="badge">🎓 Sekolah &amp; Universitas</span>
+          <span class="badge">🏛️ Pusat Konvensi</span>
+          <span class="badge">🏟️ Arena Olahraga</span>
+          <span class="badge">🛣️ Jalan, Jembatan, Saluran Air</span>
+          <span class="badge">⚖️ Pengadilan &amp; Penjara</span>
+          <span class="badge">🏢 Gedung DPR/DPRD</span>
+        </div>
+        <p style="margin-top:12px; color:var(--ink-600); font-size:.9rem;">Semua entitas ini memiliki karakteristik yang sama: dimiliki publik, dibiayai dari dana publik, dan hasil evaluasinya berdampak langsung pada kesejahteraan warga.</p>
+      </div>
+    </section>
+
+    <!-- ============ 3. PERBANDINGAN ============ -->
+    <section id="view-perbandingan" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 3</span>
+        <h2>Perbedaan Proyek Sektor Publik dan Swasta</h2>
+        <p class="lead">Enam karakteristik kunci yang membedakan cara proyek publik dievaluasi dibandingkan proyek swasta.</p>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Karakteristik</th><th>Sektor Publik</th><th>Sektor Swasta</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Ukuran investasi</td><td class="tag-pub">Besar</td><td class="tag-priv">Sebagian besar; lebih banyak menengah–kecil</td></tr>
+              <tr><td>Estimasi umur proyek</td><td class="tag-pub">Panjang (30–50+ tahun)</td><td class="tag-priv">Pendek (2–25 tahun)</td></tr>
+              <tr><td>Estimasi arus kas tahunan</td><td class="tag-pub">Tanpa laba; biaya, manfaat &amp; disbenefit diestimasi</td><td class="tag-priv">Pendapatan berkontribusi pada laba; biaya diestimasi</td></tr>
+              <tr><td>Pendanaan</td><td class="tag-pub">Pajak, retribusi, obligasi, dana pribadi</td><td class="tag-priv">Saham, obligasi, pinjaman, pemilik individu</td></tr>
+              <tr><td>Kriteria pemilihan alternatif</td><td class="tag-pub">Multi-kriteria</td><td class="tag-priv">Terutama berbasis tingkat pengembalian (rate of return)</td></tr>
+              <tr><td>Suku bunga (discount rate)</td><td class="tag-pub">Lebih rendah</td><td class="tag-priv">Lebih tinggi, berbasis biaya modal</td></tr>
+              <tr><td>Lingkungan evaluasi</td><td class="tag-pub">Cenderung politis</td><td class="tag-priv">Terutama ekonomi</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="note">💡 Karena umur proyek publik jauh lebih panjang dan suku bunga lebih rendah, dampak nilai waktu uang (time value of money) menjadi sangat sensitif terhadap hasil analisis B/C — kesalahan kecil pada asumsi suku bunga bisa mengubah kesimpulan kelayakan proyek.</div>
+    </section>
+
+    <!-- ============ 4. PENGERTIAN ============ -->
+    <section id="view-pengertian" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 4</span>
+        <h2>Cost, Benefit, dan Disbenefit</h2>
+        <p class="lead">Tiga komponen inti yang menyusun rasio B/C — memahami perbedaannya adalah kunci untuk menghitung rasio dengan benar.</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3><span class="chip" style="background:#e8f0ff;">Cost</span>Biaya</h3>
+          <p>Perkiraan pengeluaran bagi pemerintahan dan entitas lainnya untuk membiayai pengerjaan konstruksi, operasi, dan perawatan proyek. Nilai sisa (salvage value) yang diharapkan biasanya sedikit atau tidak ada.</p>
+        </div>
+        <div class="card">
+          <h3><span class="chip" style="background:#e6f7ee; color:var(--good);">Benefit</span>Manfaat</h3>
+          <p>Keuntungan yang dirasakan langsung oleh pemilik proyek, yaitu publik/masyarakat. Contoh: penurunan biaya kesehatan warga akibat adanya fasilitas kesehatan baru.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip" style="background:#fdecea; color:var(--bad);">Disbenefit</span>Kerugian Tak Langsung</h3>
+        <p>Harapan yang tidak diinginkan atau konsekuensi negatif bagi pemilik (publik) jika alternatif dilaksanakan. Disbenefit berbeda dari cost karena sifatnya adalah <strong>kerugian tidak langsung</strong> dari pelaksanaan alternatif — misalnya hilangnya lahan produktif akibat pembangunan fasilitas baru, bukan biaya konstruksi itu sendiri.</p>
+        <ul class="tick" style="margin-top:10px;">
+          <li>Cost → biaya langsung membangun &amp; menjalankan proyek</li>
+          <li>Benefit → manfaat langsung yang dinikmati publik</li>
+          <li>Disbenefit → dampak negatif tidak langsung yang ditanggung publik</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ============ 5. RUMUS ============ -->
+    <section id="view-rumus" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 5</span>
+        <h2>Rasio B/C pada Proyek Tunggal</h2>
+        <p class="lead">Rasio B/C dapat dihitung dengan pendekatan ekivalensi (PW/AW/FW) maupun pendekatan konvensional yang memisahkan disbenefit.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Persamaan 9.1</span>Pendekatan Ekivalensi</h3>
+        <div class="formula">
+          <span class="eq-tag">[9.1]</span>
+          B/C&nbsp;=&nbsp;
+          <span class="frac"><span class="num">PW manfaat</span><span class="den">PW biaya</span></span>
+          &nbsp;=&nbsp;
+          <span class="frac"><span class="num">AW manfaat</span><span class="den">AW biaya</span></span>
+          &nbsp;=&nbsp;
+          <span class="frac"><span class="num">FW manfaat</span><span class="den">FW biaya</span></span>
+        </div>
+        <div class="formula-caption">PW = Present Worth, AW = Annual Worth, FW = Future Worth</div>
+
+        <div class="grid-2">
+          <div class="verdict" style="background:#f0faf5; color:var(--good);"><span class="icon">✅</span> Jika B/C ≥ 1,0 → proyek diterima, secara ekonomi layak untuk estimasi &amp; discount rate yang digunakan.</div>
+          <div class="verdict bad"><span class="icon">❌</span> Jika B/C &lt; 1,0 → proyek tidak dapat diterima secara ekonomi.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Persamaan 9.2</span>B/C Konvensional</h3>
+        <div class="formula">
+          <span class="eq-tag">[9.2]</span>
+          B/C&nbsp;=&nbsp;
+          <span class="frac"><span class="num">benefit − disbenefit</span><span class="den">cost</span></span>
+          &nbsp;=&nbsp;
+          <span class="frac"><span class="num">B − D</span><span class="den">C</span></span>
+        </div>
+        <div class="formula-caption">Disbenefit mengurangi pembilang (manfaat), bukan menambah biaya</div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Persamaan 9.3</span>B/C Termodifikasi (Modified)</h3>
+        <div class="formula">
+          <span class="eq-tag">[9.3]</span>
+          Modified&nbsp;B/C&nbsp;=&nbsp;
+          <span class="frac"><span class="num">benefit − disbenefit − biaya O&amp;M</span><span class="den">investasi awal</span></span>
+        </div>
+        <div class="formula-caption">Biaya operasi &amp; perawatan (O&amp;M) dipindah ke pembilang; penyebut hanya investasi awal</div>
+      </div>
+
+      <div class="note">📌 Perbedaan mendasar: pada rumus konvensional, seluruh biaya (investasi + O&amp;M) berada di penyebut. Pada rumus termodifikasi, biaya O&amp;M dikurangkan bersama disbenefit di pembilang, sehingga penyebut hanya berisi investasi awal. Kedua metode dapat menghasilkan nilai rasio yang berbeda, tetapi kesimpulan layak/tidak layak (relatif terhadap ambang 1,0) biasanya konsisten.</div>
+    </section>
+
+    <!-- ============ 6. KALKULATOR ============ -->
+    <section id="view-kalkulator" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 6</span>
+        <h2>Kalkulator B/C Interaktif</h2>
+        <p class="lead">Masukkan nilai tahunan (dalam satuan yang sama, mis. juta USD) untuk melihat perhitungan B/C konvensional dan termodifikasi secara langsung — cocok untuk menguji ulang studi kasus di bagian berikutnya.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Input</span>Nilai Ekuivalen Tahunan</h3>
+        <div class="calc-grid">
+          <div class="field">
+            <label for="inBenefit">Benefit (B)</label>
+            <input type="number" id="inBenefit" value="8" step="0.1">
+          </div>
+          <div class="field">
+            <label for="inDisbenefit">Disbenefit (D)</label>
+            <input type="number" id="inDisbenefit" value="0.6" step="0.1">
+          </div>
+          <div class="field">
+            <label for="inCost">Investasi tahunan / Award (C investasi)</label>
+            <input type="number" id="inCost" value="12.864" step="0.001">
+          </div>
+          <div class="field">
+            <label for="inOM">Biaya O&amp;M tahunan</label>
+            <input type="number" id="inOM" value="2" step="0.1">
+          </div>
+        </div>
+
+        <div class="calc-result">
+          <div class="result-box" id="boxConv">
+            <div class="label">B/C Konvensional</div>
+            <div class="num" id="valConv">–</div>
+            <div class="verdict-text" id="verdictConv"></div>
+          </div>
+          <div class="result-box" id="boxMod">
+            <div class="label">B/C Termodifikasi</div>
+            <div class="num" id="valMod">–</div>
+            <div class="verdict-text" id="verdictMod"></div>
+          </div>
+        </div>
+      </div>
+      <div class="note">🔢 Nilai bawaan kalkulator ini sama persis dengan data studi kasus Yayasan Afram (Bagian 8) — ubah angkanya untuk melihat bagaimana sensitivitas disbenefit memengaruhi kelayakan proyek.</div>
+    </section>
+
+    <!-- ============ 7. KASUS ============ -->
+    <section id="view-kasus" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 7 · Studi Kasus</span>
+        <h2>Proposal Yayasan Afram</h2>
+        <p class="lead">Pengajuan proposal ke Dewan Direksi Yayasan untuk membangun kompleks rumah sakit dan klinik baru di sebuah negara Afrika Tengah yang miskin.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Latar Belakang</span>Konteks Yayasan</h3>
+        <p>Pada masa lalu, Yayasan Afram telah menerima banyak hibah untuk meningkatkan kehidupan dan kondisi kesehatan orang-orang di negara-negara yang sedang dilanda perang dan kemiskinan di seluruh dunia. Manajer proyek menyatakan bahwa proyek ini tidak mempunyai pengaruh negatif yang besar terhadap lahan pertanian utama atau daerah vital lainnya.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Data</span>Estimasi Manajer Proyek</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Komponen</th><th>Nilai</th></tr></thead>
+            <tbody>
+              <tr><td>Jumlah hibah (Award)</td><td>$20 juta di tahun pertama, menurun $5 juta/tahun selama 3 tahun berikutnya</td></tr>
+              <tr><td>Biaya tahunan (Annual cost)</td><td>$2 juta per tahun selama 10 tahun</td></tr>
+              <tr><td>Keuntungan (Benefit)</td><td>Mengurangi $8 juta per tahun biaya kesehatan warga</td></tr>
+              <tr><td>Kerugian (Disbenefit)</td><td>$0,1 juta – $0,6 juta untuk pembebasan lahan subur &amp; komersial</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Pertanyaan</span>Yang Harus Dijawab</h3>
+        <p>Gunakan metode konvensional B/C dan B/C yang dimodifikasi untuk menentukan kelayakan manfaat biaya dari proyek ini, jika proyek dipertimbangkan secara ekonomi selama kurun waktu <strong>10 tahun</strong>, dengan suku bunga <strong>6% per tahun</strong>.</p>
+      </div>
+    </section>
+
+    <!-- ============ 8. PENYELESAIAN ============ -->
+    <section id="view-penyelesaian" class="view" style="display:none;">
+      <div class="view-header">
+        <span class="eyebrow">Bagian 8 · Penyelesaian</span>
+        <h2>Perhitungan & Kesimpulan</h2>
+        <p class="lead">Langkah demi langkah mengubah hibah yang menurun menjadi nilai ekuivalen tahunan, lalu menghitung kedua rasio B/C.</p>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Langkah 1</span>Diagram Arus Kas Hibah (Award)</h3>
+        <p style="font-size:.9rem; color:var(--ink-600);">Hibah menurun dari $20 juta di tahun 1 menjadi $5 juta di tahun 4 (gradien turun $5 juta/tahun):</p>
+        <div class="cf-diagram">
+          <div class="cf-bar-wrap"><div class="cf-bar" style="height:100%;"></div><div class="cf-label">$20 jt</div><div class="cf-year">Tahun 1</div></div>
+          <div class="cf-bar-wrap"><div class="cf-bar" style="height:75%;"></div><div class="cf-label">$15 jt</div><div class="cf-year">Tahun 2</div></div>
+          <div class="cf-bar-wrap"><div class="cf-bar" style="height:50%;"></div><div class="cf-label">$10 jt</div><div class="cf-year">Tahun 3</div></div>
+          <div class="cf-bar-wrap"><div class="cf-bar" style="height:25%;"></div><div class="cf-label">$5 jt</div><div class="cf-year">Tahun 4</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Langkah 2</span>Konversi ke Nilai Ekuivalen Tahunan (Gradien Aritmetik)</h3>
+        <div class="formula">
+          Award&nbsp;=&nbsp;20&nbsp;−&nbsp;5(A/G, 6%, 4)&nbsp;=&nbsp;<strong>$12,864 juta/tahun</strong>
+        </div>
+        <p style="font-size:.9rem; color:var(--ink-600);">Cara alternatif (present worth lalu disetahunkan selama 4 tahun):</p>
+        <div class="formula" style="font-size:.95rem;">
+          P&nbsp;=&nbsp;20(P/F,6%,1)+15(P/F,6%,2)+10(P/F,6%,3)+5(P/F,6%,4)&nbsp;=&nbsp;<strong>$44,5745 juta</strong><br><br>
+          A&nbsp;=&nbsp;44,5745(A/P,6%,4)&nbsp;=&nbsp;<strong>$12,864 juta/tahun</strong>
+        </div>
+        <div class="grid-3">
+          <div class="stat-box neutral"><div class="k">Award tahunan</div><div class="v">$12,864 jt</div></div>
+          <div class="stat-box neutral"><div class="k">Biaya tahunan</div><div class="v">$2 jt</div></div>
+          <div class="stat-box neutral"><div class="k">Benefit tahunan</div><div class="v">$8 jt</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Langkah 3</span>Rasio B/C Konvensional</h3>
+        <div class="formula">
+          B/C&nbsp;=&nbsp;
+          <span class="frac"><span class="num">8,0 − 0,6</span><span class="den">12,864 + 2,0</span></span>
+          &nbsp;=&nbsp;<strong>0,50</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Langkah 4</span>Rasio B/C Termodifikasi</h3>
+        <div class="formula">
+          Modified&nbsp;B/C&nbsp;=&nbsp;
+          <span class="frac"><span class="num">8,0 − 0,6 − 2,0</span><span class="den">12,864</span></span>
+          &nbsp;=&nbsp;<strong>0,42</strong>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="chip">Kesimpulan</span>Kelayakan Proyek</h3>
+        <div class="grid-2">
+          <div class="result-box fail"><div class="label">B/C Konvensional</div><div class="num">0,50</div><div class="verdict-text">&lt; 1,0 → tidak layak secara ekonomi</div></div>
+          <div class="result-box fail"><div class="label">B/C Termodifikasi</div><div class="num">0,42</div><div class="verdict-text">&lt; 1,0 → tidak layak secara ekonomi</div></div>
+        </div>
+        <p style="margin-top:16px;">Proposal <strong>tidak dapat dibenarkan secara ekonomi</strong> karena kedua ukuran B/C bernilai kurang dari 1,0. Jika digunakan estimasi disbenefit terendah ($0,1 juta/tahun), rasio meningkat sedikit, namun tetap tidak cukup untuk membenarkan proposal tersebut.</p>
+      </div>
+
+      <div class="note">🎯 Coba masukkan disbenefit $0,1 juta pada <button onclick="sendPrompt('Tolong buka bagian Kalkulator B/C Interaktif')" style="border:none;background:none;color:var(--blue-600);font-weight:700;cursor:pointer;padding:0;text-decoration:underline;">Kalkulator B/C Interaktif</button> untuk membuktikan sendiri bahwa kesimpulannya tidak berubah.</div>
+
+      <div class="footer-note">Sumber materi: Pertemuan 13 — Analisa Manfaat Biaya, Benefit/Cost Analysis and Public Sector Economics.</div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ---------- toggle sidebar mobile ----------
+  const sidebarEl = document.getElementById('sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+  function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); }
+  function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+
+  hamburgerBtn.addEventListener('click', ()=>{
+    sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlayEl.addEventListener('click', closeSidebar);
+
+  // ---------- navigasi antar section ----------
+  const navButtons = document.querySelectorAll('.nav-btn');
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const target = btn.dataset.target;
+      document.querySelectorAll('main > .shell, main #mainArea > .view').forEach(()=>{});
+      document.querySelectorAll('#mainArea .view').forEach(s=>s.style.display='none');
+      document.getElementById('view-'+target).style.display='block';
+      navButtons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      window.scrollTo({top:0, behavior:'smooth'});
+      closeSidebar(); // tidak berefek di desktop
+    });
+  });
+
+  // ---------- kalkulator B/C ----------
+  function fmt(n){ return isFinite(n) ? n.toFixed(2) : '–'; }
+
+  function updateCalc(){
+    const B = parseFloat(document.getElementById('inBenefit').value) || 0;
+    const D = parseFloat(document.getElementById('inDisbenefit').value) || 0;
+    const C = parseFloat(document.getElementById('inCost').value) || 0;
+    const OM = parseFloat(document.getElementById('inOM').value) || 0;
+
+    const conv = (B - D) / (C + OM);
+    const mod = (B - D - OM) / C;
+
+    const valConv = document.getElementById('valConv');
+    const valMod = document.getElementById('valMod');
+    const boxConv = document.getElementById('boxConv');
+    const boxMod = document.getElementById('boxMod');
+    const verdictConv = document.getElementById('verdictConv');
+    const verdictMod = document.getElementById('verdictMod');
+
+    valConv.textContent = fmt(conv);
+    valMod.textContent = fmt(mod);
+
+    boxConv.className = 'result-box ' + (conv >= 1 ? 'pass' : 'fail');
+    boxMod.className = 'result-box ' + (mod >= 1 ? 'pass' : 'fail');
+
+    verdictConv.textContent = conv >= 1 ? '≥ 1,0 → layak secara ekonomi' : '< 1,0 → tidak layak secara ekonomi';
+    verdictMod.textContent = mod >= 1 ? '≥ 1,0 → layak secara ekonomi' : '< 1,0 → tidak layak secara ekonomi';
+  }
+
+  ['inBenefit','inDisbenefit','inCost','inOM'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', updateCalc);
+  });
+  updateCalc();
+
+  // sendPrompt fallback if not provided by host environment
+  if (typeof sendPrompt !== 'function') {
+    window.sendPrompt = function(){};
+  }
+</script>
+</body>
+</html>

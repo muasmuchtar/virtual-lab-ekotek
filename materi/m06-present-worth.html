@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Present Worth Analysis Method — Materi Pertemuan 7</title>
+<style>
+  :root{
+    --navy:#241226;
+    --navy-2:#331a3a;
+    --magenta:#c31577;
+    --magenta-2:#e91e8c;
+    --ink:#2b2530;
+    --muted:#6b6470;
+    --line:#e7e1ea;
+    --bg-card:#ffffff;
+    --bg-page:#faf8fb;
+    --plus:#1a7f4b;
+    --minus:#b3261e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg-page); color:var(--ink); line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Segoe UI Semibold', 'Segoe UI', sans-serif; font-weight:600; margin-top:0;}
+  .shell{display:flex; min-height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:280px; flex:0 0 280px;
+    background:linear-gradient(160deg, var(--navy) 0%, var(--magenta) 130%);
+    color:#f1e8f3;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    padding:26px 0 30px;
+  }
+  .sidebar .brand{
+    padding:0 22px 20px; border-bottom:1px solid rgba(255,255,255,0.18); margin-bottom:14px;
+  }
+  .sidebar .brand .tag{font-size:11px; letter-spacing:2px; opacity:0.75; text-transform:uppercase;}
+  .sidebar .brand h1{font-size:19px; margin:4px 0 2px; line-height:1.3;}
+  .sidebar .brand .sub{font-size:12.5px; opacity:0.8;}
+  .nav-group{margin-bottom:6px;}
+  .nav-label{
+    font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; opacity:0.55;
+    padding:14px 22px 6px;
+  }
+  .nav-btn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:none; border:none; color:#f1e8f3; font-size:14px;
+    padding:10px 22px; cursor:pointer; opacity:0.85; border-left:3px solid transparent;
+    font-family:inherit;
+  }
+  .nav-btn .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.15);
+    font-size:11px; flex:0 0 auto;
+  }
+  .nav-btn:hover{opacity:1; background:rgba(255,255,255,0.06);}
+  .nav-btn.active{opacity:1; background:rgba(255,255,255,0.14); border-left-color:#fff; font-weight:600;}
+
+  /* ---------- MAIN ---------- */
+  main{flex:1; min-width:0; padding:42px 48px 70px;}
+  .view{display:none; max-width:900px; margin:0 auto; animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  .eyebrow{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--magenta); font-weight:700; margin-bottom:6px;}
+  .view h2{font-size:28px; margin-bottom:6px;}
+  .lede{color:var(--muted); font-size:15.5px; margin-bottom:26px;}
+
+  .card{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:22px 26px; margin-bottom:20px; box-shadow:0 1px 2px rgba(30,10,30,0.03);
+  }
+  .card h3{font-size:16px; color:var(--navy-2); margin-bottom:10px;}
+  .card p{margin:0 0 10px;}
+  .card p:last-child{margin-bottom:0;}
+
+  .callout{
+    border-left:4px solid var(--magenta); background:#fdf1f8;
+    border-radius:0 10px 10px 0; padding:16px 20px; margin:18px 0;
+  }
+  .callout.formula{background:#f4f0fb; border-left-color:#6a3fb5;}
+  .callout .label{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--magenta); font-weight:700; margin-bottom:6px;}
+  .callout.formula .label{color:#6a3fb5;}
+
+  .formula-box{
+    font-family:'Cambria Math', Georgia, serif; font-size:16.5px; text-align:center;
+    background:#f4f0fb; border:1px dashed #c9b8e8; border-radius:10px; padding:14px; margin:12px 0;
+  }
+  .formula-box .plus{color:var(--plus); font-weight:700;}
+  .formula-box .minus{color:var(--minus); font-weight:700;}
+
+  ul.tight{margin:8px 0; padding-left:20px;}
+  ul.tight li{margin-bottom:6px;}
+
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:14px 0;}
+  table{width:100%; min-width:480px; border-collapse:collapse; font-size:14px;}
+  th, td{padding:9px 12px; border-bottom:1px solid var(--line); text-align:left;}
+  th{background:#f6f1f7; color:var(--navy-2); font-weight:600; font-size:13px;}
+  td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+  tr.pos td.num{color:var(--plus); font-weight:600;}
+  tr.neg td.num{color:var(--minus); font-weight:600;}
+  tr.pick{background:#fdf1f8;}
+  tr.pick td:first-child{font-weight:700;}
+
+  .badge{
+    display:inline-block; font-size:11.5px; font-weight:700; padding:3px 10px;
+    border-radius:20px; background:#e8f7ee; color:var(--plus); margin-left:6px;
+  }
+
+  /* cash-flow diagram */
+  .cfd{width:100%; max-width:640px; display:block; margin:14px auto;}
+  .cfd .axis{stroke:#3a3140; stroke-width:1.5;}
+  .cfd .cost{stroke:var(--minus); stroke-width:2.2;}
+  .cfd .income{stroke:var(--plus); stroke-width:2.2;}
+  .cfd text{font-size:12px; fill:#3a3140; font-family:inherit;}
+  .cfd .val{font-size:11.5px; font-weight:600;}
+
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .mini-card{background:#f9f6fa; border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .mini-card h4{margin:0 0 6px; font-size:13.5px; color:var(--navy-2);}
+  .mini-card .pw{font-size:19px; font-weight:700; margin-top:6px;}
+  .mini-card .pw.minus{color:var(--minus);}
+  .mini-card .foot{font-size:12px; color:var(--muted); margin-top:4px;}
+
+  details.reveal{
+    border:1px solid var(--line); border-radius:10px; margin-top:12px; overflow:hidden;
+  }
+  details.reveal summary{
+    cursor:pointer; list-style:none; padding:12px 16px; background:#f6f1f7;
+    font-weight:600; font-size:14px; color:var(--navy-2); display:flex; align-items:center; gap:8px;
+  }
+  details.reveal summary::-webkit-details-marker{display:none;}
+  details.reveal summary::before{content:"▸"; transition:transform .18s ease;}
+  details.reveal[open] summary::before{transform:rotate(90deg);}
+  details.reveal .reveal-body{padding:16px 18px;}
+
+  .quiz-nav{display:flex; gap:10px; margin-bottom:22px; flex-wrap:wrap;}
+  .quiz-nav a{
+    text-decoration:none; font-size:13px; font-weight:600; color:var(--navy-2);
+    background:#f6f1f7; padding:8px 14px; border-radius:20px; border:1px solid var(--line);
+  }
+
+  .footer-note{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted);}
+
+  /* ---------- topbar & hamburger: hidden on desktop ---------- */
+  .mobile-topbar{display:none;}
+  .hamburger-btn{
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+    width:36px; height:36px; background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25); border-radius:6px; cursor:pointer; padding:0;
+  }
+  .hamburger-btn span{display:block; width:16px; height:1.6px; background:#fff;}
+  .sidebar-overlay{display:none;}
+
+  /* ---------- MOBILE MODE ---------- */
+  @media(max-width:880px){
+    .shell{display:block;}
+    .mobile-topbar{
+      display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:40;
+      background:linear-gradient(120deg, var(--navy), var(--magenta));
+      padding:14px 16px; color:#fff;
+    }
+    .mobile-topbar .m-title{font-size:14.5px; font-weight:600;}
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:82%; max-width:300px;
+      transform:translateX(-100%); transition:transform .28s ease;
+      box-shadow:2px 0 28px rgba(0,0,0,0.35);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{
+      position:fixed; inset:0; background:rgba(9,15,19,0.5); z-index:55;
+    }
+    .sidebar-overlay.show{display:block;}
+    main{width:100%; min-width:0; padding:22px 16px 60px;}
+    .view h2{font-size:22px;}
+    .grid-3{grid-template-columns:1fr;}
+    .card{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="mobile-topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka menu navigasi">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="m-title">Present Worth Analysis</div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="tag">Ekonomi Teknik · Pertemuan 7</div>
+      <h1>Present Worth Analysis Method</h1>
+      <div class="sub">Analisis Nilai Sekarang</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Konsep Dasar</div>
+      <button class="nav-btn active" data-target="pendahuluan"><span class="num">1</span> Pendahuluan &amp; Definisi</button>
+      <button class="nav-btn" data-target="istilah"><span class="num">2</span> Istilah Lain (PV, NPV)</button>
+      <button class="nav-btn" data-target="ilustrasi"><span class="num">3</span> Ilustrasi &amp; Konsep</button>
+      <button class="nav-btn" data-target="kegunaan"><span class="num">4</span> Kegunaan Analisis PW</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Metode &amp; Rumus</div>
+      <button class="nav-btn" data-target="equal-life"><span class="num">5</span> Alternatif Umur Sama</button>
+      <button class="nav-btn" data-target="studi-kasus"><span class="num">6</span> Studi Kasus: Pembangkit</button>
+      <button class="nav-btn" data-target="diff-life"><span class="num">7</span> Alternatif Umur Berbeda</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Latihan</div>
+      <button class="nav-btn" data-target="soal1"><span class="num">8</span> Soal 1 — Enam Proyek</button>
+      <button class="nav-btn" data-target="soal2"><span class="num">9</span> Soal 2 — In-house vs Contract</button>
+      <button class="nav-btn" data-target="soal3"><span class="num">10</span> Soal 3 — Mesin X vs Y</button>
+    </div>
+  </aside>
+
+  <main id="mainArea">
+
+    <!-- 1. PENDAHULUAN -->
+    <section class="view active" id="view-pendahuluan">
+      <div class="eyebrow">Bagian 1</div>
+      <h2>Apa itu Analisis Present Worth (PW)?</h2>
+      <p class="lede">Fondasi dari seluruh metode PW: mengukur nilai investasi berdasarkan nilai uang saat ini.</p>
+
+      <div class="card">
+        <h3>Definisi</h3>
+        <p><em>Present worth analysis</em> (analisis nilai sekarang) didasarkan pada konsep <strong>ekuivalensi</strong>, di mana semua arus kas masuk dan arus kas keluar yang akan terjadi di masa yang akan datang diperhitungkan terhadap waktu sekarang.</p>
+      </div>
+
+      <div class="callout">
+        <div class="label">Ilustrasi Sederhana</div>
+        <p>Seseorang atau sekelompok orang yang akan berinvestasi pada suatu proyek tentu akan melakukan perhitungan atau analisa terlebih dahulu — apakah investasi tersebut akan menguntungkan atau tidak. Tidak mungkin seseorang berinvestasi atau menanamkan uangnya pada suatu sektor tanpa adanya pertimbangan sama sekali.</p>
+      </div>
+
+      <div class="card">
+        <h3>Mengapa "Masa Depan" Menjadi Masalah?</h3>
+        <p>Untung atau tidaknya suatu investasi menyangkut sesuatu yang <strong>belum terjadi</strong> — baru akan terjadi nanti, di masa yang akan datang. Karena itu dibutuhkan sebuah metode untuk memperhitungkan kejadian di masa depan ke dalam ukuran yang bisa dibandingkan hari ini.</p>
+      </div>
+
+      <div class="card">
+        <h3>Konsep Present Worth</h3>
+        <p>Keuntungan atau kerugian yang terjadinya pada masa yang akan datang <strong>diperhitungkan berdasarkan kondisi saat ini (present)</strong> — itulah kira-kira pertimbangan dasar dari metode ini.</p>
+      </div>
+    </section>
+
+    <!-- 2. ISTILAH -->
+    <section class="view" id="view-istilah">
+      <div class="eyebrow">Bagian 2</div>
+      <h2>Istilah Lain Present Worth (PW)</h2>
+      <p class="lede">Di berbagai literatur, metode PW sering muncul dengan nama yang berbeda namun konsepnya sama.</p>
+
+      <div class="card">
+        <h3>Beberapa istilah atau kesamaan nama dengan metode Present Worth</h3>
+        <ul class="tight">
+          <li><strong>PV</strong> (Present Value)</li>
+          <li><strong>NPV</strong> (Net Present Value)</li>
+        </ul>
+        <p>Ketiganya (PW, PV, NPV) pada dasarnya menggunakan logika perhitungan yang sama: mendiskontokan arus kas masa depan ke titik waktu sekarang.</p>
+      </div>
+    </section>
+
+    <!-- 3. ILUSTRASI (gabung dgn masa depan) -->
+    <section class="view" id="view-ilustrasi">
+      <div class="eyebrow">Bagian 3</div>
+      <h2>Ilustrasi &amp; Alur Berpikir Konsep PW</h2>
+      <p class="lede">Menghubungkan intuisi sehari-hari dengan logika ekonomi teknik.</p>
+
+      <div class="card">
+        <h3>1. Titik Berangkat: Keputusan Investasi</h3>
+        <p>Setiap keputusan berinvestasi lahir dari pertimbangan untung–rugi, bukan dari dorongan tiba-tiba.</p>
+      </div>
+
+      <div class="card">
+        <h3>2. Tantangannya: Hasil Ada di Masa Depan</h3>
+        <p>Untung-rugi sebuah investasi baru terlihat nanti — pada masa yang akan datang, yang saat ini <em>belum terjadi</em>.</p>
+      </div>
+
+      <div class="card">
+        <h3>3. Solusinya: Diperhitungkan di Titik "Sekarang"</h3>
+        <p>Metode PW menjawab tantangan ini dengan mengonversi seluruh arus kas masa depan (biaya, pendapatan, nilai sisa) menjadi satu nilai ekuivalen pada waktu sekarang (t = 0), sehingga bisa dibandingkan secara adil antar alternatif.</p>
+      </div>
+    </section>
+
+    <!-- 4. KEGUNAAN -->
+    <section class="view" id="view-kegunaan">
+      <div class="eyebrow">Bagian 4</div>
+      <h2>Apa Gunanya Analisis Present Worth?</h2>
+      <p class="lede">PW bukan sekadar rumus — ia adalah alat justifikasi keputusan.</p>
+
+      <div class="card">
+        <h3>Sebagai Alat Justifikasi</h3>
+        <p>Analisis PW digunakan sebagai metode pertimbangan (justifikasi) untuk memutuskan alternatif mana yang sebaiknya dipilih — apakah A, B, C, dan seterusnya — tergantung dari hasil perhitungan PW masing-masing.</p>
+        <div class="grid-3">
+          <div class="mini-card">
+            <h4>Nilai PW Positif (+)</h4>
+            <p>Alternatif dengan nilai PW <strong>(+) lebih besar</strong> itulah yang dipilih.</p>
+          </div>
+          <div class="mini-card">
+            <h4>Nilai PW Negatif (−)</h4>
+            <p>Alternatif dengan nilai PW <strong>(−) lebih kecil (mendekati nol)</strong> itulah yang dipilih.</p>
+          </div>
+          <div class="mini-card">
+            <h4>Basis Rumus</h4>
+            <p>Semua rumus yang digunakan dalam metode ini terkait dengan rumus-rumus faktor bunga (P/A, P/F, dst.) yang telah dipelajari pada pertemuan sebelumnya.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. EQUAL LIFE -->
+    <section class="view" id="view-equal-life">
+      <div class="eyebrow">Bagian 5</div>
+      <h2>Present Worth Analysis of Equal-Life Alternatives</h2>
+      <p class="lede">Aturan pemilihan ketika seluruh alternatif memiliki umur (life) yang sama.</p>
+
+      <div class="card">
+        <h3>Konvensi Tanda</h3>
+        <ul class="tight">
+          <li><span class="minus">Tanda (−)</span> menyatakan pengeluaran / <em>outcome</em></li>
+          <li><span class="plus">Tanda (+)</span> menyatakan pemasukan / <em>income</em></li>
+        </ul>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th class="num">PW<sub>A</sub></th><th class="num">PW<sub>B</sub></th><th>Alternatif Terpilih</th></tr></thead>
+            <tbody>
+              <tr class="neg"><td class="num">$−2300</td><td class="num">$−1500</td><td>B</td></tr>
+              <tr class="neg"><td class="num">−500</td><td class="num">+1000</td><td>B</td></tr>
+              <tr class="pos"><td class="num">+2500</td><td class="num">+2000</td><td>A</td></tr>
+              <tr class="pos"><td class="num">+4800</td><td class="num">−400</td><td>A</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Pola di atas menegaskan aturan pada Bagian 4: pilih PW yang lebih besar (baik saat keduanya positif, negatif, maupun campuran).</p>
+      </div>
+    </section>
+
+    <!-- 6. STUDI KASUS -->
+    <section class="view" id="view-studi-kasus">
+      <div class="eyebrow">Bagian 6</div>
+      <h2>Studi Kasus: Pemilihan Alternatif Pembangkit</h2>
+      <p class="lede">Sebuah pemilik pabrik sedang mempertimbangkan tiga alternatif pembangkit listrik dengan suku bunga (i) = 10%.</p>
+
+      <div class="card">
+        <h3>Data Alternatif (umur sama = 8 tahun)</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th class="num">Electric-Powered</th><th class="num">Gas-Powered</th><th class="num">Solar-Powered</th></tr></thead>
+            <tbody>
+              <tr><td>First cost, $</td><td class="num">−4.500</td><td class="num">−3.500</td><td class="num">−6.000</td></tr>
+              <tr><td>Annual operating cost (AOC), $/tahun</td><td class="num">−900</td><td class="num">−700</td><td class="num">−50</td></tr>
+              <tr><td>Salvage value S, $</td><td class="num">200</td><td class="num">350</td><td class="num">100</td></tr>
+              <tr><td>Life, tahun</td><td class="num">8</td><td class="num">8</td><td class="num">8</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Diagram Arus Kas (Cash Flow Diagram)</h3>
+        <p>Setiap alternatif memiliki: biaya awal (P) di t=0 sebagai pengeluaran, biaya operasional tahunan (A) dari tahun 1–8, dan nilai sisa (F) sebagai pemasukan di tahun ke-8.</p>
+
+        <svg class="cfd" viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+          <line class="axis" x1="40" y1="90" x2="600" y2="90"/>
+          <line class="cost" x1="40" y1="90" x2="40" y2="30"/>
+          <text x="20" y="24" class="val">P=4500</text>
+          <g class="income">
+            <line x1="100" y1="90" x2="100" y2="55"/><line x1="140" y1="90" x2="140" y2="55"/>
+            <line x1="180" y1="90" x2="180" y2="55"/><line x1="220" y1="90" x2="220" y2="55"/>
+            <line x1="260" y1="90" x2="260" y2="55"/><line x1="300" y1="90" x2="300" y2="55"/>
+            <line x1="340" y1="90" x2="340" y2="55"/><line x1="380" y1="90" x2="380" y2="55"/>
+          </g>
+          <text x="215" y="45" class="val">A=900 /thn</text>
+          <line class="cost" x1="380" y1="90" x2="380" y2="130"/>
+          <text x="365" y="145" class="val">F=200</text>
+          <text x="35" y="105">0</text><text x="95" y="105">1</text><text x="135" y="105">2</text>
+          <text x="175" y="105">3</text><text x="215" y="105">4</text><text x="255" y="105">5</text>
+          <text x="295" y="105">6</text><text x="335" y="105">7</text><text x="375" y="105">8</text>
+        </svg>
+        <p style="text-align:center; font-size:12.5px; color:var(--muted); margin-top:-4px;">Electric-Powered — pola serupa berlaku untuk Gas-Powered (P=3500, A=700, F=350) dan Solar-Powered (P=6000, A=50, F=100).</p>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Rumus &amp; Perhitungan</div>
+        <div class="formula-box">PW = <span class="minus">−P</span> <span class="minus">− A(P/A, i%, n)</span> <span class="plus">+ S(P/F, i%, n)</span></div>
+        <ul class="tight">
+          <li>PW<sub>E</sub> = −4500 − 900(P/A,10%,8) + 200(P/F,10%,8) = <strong>$−9.208</strong></li>
+          <li>PW<sub>G</sub> = −3500 − 700(P/A,10%,8) + 350(P/F,10%,8) = <strong>$−7.071</strong></li>
+          <li>PW<sub>S</sub> = −6000 − 50(P/A,10%,8) + 100(P/F,10%,8) = <strong>$−6.220</strong></li>
+        </ul>
+      </div>
+
+      <div class="grid-3">
+        <div class="mini-card"><h4>Electric-Powered</h4><div class="pw minus">$−9.208</div></div>
+        <div class="mini-card"><h4>Gas-Powered</h4><div class="pw minus">$−7.071</div></div>
+        <div class="mini-card"><h4>Solar-Powered <span class="badge">Terpilih</span></h4><div class="pw minus">$−6.220</div></div>
+      </div>
+      <p style="margin-top:12px;"><strong>Rekomendasi:</strong> dipilih <strong>Solar-Powered</strong> karena memiliki nilai PW pengeluaran paling rendah (nilai negatif terkecil / paling mendekati nol).</p>
+    </section>
+
+    <!-- 7. DIFFERENT LIFE -->
+    <section class="view" id="view-diff-life">
+      <div class="eyebrow">Bagian 7</div>
+      <h2>Present Worth Analysis of Different-Life Alternatives</h2>
+      <p class="lede">Ketika umur ekonomis antar alternatif berbeda, perbandingan PW harus dilakukan pada periode yang sepadan (biasanya KPK/LCM dari kedua umur).</p>
+
+      <div class="card">
+        <h3>Data: Pemilihan Peralatan dari 2 Vendor</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th class="num">Vendor A</th><th class="num">Vendor B</th></tr></thead>
+            <tbody>
+              <tr><td>First cost, $</td><td class="num">−15.000</td><td class="num">−18.000</td></tr>
+              <tr><td>Annual M&amp;O cost, $/tahun</td><td class="num">−3.500</td><td class="num">−3.100</td></tr>
+              <tr><td>Salvage value, $</td><td class="num">1.000</td><td class="num">2.000</td></tr>
+              <tr><td>Life, tahun</td><td class="num">6</td><td class="num">9</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Pertanyaan:</strong></p>
+        <ul class="tight">
+          <li>(a) Tentukan vendor mana yang sebaiknya dipilih, dengan asumsi suku bunga 15%/tahun (umur berbeda → dibandingkan pada periode 18 tahun, KPK dari 6 dan 9).</li>
+          <li>(b) Apabila diasumsikan kedua peralatan mempunyai umur yang sama sebesar 5 tahun, vendor mana yang dipilih?</li>
+        </ul>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi (a) — Periode Studi 18 Tahun</div>
+        <div class="formula-box" style="text-align:left;">
+          PW<sub>A</sub> = −15.000 − 15.000(P/F,15%,6) + 1.000(P/F,15%,6)<br>
+          &nbsp;&nbsp;&nbsp;− 15.000(P/F,15%,12) + 1.000(P/F,15%,12) + 1.000(P/F,15%,18)<br>
+          &nbsp;&nbsp;&nbsp;− 3.500(P/A,15%,18) = <strong class="minus">$−45.036</strong>
+        </div>
+        <div class="formula-box" style="text-align:left;">
+          PW<sub>B</sub> = −18.000 − 18.000(P/F,15%,9) + 2.000(P/F,15%,9)<br>
+          &nbsp;&nbsp;&nbsp;+ 2.000(P/F,15%,18) − 3.100(P/A,15%,18) = <strong class="minus">$−41.384</strong>
+        </div>
+        <p><strong>Rekomendasi:</strong> Vendor B dipilih karena biaya (PW) lebih kecil dibanding Vendor A.</p>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi (b) — Umur Disamakan Menjadi 5 Tahun</div>
+        <div class="formula-box" style="text-align:left;">
+          PW<sub>A</sub> = −15.000 − 3.500(P/A,15%,5) + 1.000(P/F,15%,5) = <strong class="minus">$−26.236</strong>
+        </div>
+        <div class="formula-box" style="text-align:left;">
+          PW<sub>B</sub> = −18.000 − 3.100(P/A,15%,5) + 2.000(P/F,15%,5) = <strong class="minus">$−27.397</strong>
+        </div>
+        <p><strong>Rekomendasi:</strong> Vendor A dipilih.</p>
+      </div>
+
+      <div class="callout">
+        <div class="label">Catatan Penting</div>
+        <p>Perbandingan (a) dan (b) menunjukkan bahwa <strong>asumsi umur proyek sangat memengaruhi keputusan akhir</strong>. Karena itu penentuan periode studi (umur asli vs. disamakan) harus dilakukan dengan cermat sebelum menghitung PW.</p>
+      </div>
+    </section>
+
+    <!-- 8. SOAL 1 -->
+    <section class="view" id="view-soal1">
+      <div class="eyebrow">Latihan · Soal 1</div>
+      <h2>Pemilihan di Antara Enam Proyek Independen</h2>
+      <p class="lede">Usia proyek = 10 tahun, i = 25%.</p>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Project</th><th class="num">First Cost, $</th><th class="num">Estimated Annual Income, $/tahun</th></tr></thead>
+            <tbody>
+              <tr><td>F</td><td class="num">−200.000</td><td class="num">54.000</td></tr>
+              <tr><td>G</td><td class="num">−120.000</td><td class="num">21.000</td></tr>
+              <tr><td>H</td><td class="num">−250.000</td><td class="num">115.000</td></tr>
+              <tr><td>I</td><td class="num">−370.000</td><td class="num">205.000</td></tr>
+              <tr><td>J</td><td class="num">−50.000</td><td class="num">26.000</td></tr>
+              <tr><td>K</td><td class="num">−9.000</td><td class="num">2.100</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Pertanyaan:</strong> Project mana yang sebaiknya dipilih berdasarkan analisa PW?</p>
+      </div>
+
+      <details class="reveal">
+        <summary>Lihat Pembahasan</summary>
+        <div class="reveal-body">
+          <div class="formula-box">PW = −First Cost + Income × (P/A, 25%, 10),&nbsp; (P/A,25%,10) ≈ 3,5705</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Project</th><th class="num">PW ($)</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr class="neg"><td>F</td><td class="num">−7.193</td><td>Tidak layak</td></tr>
+                <tr class="neg"><td>G</td><td class="num">−45.020</td><td>Tidak layak</td></tr>
+                <tr class="pos"><td>H</td><td class="num">+160.608</td><td>Layak</td></tr>
+                <tr class="pos pick"><td>I</td><td class="num">+362.053</td><td>Layak — PW tertinggi</td></tr>
+                <tr class="pos"><td>J</td><td class="num">+42.833</td><td>Layak</td></tr>
+                <tr class="neg"><td>K</td><td class="num">−1.502</td><td>Tidak layak</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Rekomendasi:</strong> Proyek F, G, dan K memiliki PW negatif sehingga tidak layak secara ekonomi. Di antara proyek yang layak (H, I, J), <strong>Proyek I</strong> memberikan nilai PW tertinggi sehingga menjadi pilihan terbaik.</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 9. SOAL 2 -->
+    <section class="view" id="view-soal2">
+      <div class="eyebrow">Latihan · Soal 2</div>
+      <h2>In-house vs Contract (Magnetic Membrane Switches)</h2>
+      <p class="lede">Bandingkan dua opsi produksi dengan analisis PW pada suku bunga 10%/tahun. Satuan: $1 juta.</p>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th class="num">In-house</th><th class="num">Contract</th></tr></thead>
+            <tbody>
+              <tr><td>First cost, $</td><td class="num">−30</td><td class="num">0</td></tr>
+              <tr><td>Annual cost, $/tahun</td><td class="num">−5</td><td class="num">−2</td></tr>
+              <tr><td>Annual income, $/tahun</td><td class="num">14</td><td class="num">3,1</td></tr>
+              <tr><td>Salvage value, $</td><td class="num">2</td><td class="num">—</td></tr>
+              <tr><td>Life, tahun</td><td class="num">5</td><td class="num">5</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <details class="reveal">
+        <summary>Lihat Pembahasan</summary>
+        <div class="reveal-body">
+          <div class="formula-box">(P/A,10%,5) ≈ 3,7908 &nbsp;|&nbsp; (P/F,10%,5) ≈ 0,6209</div>
+          <p><strong>In-house:</strong> arus kas bersih tahunan = 14 − 5 = 9 juta/tahun</p>
+          <div class="formula-box">PW<sub>in-house</sub> = −30 + 9(P/A,10%,5) + 2(P/F,10%,5) ≈ <strong class="plus">$5,36 juta</strong></div>
+          <p><strong>Contract:</strong> arus kas bersih tahunan = 3,1 − 2 = 1,1 juta/tahun</p>
+          <div class="formula-box">PW<sub>contract</sub> = 1,1(P/A,10%,5) ≈ <strong class="plus">$4,17 juta</strong></div>
+          <p><strong>Rekomendasi:</strong> pilih <strong>In-house</strong>, karena PW-nya lebih tinggi (≈$5,36 juta berbanding ≈$4,17 juta).</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- 10. SOAL 3 -->
+    <section class="view" id="view-soal3">
+      <div class="eyebrow">Latihan · Soal 3</div>
+      <h2>Mesin X vs Mesin Y (Proses Pengelasan Robotik)</h2>
+      <p class="lede">Suku bunga 10%/tahun, dengan umur ekonomis berbeda (Mesin X = 3 tahun, Mesin Y = 6 tahun).</p>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th></th><th class="num">Machine X</th><th class="num">Machine Y</th></tr></thead>
+            <tbody>
+              <tr><td>First cost, $</td><td class="num">−250.000</td><td class="num">−430.000</td></tr>
+              <tr><td>Annual operating cost, $/tahun</td><td class="num">−60.000</td><td class="num">−40.000</td></tr>
+              <tr><td>Salvage value, $</td><td class="num">70.000</td><td class="num">95.000</td></tr>
+              <tr><td>Life, tahun</td><td class="num">3</td><td class="num">6</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Pertanyaan:</strong> Tentukan alternatif yang sebaiknya dipilih berdasarkan analisis PW.</p>
+      </div>
+
+      <details class="reveal">
+        <summary>Lihat Pembahasan</summary>
+        <div class="reveal-body">
+          <p>Karena umur berbeda (3 vs 6 tahun), periode studi disamakan menjadi <strong>KPK = 6 tahun</strong>. Mesin X diasumsikan dibeli kembali (reinvestasi) pada akhir tahun ke-3.</p>
+          <div class="formula-box" style="text-align:left;">
+            PW<sub>X</sub> = −250.000 − 250.000(P/F,10%,3) + 70.000(P/F,10%,3)<br>
+            &nbsp;&nbsp;&nbsp;− 60.000(P/A,10%,6) + 70.000(P/F,10%,6) ≈ <strong class="minus">$−607.039</strong>
+          </div>
+          <div class="formula-box" style="text-align:left;">
+            PW<sub>Y</sub> = −430.000 − 40.000(P/A,10%,6) + 95.000(P/F,10%,6) ≈ <strong class="minus">$−550.585</strong>
+          </div>
+          <p><strong>Rekomendasi:</strong> pilih <strong>Machine Y</strong>, karena nilai PW-nya kurang negatif (biaya ekuivalen lebih rendah) dibanding Machine X.</p>
+        </div>
+      </details>
+
+      <div class="footer-note">
+        Materi disusun ulang dalam format dashboard interaktif dari slide "Present Worth Analysis Method" (Pertemuan 7). Semua rumus mengacu pada faktor bunga standar (P/A, i%, n) dan (P/F, i%, n) yang telah dibahas pada pertemuan sebelumnya.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ---------- navigasi sidebar (swap section) ----------
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const views = document.querySelectorAll('.view');
+
+  function showView(target){
+    views.forEach(v => v.classList.remove('active'));
+    const el = document.getElementById('view-' + target);
+    if(el) el.classList.add('active');
+    navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+    document.getElementById('mainArea').scrollTo({top:0, behavior:'instant'});
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      showView(btn.dataset.target);
+      closeSidebar(); // tidak berefek di desktop
+    });
+  });
+
+  // ---------- toggle sidebar mobile (off-canvas) ----------
+  const sidebarEl = document.getElementById('sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+  function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); }
+  function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+
+  hamburgerBtn.addEventListener('click', ()=>{
+    sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlayEl.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>

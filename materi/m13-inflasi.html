@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pertemuan 15 — Inflasi, PDB & Pendapatan Nasional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  /* ============ TOKENS ============ */
+  :root{
+    --paper: #EEF2EA;
+    --paper-deep: #E4EADF;
+    --rule: #C6D2BE;
+    --rule-soft: #D8E0D1;
+    --ink: #1E2E22;
+    --ink-soft: #4B5B4E;
+    --ink-faint: #7C8B7C;
+    --rust: #A23E2E;
+    --rust-soft: #C96B57;
+    --green-deep: #2C5F45;
+    --gold: #A9782E;
+    --card: #F7FAF4;
+    --sidebar-bg: #16241A;
+    --sidebar-ink: #CBDAC2;
+    --sidebar-ink-dim: #7E9480;
+    --sidebar-accent: #D7B15C;
+    --serif: 'Lora', Georgia, serif;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.6; font-size:16px;
+  }
+
+  ::selection{ background:var(--gold); color:#1E2E22; }
+
+  /* ============ SHELL / LAYOUT ============ */
+  .shell{ display:flex; min-height:100vh; }
+
+  .sidebar{
+    width:270px; flex:0 0 270px;
+    background:var(--sidebar-bg); color:var(--sidebar-ink);
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    padding:28px 0 40px;
+    border-right:1px solid rgba(0,0,0,.25);
+  }
+  .sidebar::-webkit-scrollbar{ width:8px; }
+  .sidebar::-webkit-scrollbar-thumb{ background:#2b3d2f; border-radius:4px; }
+
+  .brand{
+    padding:0 24px 22px; margin-bottom:14px;
+    border-bottom:1px solid rgba(215,177,92,.22);
+  }
+  .brand .kicker{
+    font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+    color:var(--sidebar-accent); text-transform:uppercase;
+  }
+  .brand h1{
+    font-family:var(--serif); font-weight:600; font-size:21px;
+    margin:8px 0 4px; color:#F2EEDF; line-height:1.28;
+  }
+  .brand p{ margin:0; font-size:12.5px; color:var(--sidebar-ink-dim); }
+
+  nav.toc{ padding:6px 14px; }
+  nav.toc .group-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.08em;
+    color:var(--sidebar-ink-dim); text-transform:uppercase;
+    padding:16px 10px 6px;
+  }
+  nav.toc a{
+    display:block; color:var(--sidebar-ink); text-decoration:none;
+    font-size:14px; padding:8px 10px; border-radius:5px;
+    border-left:2px solid transparent; margin-bottom:1px;
+    transition:background .15s ease, color .15s ease, border-color .15s ease;
+  }
+  nav.toc a span.num{
+    font-family:var(--mono); font-size:11.5px; color:var(--sidebar-ink-dim);
+    margin-right:8px;
+  }
+  nav.toc a:hover{ background:rgba(255,255,255,.05); color:#fff; }
+  nav.toc a.active{
+    background:rgba(215,177,92,.10); color:#F2EEDF;
+    border-left-color:var(--sidebar-accent);
+  }
+
+  main{ flex:1; min-width:0; }
+
+  .page{
+    max-width:760px; margin:0 auto; padding:64px 40px 40px;
+  }
+
+  /* ============ MOBILE TOPBAR / HAMBURGER (hidden on desktop) ============ */
+  .mobile-topbar{ display:none; }
+  .hamburger-btn{
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+    width:38px; height:38px; background:rgba(255,255,255,.07);
+    border:1px solid rgba(215,177,92,.3); border-radius:6px; cursor:pointer; padding:0;
+    flex:0 0 auto;
+  }
+  .hamburger-btn span{ display:block; width:17px; height:1.5px; background:var(--sidebar-accent); }
+  .sidebar-overlay{ display:none; }
+
+  /* ============ TYPOGRAPHY ============ */
+  h2.section-title{
+    font-family:var(--serif); font-weight:700; font-size:30px;
+    color:var(--ink); margin:0 0 6px; line-height:1.2;
+  }
+  .section-eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--rust);
+    letter-spacing:.03em; margin-bottom:10px;
+  }
+  .section-intro{
+    font-size:16px; color:var(--ink-soft); max-width:60ch; margin:0 0 30px;
+  }
+  section.block{ padding-top:26px; margin-bottom:8px; scroll-margin-top:24px; }
+  section.block + section.block{ border-top:1px solid var(--rule); padding-top:56px; margin-top:30px; }
+
+  h3{
+    font-family:var(--serif); font-weight:600; font-size:20px;
+    margin:34px 0 10px; color:var(--ink);
+  }
+  h4{
+    font-family:var(--sans); font-weight:600; font-size:14.5px;
+    margin:22px 0 8px; color:var(--green-deep); text-transform:uppercase; letter-spacing:.02em;
+  }
+  p{ margin:0 0 14px; max-width:66ch; }
+  strong{ color:var(--ink); font-weight:600; }
+  a.inline{ color:var(--green-deep); text-decoration-color:var(--rule); text-underline-offset:3px; }
+
+  ul, ol{ margin:0 0 16px; padding-left:22px; max-width:64ch; }
+  li{ margin-bottom:7px; }
+
+  /* ============ DEFINITION CARD ============ */
+  .def{
+    background:var(--card); border:1px solid var(--rule);
+    border-left:4px solid var(--green-deep);
+    border-radius:3px; padding:18px 22px; margin:18px 0 24px;
+  }
+  .def .label{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--green-deep); margin-bottom:6px; display:block;
+  }
+  .def p{ margin:0; font-size:16px; color:var(--ink); }
+  .def.alt{ border-left-color:var(--rust); }
+  .def.alt .label{ color:var(--rust); }
+  .def.gold{ border-left-color:var(--gold); }
+  .def.gold .label{ color:var(--gold); }
+
+  /* ============ FORMULA BLOCK ============ */
+  .formula{
+    background:var(--sidebar-bg); color:#F2EEDF; border-radius:5px;
+    padding:22px 26px; margin:20px 0; overflow-x:auto;
+  }
+  .formula .flabel{
+    font-family:var(--mono); font-size:11px; color:var(--sidebar-accent);
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:10px;
+  }
+  .formula .fmath{
+    font-family:var(--mono); font-size:19px; letter-spacing:.01em;
+  }
+  .formula .fnote{
+    font-family:var(--sans); font-size:13px; color:var(--sidebar-ink-dim);
+    margin-top:12px; line-height:1.55;
+  }
+  .fmath sub{ font-size:65%; }
+  .fmath sup{ font-size:65%; }
+
+  /* worked example */
+  .worked{
+    border:1px dashed var(--rule); border-radius:4px;
+    padding:16px 20px; margin:18px 0; background:#fff;
+  }
+  .worked .wlabel{
+    font-family:var(--mono); font-size:11px; text-transform:uppercase;
+    color:var(--ink-faint); letter-spacing:.05em; margin-bottom:8px;
+  }
+  .worked .wline{ font-family:var(--mono); font-size:14.5px; margin:3px 0; }
+  .worked .wresult{ color:var(--rust); font-weight:600; }
+
+  /* ============ TABLE ============ */
+  .table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:18px 0 26px; }
+  table{ border-collapse:collapse; width:100%; min-width:560px; font-size:13.5px; }
+  table caption{ text-align:left; font-family:var(--mono); font-size:11px; color:var(--ink-faint); margin-bottom:8px; text-transform:uppercase; letter-spacing:.04em;}
+  th, td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--rule-soft); }
+  th{
+    font-family:var(--mono); font-weight:500; font-size:11.5px;
+    color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em;
+    border-bottom:2px solid var(--ink); white-space:nowrap;
+  }
+  td{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+  td:first-child, th:first-child{ font-family:var(--sans); }
+  tr.total td{ font-weight:700; border-top:1px solid var(--ink); }
+
+  /* ============ PYRAMID (tingkatan inflasi) ============ */
+  .pyramid{ display:flex; flex-direction:column; align-items:center; gap:6px; margin:26px 0; }
+  .pyramid .tier{
+    color:#fff; text-align:center; padding:14px 10px; border-radius:3px;
+    font-family:var(--sans); font-weight:600;
+  }
+  .pyramid .tier small{ display:block; font-family:var(--mono); font-weight:400; font-size:12px; opacity:.85; margin-top:3px;}
+  .pyramid .t1{ width:38%; background:#3F7A56; }
+  .pyramid .t2{ width:58%; background:#A9782E; }
+  .pyramid .t3{ width:78%; background:#C96B57; }
+  .pyramid .t4{ width:100%; background:#A23E2E; }
+
+  /* ============ SCALE / BALANCE diagram ============ */
+  .balance-wrap{ display:flex; justify-content:center; margin:26px 0; }
+  .balance{ display:flex; align-items:flex-end; gap:0; }
+  .balance .pan{
+    width:150px; border:2px solid var(--ink); border-radius:6px;
+    padding:16px 10px; text-align:center; background:var(--card);
+  }
+  .balance .pan h5{ margin:0 0 4px; font-size:13px; font-family:var(--sans); font-weight:600;}
+  .balance .pan p{ margin:0; font-size:11.5px; color:var(--ink-faint); max-width:none; }
+  .balance .fulcrum{
+    width:2px; height:36px; background:var(--ink); align-self:center; margin:0 18px;
+    position:relative;
+  }
+  .balance .fulcrum::after{
+    content:''; position:absolute; bottom:-10px; left:50%; transform:translateX(-50%);
+    width:0; height:0; border-left:9px solid transparent; border-right:9px solid transparent;
+    border-top:12px solid var(--ink);
+  }
+
+  /* ============ FLOW / CHAIN diagram ============ */
+  .chain{ display:flex; flex-wrap:wrap; align-items:center; gap:0; margin:24px 0; }
+  .chain .link{
+    background:var(--card); border:1px solid var(--rule); border-radius:4px;
+    padding:12px 16px; font-size:13px; text-align:center; min-width:110px;
+  }
+  .chain .link .v{ font-family:var(--mono); font-weight:600; color:var(--rust); display:block; margin-top:4px; font-size:14px;}
+  .chain .arrow{ padding:0 10px; color:var(--ink-faint); font-size:18px; }
+
+  .flow-vert{ margin:24px 0; }
+  .flow-vert .step{
+    display:flex; gap:14px; align-items:stretch; margin-bottom:0;
+  }
+  .flow-vert .step .col-label{
+    flex:0 0 150px; font-family:var(--sans); font-weight:600; font-size:14px;
+    padding:14px 0; color:var(--ink);
+  }
+  .flow-vert .step .col-formula{
+    flex:1; background:var(--card); border:1px solid var(--rule); border-radius:4px;
+    padding:12px 16px; font-family:var(--mono); font-size:14px; display:flex; align-items:center;
+  }
+  .flow-vert .connector{
+    text-align:center; color:var(--ink-faint); font-family:var(--mono); font-size:12px;
+    padding:6px 0 6px 150px;
+  }
+  .flow-vert .connector.wide{ padding-left:0; }
+
+  /* ============ GRID CARDS ============ */
+  .card-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; margin:20px 0 26px; }
+  .card-grid.cols-4{ grid-template-columns:repeat(4, 1fr); }
+  .mini-card{
+    background:var(--card); border:1px solid var(--rule); border-radius:4px;
+    padding:14px 16px;
+  }
+  .mini-card h5{
+    margin:0 0 6px; font-size:14px; font-family:var(--sans); font-weight:600; color:var(--ink);
+  }
+  .mini-card p{ margin:0; font-size:12.5px; color:var(--ink-soft); }
+  .mini-card.no{ border-left:3px solid var(--rust); }
+  .mini-card.no h5::before{ content:'✕ '; color:var(--rust); }
+
+  /* sector proportion bars */
+  .sector-set{ display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin:24px 0; }
+  .sector-card{ text-align:center; }
+  .sector-card .stage{ font-family:var(--mono); font-size:11px; text-transform:uppercase; color:var(--ink-faint); margin-bottom:8px; letter-spacing:.04em;}
+  .stackbar{ display:flex; flex-direction:column-reverse; height:150px; border-radius:4px; overflow:hidden; border:1px solid var(--rule); }
+  .stackbar .seg{ display:flex; align-items:center; justify-content:center; color:#fff; font-size:10.5px; font-family:var(--mono);}
+  .seg.primer{ background:#3F7A56; }
+  .seg.sekunder{ background:#A9782E; }
+  .seg.tersier{ background:#5B7FA6; }
+  .legend-row{ display:flex; gap:14px; justify-content:center; margin-top:20px; flex-wrap:wrap;}
+  .legend-row .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:6px; }
+
+  /* padat karya vs modal */
+  .compare-two{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:22px 0; }
+  .compare-two .box{
+    border:1px solid var(--rule); border-radius:4px; padding:18px; text-align:center; background:var(--card);
+  }
+  .compare-two .box .icon{ font-size:26px; margin-bottom:8px; }
+  .compare-two .box h5{ margin:0 0 6px; font-family:var(--sans); font-weight:600; font-size:14px; }
+  .compare-two .box p{ margin:0; font-size:12.5px; color:var(--ink-soft); }
+
+  /* callout / catatan */
+  .callout{
+    background:#FBF3E4; border:1px solid #E5D2A3; border-radius:4px;
+    padding:14px 18px; margin:20px 0; font-size:14px; color:#5C4A1E;
+  }
+  .callout strong{ color:#4a3a15; }
+
+  /* source / primary reading */
+  .source-box{
+    background:var(--card); border:1px solid var(--rule); border-radius:4px;
+    padding:16px 20px; margin:22px 0 8px; font-size:13.5px;
+  }
+  .source-box .slabel{ font-family:var(--mono); font-size:11px; text-transform:uppercase; color:var(--ink-faint); letter-spacing:.05em; margin-bottom:4px;}
+
+  /* glossary */
+  .gloss{ display:grid; grid-template-columns:130px 1fr; gap:4px 18px; margin:18px 0 28px; }
+  .gloss dt{ font-family:var(--mono); font-weight:600; font-size:13px; color:var(--green-deep); padding:8px 0; border-top:1px solid var(--rule-soft);}
+  .gloss dd{ margin:0; padding:8px 0; border-top:1px solid var(--rule-soft); font-size:13.5px; color:var(--ink-soft); }
+
+  /* hero */
+  .hero{ padding-top:20px; }
+  .hero .kicker{
+    font-family:var(--mono); font-size:12px; color:var(--rust); letter-spacing:.05em; margin-bottom:14px;
+  }
+  .hero h1{
+    font-family:var(--serif); font-weight:700; font-size:42px; line-height:1.15;
+    margin:0 0 18px; color:var(--ink); max-width:14ch;
+  }
+  .hero .lede{ font-size:17px; color:var(--ink-soft); max-width:56ch; margin-bottom:28px;}
+  .hero-map{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:30px 0 10px; }
+  .hero-map .hitem{
+    background:var(--card); border:1px solid var(--rule); border-radius:4px;
+    padding:10px 8px; text-align:center; text-decoration:none; color:var(--ink);
+    transition:border-color .15s;
+  }
+  .hero-map .hitem:hover{ border-color:var(--green-deep); }
+  .hero-map .hitem .n{ font-family:var(--mono); font-size:11px; color:var(--ink-faint); display:block; margin-bottom:4px;}
+  .hero-map .hitem .t{ font-size:12px; font-weight:600; line-height:1.3; }
+
+  footer.doc-footer{
+    max-width:760px; margin:0 auto; padding:20px 40px 70px;
+    font-size:12.5px; color:var(--ink-faint); border-top:1px solid var(--rule); margin-top:30px;
+  }
+
+  /* ============ PRINT ============ */
+  @media print{
+    .sidebar, .mobile-topbar{ display:none !important; }
+    .shell{ display:block; }
+    body{ background:#fff; }
+    section.block{ page-break-inside:avoid; }
+    .formula{ background:#eee !important; color:#111 !important; }
+  }
+
+  /* ============ RESPONSIVE / MOBILE ============ */
+  @media (max-width:880px){
+    .shell{ display:block; }
+    .mobile-topbar{
+      display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:40;
+      background:var(--sidebar-bg); padding:13px 18px;
+    }
+    .mobile-topbar .mt-title{
+      font-family:var(--serif); color:#F2EEDF; font-size:15px; font-weight:600;
+    }
+    .mobile-topbar .mt-sub{ font-family:var(--mono); font-size:10.5px; color:var(--sidebar-accent); }
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:84%; max-width:310px;
+      transform:translateX(-100%); transition:transform .28s ease;
+      box-shadow:2px 0 28px rgba(0,0,0,.35);
+    }
+    .sidebar.open{ transform:translateX(0); }
+    .sidebar-overlay{ position:fixed; inset:0; background:rgba(9,15,19,.55); z-index:55; }
+    .sidebar-overlay.show{ display:block; }
+    main{ width:100%; min-width:0; }
+    .page{ padding:34px 20px 20px; }
+    .hero h1{ font-size:31px; max-width:none; }
+    .hero-map{ grid-template-columns:repeat(2,1fr); }
+    .card-grid, .card-grid.cols-4{ grid-template-columns:1fr 1fr; }
+    .sector-set{ grid-template-columns:1fr; }
+    .compare-two{ grid-template-columns:1fr; }
+    .flow-vert .step{ flex-direction:column; }
+    .flow-vert .step .col-label{ flex:none; padding:0 0 6px; }
+    .flow-vert .connector{ padding-left:0; }
+    .balance{ flex-direction:column; align-items:center; }
+    .balance .fulcrum{ display:none; }
+    .gloss{ grid-template-columns:1fr; }
+    .gloss dt{ border-top:none; padding-bottom:0; }
+    .gloss dd{ border-top:none; padding-top:2px; padding-bottom:12px; }
+    footer.doc-footer{ padding:20px 20px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="mobile-topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka daftar isi">
+      <span></span><span></span><span></span>
+    </button>
+    <div>
+      <div class="mt-title">Pertemuan 15</div>
+      <div class="mt-sub">Inflasi &amp; PDB</div>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="kicker">Referensi Kuliah · Pertemuan 15</div>
+      <h1>Inflasi, PDB &amp; Pendapatan Nasional</h1>
+      <p>Ringkasan mendalam untuk belajar &amp; dibaca ulang</p>
+    </div>
+    <nav class="toc">
+      <div class="group-label">Mulai</div>
+      <a href="#ringkasan"><span class="num">00</span>Ringkasan</a>
+
+      <div class="group-label">Inflasi</div>
+      <a href="#inflasi"><span class="num">01</span>Apa itu Inflasi</a>
+      <a href="#inflasi-uang"><span class="num">02</span>Inflasi &amp; Uang</a>
+      <a href="#tingkatan"><span class="num">03</span>Tingkatan Inflasi</a>
+      <a href="#indikator"><span class="num">04</span>Indikator Inflasi</a>
+      <a href="#suku-bunga"><span class="num">05</span>Inflasi &amp; Suku Bunga</a>
+
+      <div class="group-label">Produk Domestik Bruto</div>
+      <a href="#pdb"><span class="num">06</span>Apa itu PDB</a>
+      <a href="#pdb-tidak"><span class="num">07</span>Yang Tidak Dihitung</a>
+      <a href="#metode"><span class="num">08</span>3 Metode Penghitungan</a>
+      <a href="#sektor"><span class="num">09</span>Sektor Ekonomi</a>
+
+      <div class="group-label">Pendapatan &amp; Pertumbuhan</div>
+      <a href="#alur"><span class="num">10</span>Alur Pendapatan Nasional</a>
+      <a href="#pertumbuhan"><span class="num">11</span>Pertumbuhan Ekonomi</a>
+      <a href="#nominal-riil"><span class="num">12</span>PDB Nominal vs Riil</a>
+
+      <div class="group-label">Referensi Cepat</div>
+      <a href="#glosarium"><span class="num">13</span>Glosarium &amp; Rumus</a>
+    </nav>
+  </aside>
+
+  <main id="mainArea">
+    <div class="page">
+
+      <!-- ================= HERO / RINGKASAN ================= -->
+      <section class="block hero" id="ringkasan">
+        <div class="kicker">Pertemuan 15 — Ekonomi Makro</div>
+        <h1>Mengapa harga naik, dan bagaimana negara mengukur ukurannya sendiri</h1>
+        <p class="lede">
+          Dokumen ini menyatukan lima materi yang saling terkait: inflasi (kenapa daya beli uang berubah),
+          Produk Domestik Bruto (bagaimana ukuran ekonomi dihitung), pendapatan nasional (ke mana nilai
+          produksi itu mengalir), pertumbuhan ekonomi (seberapa cepat ukuran itu membesar), dan perbedaan
+          PDB nominal vs riil (memisahkan pertumbuhan yang nyata dari yang sekadar naiknya harga).
+        </p>
+        <div class="hero-map">
+          <a class="hitem" href="#inflasi"><span class="n">01</span><span class="t">Inflasi</span></a>
+          <a class="hitem" href="#indikator"><span class="n">04</span><span class="t">IHK · IHP · Deflator</span></a>
+          <a class="hitem" href="#pdb"><span class="n">06</span><span class="t">Produk Domestik Bruto</span></a>
+          <a class="hitem" href="#alur"><span class="n">10</span><span class="t">Alur Pendapatan Nasional</span></a>
+          <a class="hitem" href="#nominal-riil"><span class="n">12</span><span class="t">PDB Nominal vs Riil</span></a>
+        </div>
+        <div class="callout">
+          <strong>Cara membaca dokumen ini:</strong> setiap bagian dibuka dengan definisi inti (kotak hijau),
+          dilengkapi rumus (kotak gelap) dan contoh hitungan. Jika ada istilah yang belum jelas, lompat ke
+          <a class="inline" href="#glosarium">Glosarium</a> di bagian akhir.
+        </div>
+      </section>
+
+      <!-- ================= 01 INFLASI ================= -->
+      <section class="block" id="inflasi">
+        <div class="section-eyebrow">01 — Konsep Dasar</div>
+        <h2 class="section-title">Apa itu Inflasi?</h2>
+        <p class="section-intro">
+          Titik berangkat dari seluruh materi pertemuan ini: harga tidak bergerak sendiri-sendiri,
+          melainkan bergerak bersama secara umum dan terus-menerus.
+        </p>
+
+        <div class="def">
+          <span class="label">Definisi</span>
+          <p>
+            Inflasi adalah <strong>kecenderungan peningkatan harga barang dan jasa secara umum</strong>,
+            yang terjadi dalam <strong>jangka panjang</strong> dan <strong>terus-menerus</strong> —
+            bukan lonjakan harga sesaat pada satu barang saja.
+          </p>
+        </div>
+
+        <p>
+          Tiga kata kunci dalam definisi ini penting dipisahkan: <em>umum</em> (bukan hanya satu barang naik,
+          tapi mayoritas), <em>jangka panjang</em> (tren, bukan fluktuasi harian), dan <em>terus-menerus</em>
+          (kenaikan berkelanjutan, bukan lonjakan lalu turun kembali). Kenaikan harga cabai menjelang Lebaran,
+          misalnya, bukan inflasi — itu fluktuasi musiman yang biasanya kembali normal.
+        </p>
+
+        <h3>Contoh nyata: minyak goreng curah (2021)</h3>
+        <p>
+          Data pergerakan harga minyak goreng curah di pasar tradisional pada periode 4 Januari–15 November
+          2021 memperlihatkan pola inflasi dengan jelas: harga naik dari sekitar Rp13.000/kg secara bertahap
+          dan konsisten hingga menembus Rp18.000/kg — bukan lonjakan sesaat, tapi tren naik yang berlangsung
+          hampir setahun penuh.
+        </p>
+        <div class="worked">
+          <div class="wlabel">Ilustrasi tren harga</div>
+          <div class="wline">Januari 2021 &nbsp;→&nbsp; ± Rp13.000 / kg</div>
+          <div class="wline">Juli 2021 &nbsp;&nbsp;&nbsp;&nbsp;→&nbsp; ± Rp15.000 / kg</div>
+          <div class="wline">November 2021 → <span class="wresult">± Rp18.000 / kg</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 02 INFLASI & UANG ================= -->
+      <section class="block" id="inflasi-uang">
+        <div class="section-eyebrow">02 — Mekanisme</div>
+        <h2 class="section-title">Inflasi &amp; Uang</h2>
+        <p class="section-intro">
+          Inflasi pada dasarnya adalah persoalan keseimbangan: seberapa banyak uang beredar dibandingkan
+          seberapa banyak barang yang tersedia untuk dibeli dengan uang itu.
+        </p>
+
+        <p>
+          Sama seperti barang lain, <strong>nilai atau daya beli uang dipengaruhi oleh kelangkaannya
+          (scarcity)</strong>. Stabilitas harga mencerminkan daya beli uang, yang ditentukan oleh
+          keseimbangan antara <strong>pasar uang</strong> dan <strong>pasar barang</strong>.
+        </p>
+
+        <div class="balance-wrap">
+          <div class="balance">
+            <div class="pan">
+              <h5>Pasar Uang</h5>
+              <p>Jumlah uang yang beredar di masyarakat</p>
+            </div>
+            <div class="fulcrum"></div>
+            <div class="pan">
+              <h5>Pasar Barang</h5>
+              <p>Volume barang &amp; jasa yang tersedia untuk ditransaksikan</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-grid">
+          <div class="mini-card" style="border-left:3px solid var(--rust);">
+            <h5>Uang beredar berlebih</h5>
+            <p>Daya beli uang turun → harga barang naik → <strong>inflasi</strong>.</p>
+          </div>
+          <div class="mini-card" style="border-left:3px solid var(--green-deep);">
+            <h5>Uang beredar kurang</h5>
+            <p>Tidak mampu mengimbangi volume transaksi → harga turun, tapi ekonomi jadi lesu →
+            <strong>deflasi</strong>.</p>
+          </div>
+        </div>
+        <p style="font-size:13px; color:var(--ink-faint);">
+          Perhatikan bahwa deflasi bukan kabar baik: harga turun di sini adalah gejala permintaan yang lemah,
+          bukan efisiensi ekonomi.
+        </p>
+      </section>
+
+      <!-- ================= 03 TINGKATAN INFLASI ================= -->
+      <section class="block" id="tingkatan">
+        <div class="section-eyebrow">03 — Skala</div>
+        <h2 class="section-title">Tingkatan Inflasi</h2>
+        <p class="section-intro">
+          Inflasi diklasifikasikan berdasarkan besarannya per tahun. Semakin tinggi tingkatnya, semakin
+          cepat uang kehilangan nilainya dan semakin sulit rumah tangga maupun perusahaan membuat rencana
+          jangka panjang.
+        </p>
+
+        <div class="pyramid">
+          <div class="tier t4">Hiperinflasi<small>&gt; 100% per tahun</small></div>
+          <div class="tier t3">Inflasi Berat<small>30% – 100% per tahun</small></div>
+          <div class="tier t2">Inflasi Sedang<small>10% – 30% per tahun</small></div>
+          <div class="tier t1">Inflasi Ringan<small>&lt; 10% per tahun</small></div>
+        </div>
+        <p style="font-size:13px; color:var(--ink-faint); text-align:center;">
+          Semakin ke atas piramida, semakin jarang terjadi — tapi semakin merusak stabilitas ekonomi.
+        </p>
+      </section>
+
+      <!-- ================= 04 INDIKATOR INFLASI ================= -->
+      <section class="block" id="indikator">
+        <div class="section-eyebrow">04 — Pengukuran</div>
+        <h2 class="section-title">Indikator Inflasi</h2>
+        <p class="section-intro">
+          Inflasi tidak bisa "dilihat" langsung — ia dihitung lewat tiga indikator harga yang mengukurnya
+          dari sudut berbeda: dari sisi konsumen, dari sisi produsen, dan dari seluruh perekonomian.
+        </p>
+
+        <h3>1. Indeks Harga Konsumen (IHK)</h3>
+        <p>
+          IHK adalah indeks harga barang dan jasa yang dibeli konsumen, dihitung dengan
+          <strong>membandingkan harga barang dengan harga pada tahun dasar</strong>. IHK adalah indikator
+          inflasi yang paling umum dikutip karena langsung menggambarkan pengalaman rumah tangga
+          sehari-hari.
+        </p>
+
+        <div class="formula">
+          <div class="flabel">Rumus Inflasi (berbasis IHK)</div>
+          <div class="fmath">Inflasi = [ (IHK<sub>t</sub> / IHK<sub>t-1</sub>) − 1 ] × 100%</div>
+          <div class="fnote">IHK<sub>t</sub> = indeks harga periode berjalan &nbsp;·&nbsp; IHK<sub>t-1</sub> = indeks harga periode sebelumnya</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Contoh komponen Indeks Harga Konsumen, 2010–2015</caption>
+            <thead>
+              <tr><th>Komponen</th><th>2010</th><th>2011</th><th>2012</th><th>2013</th><th>2014</th><th>2015</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Bahan makanan</td><td>147.39</td><td>152.76</td><td>161.44</td><td>179.77</td><td>126.76</td><td>133.01</td></tr>
+              <tr><td>Makanan jadi, minuman, rokok &amp; tembakau</td><td>132.59</td><td>138.57</td><td>147.04</td><td>157.99</td><td>118.84</td><td>126.47</td></tr>
+              <tr><td>Perumahan, air, listrik, gas &amp; bahan bakar</td><td>119.79</td><td>123.95</td><td>128.10</td><td>136.07</td><td>115.55</td><td>119.41</td></tr>
+              <tr><td>Pakaian</td><td>126.76</td><td>136.35</td><td>142.72</td><td>143.46</td><td>106.49</td><td>110.14</td></tr>
+              <tr><td>Perawatan medis</td><td>115.86</td><td>120.79</td><td>124.30</td><td>128.90</td><td>111.00</td><td>116.90</td></tr>
+              <tr><td>Pendidikan, rekreasi &amp; olahraga</td><td>117.86</td><td>123.94</td><td>129.16</td><td>134.21</td><td>110.37</td><td>114.75</td></tr>
+              <tr><td>Transportasi, komunikasi &amp; jasa keuangan</td><td>106.10</td><td>108.14</td><td>110.52</td><td>127.50</td><td>127.27</td><td>125.32</td></tr>
+              <tr class="total"><td>Indeks Harga Konsumen (gabungan)</td><td>125.17</td><td>129.91</td><td>135.49</td><td>146.84</td><td>119.00</td><td>122.99</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>2. Indeks Harga Produsen (IHP)</h3>
+        <p>
+          IHP mengukur <strong>perubahan harga di tingkat produsen</strong> — harga yang diterima produsen
+          dari pembeli untuk suatu barang atau jasa, atau harga jual dikurangi pajak nilai tambah (PPN) dan
+          tanpa memperhitungkan biaya transportasi. IHP dikelompokkan menurut tahapan produksi: produk awal,
+          produk antara, dan produk akhir.
+        </p>
+        <div class="def gold">
+          <span class="label">Kenapa IHP penting</span>
+          <p>
+            Karena mengukur harga sebelum sampai ke konsumen, IHP dapat dipakai sebagai
+            <strong>indikator dini (leading indicator)</strong> untuk memperkirakan ke arah mana harga
+            grosir maupun eceran akan bergerak selanjutnya.
+          </p>
+        </div>
+
+        <h3>3. Deflator PDB</h3>
+        <p>
+          Deflator PDB adalah <strong>rasio antara PDB nominal dan PDB riil</strong> pada satu periode.
+          Berbeda dari IHK dan IHP yang hanya mencakup keranjang barang tertentu, deflator PDB mencakup
+          <strong>semua barang dan jasa dalam perekonomian</strong> — sehingga ia mengukur inflasi secara
+          implisit dan paling menyeluruh.
+        </p>
+        <div class="formula">
+          <div class="flabel">Rumus Deflator PDB</div>
+          <div class="fmath">Deflator PDB = (PDB Nominal / PDB Riil) × 100</div>
+        </div>
+      </section>
+
+      <!-- ================= 05 SUKU BUNGA ================= -->
+      <section class="block" id="suku-bunga">
+        <div class="section-eyebrow">05 — Dampak</div>
+        <h2 class="section-title">Inflasi &amp; Suku Bunga</h2>
+        <p class="section-intro">
+          Inflasi menentukan seberapa "nyata" pertumbuhan tabungan seseorang — inilah sebabnya bank sentral
+          selalu mengaitkan kebijakan suku bunga dengan target inflasi.
+        </p>
+        <p>
+          Seseorang yang menabung di bank akan bertambah uangnya karena adanya bunga. Persentase
+          pertambahan uang tersebut disebut <strong>suku bunga</strong>. Namun, pengaruh suku bunga pada
+          perubahan nilai aset seseorang yang sesungguhnya <strong>dipengaruhi oleh inflasi</strong> —
+          karena harga barang yang ingin dibeli dengan tabungan itu juga ikut naik.
+        </p>
+
+        <div class="worked">
+          <div class="wlabel">Contoh</div>
+          <div class="wline">Bank menetapkan suku bunga &nbsp;→&nbsp; 8% per tahun</div>
+          <div class="wline">Laju inflasi berjalan &nbsp;&nbsp;&nbsp;&nbsp;→&nbsp; 5% per tahun</div>
+          <div class="wline">Pertumbuhan nilai aset riil &nbsp;→&nbsp; <span class="wresult">3% per tahun</span></div>
+        </div>
+
+        <div class="formula">
+          <div class="flabel">Persamaan Fisher</div>
+          <div class="fmath">i &nbsp;=&nbsp; r &nbsp;+&nbsp; π</div>
+          <div class="fnote">
+            i = suku bunga nominal (8%) &nbsp;·&nbsp; r = suku bunga riil (3%) &nbsp;·&nbsp;
+            π = laju inflasi (5%). Suku bunga nominal adalah yang tertulis di buku tabungan;
+            suku bunga riil adalah pertambahan daya beli yang sesungguhnya dinikmati.
+          </div>
+        </div>
+
+        <h4>Siklus umpan balik</h4>
+        <div class="chain">
+          <div class="link">Money Supply &amp; Money Demand</div>
+          <div class="arrow">→</div>
+          <div class="link">Price Level</div>
+          <div class="arrow">→</div>
+          <div class="link">Inflation Rate</div>
+          <div class="arrow">→</div>
+          <div class="link">Nominal Interest Rate</div>
+          <div class="arrow">↺</div>
+        </div>
+        <p style="font-size:13px; color:var(--ink-faint);">
+          Perubahan jumlah uang beredar mengubah tingkat harga, tingkat harga menentukan laju inflasi,
+          dan laju inflasi pada akhirnya memengaruhi suku bunga nominal yang ditetapkan bank —
+          yang lagi-lagi memengaruhi permintaan uang.
+        </p>
+      </section>
+
+      <!-- ================= 06 PDB ================= -->
+      <section class="block" id="pdb">
+        <div class="section-eyebrow">06 — Ukuran Ekonomi</div>
+        <h2 class="section-title">Produk Domestik Bruto</h2>
+        <p class="section-intro">
+          Jika inflasi mengukur perubahan harga, PDB mengukur ukuran keseluruhan perekonomian —
+          dan keduanya harus dipisahkan agar tidak saling mencemari perhitungan.
+        </p>
+
+        <div class="def">
+          <span class="label">Definisi</span>
+          <p>
+            Produk Domestik Bruto (PDB) adalah <strong>nilai pasar</strong> dari semua
+            <strong>barang dan jasa final</strong> yang <strong>diproduksi di dalam suatu negara</strong>
+            pada <strong>periode tertentu</strong>.
+          </p>
+        </div>
+
+        <p>Empat frasa dalam definisi ini masing-masing membatasi apa yang dihitung dan apa yang tidak — dibahas satu per satu di bawah.</p>
+
+        <h3>"Nilai pasar" — menyamakan satuan lewat harga</h3>
+        <p>
+          PDB tidak bisa menjumlahkan apel dan jeruk secara langsung karena satuannya beda. Solusinya:
+          kalikan setiap barang dengan harganya, baru dijumlahkan.
+        </p>
+        <div class="chain">
+          <div class="link">Apel <span class="v">× harga</span></div>
+          <div class="arrow">+</div>
+          <div class="link">Jeruk <span class="v">× harga</span></div>
+          <div class="arrow">=</div>
+          <div class="link">Nilai total <span class="v">Rp</span></div>
+        </div>
+
+        <h3>"Barang &amp; jasa final" — menghindari hitung ganda</h3>
+        <p>
+          Hanya <strong>nilai tambah (value added)</strong> pada tiap tahap produksi yang dihitung, bukan
+          seluruh harga jual di setiap rantai — kalau tidak, bahan baku akan terhitung berkali-kali.
+        </p>
+        <div class="chain">
+          <div class="link">Wol domba <span class="v">Rp2.000</span></div>
+          <div class="arrow">→</div>
+          <div class="link">Benang <span class="v">Rp20.000</span></div>
+          <div class="arrow">→</div>
+          <div class="link">Sweater <span class="v">Rp200.000</span></div>
+        </div>
+        <div class="worked">
+          <div class="wlabel">Nilai tambah di tiap tahap</div>
+          <div class="wline">Domba → Benang &nbsp;&nbsp;&nbsp;&nbsp;: Rp20.000 − Rp2.000 &nbsp;=&nbsp; <span class="wresult">Rp18.000</span></div>
+          <div class="wline">Benang → Sweater &nbsp;: Rp200.000 − Rp20.000 &nbsp;=&nbsp; <span class="wresult">Rp180.000</span></div>
+        </div>
+        <p>
+          PDB yang dicatat dari rantai ini bukan Rp2.000 + Rp20.000 + Rp200.000 (yang akan menghitung nilai
+          wol tiga kali), melainkan Rp2.000 + Rp18.000 + Rp180.000 — nilai tambah murni di tiap tahap,
+          yang jika dijumlahkan tetap sama dengan harga jual akhir (Rp200.000).
+        </p>
+      </section>
+
+      <!-- ================= 07 PDB TIDAK MENGHITUNG ================= -->
+      <section class="block" id="pdb-tidak">
+        <div class="section-eyebrow">07 — Batasan</div>
+        <h2 class="section-title">Apa yang Tidak Dihitung PDB</h2>
+        <p class="section-intro">
+          Memahami PDB sama pentingnya lewat apa yang <em>tidak</em> ia hitung — inilah sumber kesalahpahaman
+          paling umum tentang angka ini.
+        </p>
+
+        <h4>"Diproduksi" — bukan sekadar berpindah tangan</h4>
+        <div class="card-grid">
+          <div class="mini-card no">
+            <h5>Barang bekas &amp; koleksi</h5>
+            <p>Buku Harry Potter edisi pertama seharga $18 (1997) terjual $471.000 (2021) —
+            bukan produksi baru, hanya perpindahan aset.</p>
+          </div>
+          <div class="mini-card no">
+            <h5>Transaksi pasar modal</h5>
+            <p>Jual-beli saham memindahkan kepemilikan, bukan menciptakan barang/jasa baru.</p>
+          </div>
+        </div>
+
+        <h4>"Di dalam suatu negara" — batas wilayah, bukan kewarganegaraan</h4>
+        <p>
+          PDB tidak menghitung barang yang diproduksi di luar wilayah negara tersebut, meski oleh warga
+          negaranya sendiri — konsep ini murni geografis (berbeda dari PNB/GNP yang berbasis
+          kewarganegaraan, lihat bagian <a class="inline" href="#alur">Alur Pendapatan Nasional</a>).
+        </p>
+
+        <h4>"Pada periode tertentu" — konsep aliran (flow), bukan stok</h4>
+        <p>
+          PDB dinyatakan dalam <strong>satuan per waktu</strong> (per tahun, per kuartal). Karena itu,
+          penjualan barang dari persediaan (inventory) yang sudah diproduksi pada periode sebelumnya
+          <strong>tidak</strong> dihitung lagi pada PDB periode berjalan.
+        </p>
+
+        <h4>Kategori lain yang juga tidak dihitung</h4>
+        <div class="card-grid cols-4">
+          <div class="mini-card no"><h5>Aktivitas ilegal</h5><p>Tidak tercatat resmi &amp; di luar kerangka pasar formal.</p></div>
+          <div class="mini-card no"><h5>Transfer payment</h5><p>Bantuan sosial, pensiun — perpindahan dana tanpa produksi baru.</p></div>
+          <div class="mini-card no"><h5>Konsumsi pribadi non-pasar</h5><p>Mis. memasak untuk keluarga sendiri, tidak melalui transaksi pasar.</p></div>
+          <div class="mini-card no"><h5>Barang/jasa non-pasar lain</h5><p>Aktivitas yang tidak melibatkan harga pasar sama sekali.</p></div>
+        </div>
+      </section>
+
+      <!-- ================= 08 METODE PENGHITUNGAN PDB ================= -->
+      <section class="block" id="metode">
+        <div class="section-eyebrow">08 — Cara Menghitung</div>
+        <h2 class="section-title">Tiga Metode Penghitungan PDB</h2>
+        <p class="section-intro">
+          Karena setiap rupiah yang diproduksi juga menjadi pendapatan seseorang dan akhirnya dibelanjakan
+          oleh seseorang lain, PDB yang sama dapat dihitung dari tiga sisi berbeda — dan idealnya
+          menghasilkan angka yang sama.
+        </p>
+
+        <h4>1. Pendekatan Produksi</h4>
+        <p>Menjumlahkan nilai tambah dari seluruh lapangan usaha, dengan mengalikan jumlah barang (Q) dengan harganya (P).</p>
+        <div class="formula">
+          <div class="fmath">Y = (P<sub>1</sub>×Q<sub>1</sub>) + (P<sub>2</sub>×Q<sub>2</sub>) + (P<sub>3</sub>×Q<sub>3</sub>) + … + (P<sub>n</sub>×Q<sub>n</sub>)</div>
+        </div>
+
+        <h4>2. Pendekatan Pengeluaran</h4>
+        <p>Menjumlahkan total pengeluaran/konsumsi seluruh pelaku ekonomi.</p>
+        <div class="formula">
+          <div class="fmath">Y = C + I + G + (X − M)</div>
+          <div class="fnote">C = konsumsi rumah tangga &nbsp;·&nbsp; I = investasi perusahaan &nbsp;·&nbsp; G = belanja pemerintah &nbsp;·&nbsp; X−M = ekspor dikurangi impor</div>
+        </div>
+
+        <h4>3. Pendekatan Pendapatan</h4>
+        <p>Menjumlahkan total pendapatan yang diterima pelaku ekonomi sebagai balas jasa faktor produksi.</p>
+        <div class="formula">
+          <div class="fmath">Y = w + r + i + p</div>
+          <div class="fnote">w = upah (tenaga kerja) &nbsp;·&nbsp; r = sewa (tanah) &nbsp;·&nbsp; i = bunga (modal) &nbsp;·&nbsp; p = dividen/laba (kewirausahaan)</div>
+        </div>
+
+        <div class="callout">
+          <strong>Mengapa tiga metode ini valid bersamaan:</strong> ini adalah cerminan dari sirkulasi
+          ekonomi — pengeluaran satu pihak (misalnya rumah tangga membeli sweater) adalah pendapatan
+          pihak lain (produsen sweater), yang berasal dari produksi (proses membuat sweater itu sendiri).
+        </div>
+      </section>
+
+      <!-- ================= 09 SEKTOR EKONOMI ================= -->
+      <section class="block" id="sektor">
+        <div class="section-eyebrow">09 — Struktur</div>
+        <h2 class="section-title">Sektor Ekonomi &amp; Kontribusinya</h2>
+        <p class="section-intro">
+          Komposisi sektor sebuah negara adalah salah satu penanda paling jelas dari tahap pembangunan
+          ekonominya.
+        </p>
+
+        <div class="gloss" style="grid-template-columns:110px 1fr;">
+          <dt>Primer</dt><dd>Mengambil sumber daya alam secara langsung (pertanian, tambang, perikanan).</dd>
+          <dt>Sekunder</dt><dd>Mengolah hasil sektor primer menjadi barang bernilai lebih tinggi (manufaktur, industri).</dd>
+          <dt>Tersier</dt><dd>Menghasilkan jasa/layanan (perdagangan, keuangan, pariwisata, pendidikan).</dd>
+        </div>
+
+        <h4>Pergeseran struktur seiring pembangunan</h4>
+        <div class="sector-set">
+          <div class="sector-card">
+            <div class="stage">Least-Developed</div>
+            <div class="stackbar">
+              <div class="seg tersier" style="height:22%;">Tersier</div>
+              <div class="seg sekunder" style="height:28%;">Sekunder</div>
+              <div class="seg primer" style="height:50%;">Primer</div>
+            </div>
+          </div>
+          <div class="sector-card">
+            <div class="stage">Developing</div>
+            <div class="stackbar">
+              <div class="seg tersier" style="height:24%;">Tersier</div>
+              <div class="seg sekunder" style="height:41%;">Sekunder</div>
+              <div class="seg primer" style="height:35%;">Primer</div>
+            </div>
+          </div>
+          <div class="sector-card">
+            <div class="stage">Developed</div>
+            <div class="stackbar">
+              <div class="seg tersier" style="height:38%;">Tersier</div>
+              <div class="seg sekunder" style="height:38%;">Sekunder</div>
+              <div class="seg primer" style="height:24%;">Primer</div>
+            </div>
+          </div>
+        </div>
+        <div class="legend-row">
+          <span><span class="dot" style="background:#3F7A56;"></span>Primer</span>
+          <span><span class="dot" style="background:#A9782E;"></span>Sekunder</span>
+          <span><span class="dot" style="background:#5B7FA6;"></span>Tersier</span>
+        </div>
+        <p style="font-size:13px; color:var(--ink-faint); text-align:center;">
+          Semakin maju sebuah negara, semakin besar porsi sektor tersier dan semakin kecil porsi sektor primer.
+        </p>
+
+        <h4>Empat komponen kontribusi terhadap ekonomi</h4>
+        <p>Kelompok ini persis mencerminkan pendekatan pengeluaran (Y = C + I + G + (X−M)):</p>
+        <div class="card-grid">
+          <div class="mini-card"><h5>Konsumsi Rumah Tangga</h5><p>Belanja masyarakat untuk kebutuhan sehari-hari.</p></div>
+          <div class="mini-card"><h5>Investasi Perusahaan</h5><p>Pembelian modal, mesin, dan aset produktif.</p></div>
+          <div class="mini-card"><h5>Belanja Pemerintah</h5><p>Pengeluaran negara untuk barang, jasa, dan infrastruktur publik.</p></div>
+          <div class="mini-card"><h5>Konsumsi Masyarakat Luar Negeri</h5><p>Ekspor bersih — permintaan dari luar negeri terhadap produk domestik.</p></div>
+        </div>
+
+        <h4>Padat karya vs padat modal</h4>
+        <div class="compare-two">
+          <div class="box">
+            <div class="icon">👷‍♀️👷</div>
+            <h5>Padat Karya</h5>
+            <p>Produksi bergantung pada jumlah tenaga kerja manusia sebagai faktor produksi utama.</p>
+          </div>
+          <div class="box">
+            <div class="icon">🏭⚙️</div>
+            <h5>Padat Modal</h5>
+            <p>Produksi bergantung pada mesin, teknologi, dan peralatan sebagai faktor produksi utama.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 10 ALUR PENDAPATAN NASIONAL ================= -->
+      <section class="block" id="alur">
+        <div class="section-eyebrow">10 — Dari Produksi ke Kantong Pribadi</div>
+        <h2 class="section-title">Alur Pendapatan Nasional</h2>
+        <p class="section-intro">
+          PDB adalah titik awal dari serangkaian penyesuaian bertahap sampai akhirnya menjadi
+          <strong>gaji bersih yang benar-benar bisa dibelanjakan</strong> seseorang.
+        </p>
+
+        <div class="flow-vert">
+          <div class="step">
+            <div class="col-label">PDB (Y)</div>
+            <div class="col-formula">Dihitung lewat 3 pendekatan: Produksi, Pendapatan, atau Pengeluaran</div>
+          </div>
+          <div class="connector">+ NFIA (Net Factor Income Abroad) ↓</div>
+          <div class="step">
+            <div class="col-label">PNB (GNP)</div>
+            <div class="col-formula">Produk Nasional Bruto — berbasis kewarganegaraan, bukan wilayah</div>
+          </div>
+          <div class="connector">− Depresiasi ↓</div>
+          <div class="step">
+            <div class="col-label">NNP</div>
+            <div class="col-formula">Net National Product — PNB dikurangi penyusutan aset modal</div>
+          </div>
+          <div class="connector">+ Subsidi − Pajak Tidak Langsung ↓</div>
+          <div class="step">
+            <div class="col-label">NI</div>
+            <div class="col-formula">National Income — pendapatan riil dari seluruh faktor produksi</div>
+          </div>
+          <div class="connector">− Pajak Perusahaan &amp; Laba Ditahan + Transfer Payment ↓</div>
+          <div class="step">
+            <div class="col-label">PI</div>
+            <div class="col-formula">Personal Income — pendapatan yang benar-benar diterima perorangan</div>
+          </div>
+          <div class="connector">− Pajak Langsung ↓</div>
+          <div class="step">
+            <div class="col-label">DI (Y<sub>D</sub>)</div>
+            <div class="col-formula"><strong>Disposable Income</strong> — take-home pay / gaji bersih siap dibelanjakan</div>
+          </div>
+        </div>
+
+        <div class="callout">
+          <strong>Intuisi ringkas:</strong> PDB → PNB menyesuaikan basis (wilayah → kewarganegaraan).
+          PNB → NNP membuang nilai aset yang aus. NNP → NI membuang distorsi pajak tidak langsung &amp; subsidi.
+          NI → PI menyisihkan bagian yang tidak sampai ke tangan individu (laba ditahan, pajak perusahaan)
+          dan menambahkan yang memang sampai (transfer payment). PI → DI hanya menyisakan setelah pajak
+          langsung — angka inilah yang sesungguhnya bisa dibelanjakan atau ditabung seseorang.
+        </div>
+      </section>
+
+      <!-- ================= 11 PERTUMBUHAN EKONOMI ================= -->
+      <section class="block" id="pertumbuhan">
+        <div class="section-eyebrow">11 — Kecepatan</div>
+        <h2 class="section-title">Pertumbuhan Ekonomi</h2>
+        <p class="section-intro">
+          Jika PDB adalah ukuran ekonomi pada satu titik waktu, pertumbuhan ekonomi mengukur seberapa
+          cepat ukuran itu berubah dari waktu ke waktu.
+        </p>
+
+        <div class="def">
+          <span class="label">Definisi</span>
+          <p>
+            Kenaikan jangka panjang atas kemampuan suatu negara untuk menyediakan
+            <strong>semakin banyak jenis barang dan jasa</strong> kepada penduduknya.
+          </p>
+        </div>
+
+        <h4>Model input – proses – output</h4>
+        <div class="chain">
+          <div class="link">Input<span class="v" style="font-size:11px; color:var(--ink-soft);">SDA · SDM · Modal · Keahlian</span></div>
+          <div class="arrow">→</div>
+          <div class="link">Proses<span class="v" style="font-size:11px; color:var(--ink-soft);">Teknologi · Ideologi · Kelembagaan · Sistem sosial</span></div>
+          <div class="arrow">→</div>
+          <div class="link">Output<span class="v" style="font-size:11px; color:var(--ink-soft);">Barang &amp; jasa yang diproduksi</span></div>
+        </div>
+
+        <div class="formula">
+          <div class="flabel">Rumus Pertumbuhan Ekonomi</div>
+          <div class="fmath">G<sub>t</sub> = [ (PDB<sub>t</sub> − PDB<sub>t-1</sub>) / PDB<sub>t-1</sub> ] × 100%</div>
+          <div class="fnote">G<sub>t</sub> = pertumbuhan periode t &nbsp;·&nbsp; PDB<sub>t</sub> = PDB periode berjalan &nbsp;·&nbsp; PDB<sub>t-1</sub> = PDB satu periode sebelumnya</div>
+        </div>
+
+        <div class="worked">
+          <div class="wlabel">Contoh soal</div>
+          <div class="wline">PDB tahun 2020 &nbsp;=&nbsp; 2.000</div>
+          <div class="wline">PDB tahun 2021 &nbsp;=&nbsp; 2.400</div>
+          <div class="wline">G<sub>t</sub> = (2.400 − 2.000) / 2.000 × 100%</div>
+          <div class="wline">G<sub>t</sub> = <span class="wresult">20%</span></div>
+        </div>
+      </section>
+
+      <!-- ================= 12 PDB NOMINAL VS RIIL ================= -->
+      <section class="block" id="nominal-riil">
+        <div class="section-eyebrow">12 — Memisahkan Harga dari Volume</div>
+        <h2 class="section-title">PDB Nominal vs PDB Riil</h2>
+        <p class="section-intro">
+          Ini adalah titik temu dari seluruh materi: pertumbuhan PDB bisa "palsu" jika hanya didorong
+          kenaikan harga, bukan kenaikan produksi sesungguhnya. PDB nominal vs riil memisahkan keduanya.
+        </p>
+
+        <div class="card-grid">
+          <div class="mini-card">
+            <h5>PDB Nominal (ADHB)</h5>
+            <p>Atas Dasar Harga Berlaku — dihitung memakai harga yang berlaku pada periode tersebut.
+            Masih dipengaruhi perubahan harga (inflasi).</p>
+          </div>
+          <div class="mini-card">
+            <h5>PDB Riil (ADHK)</h5>
+            <p>Atas Dasar Harga Konstan — dihitung memakai harga pada satu tahun dasar tetap, sehingga
+            murni mencerminkan perubahan jumlah produksi.</p>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <caption>Data harga (P) &amp; jumlah (Q) — tahun dasar 2019</caption>
+            <thead><tr><th>Tahun</th><th>Harga (P)</th><th>Jumlah (Q)</th></tr></thead>
+            <tbody>
+              <tr><td>2019</td><td>1.000</td><td>20</td></tr>
+              <tr><td>2020</td><td>1.500</td><td>20</td></tr>
+              <tr><td>2021</td><td>1.200</td><td>25</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="worked">
+          <div class="wlabel">PDB ADHB — pakai harga tahun berjalan</div>
+          <div class="wline">2019 = 1.000 × 20 = <span class="wresult">20.000</span></div>
+          <div class="wline">2020 = 1.500 × 20 = <span class="wresult">30.000</span></div>
+          <div class="wline">2021 = 1.200 × 25 = <span class="wresult">30.000</span></div>
+        </div>
+        <div class="worked">
+          <div class="wlabel">PDB ADHK — pakai harga tahun dasar 2019 (Rp1.000) untuk semua tahun</div>
+          <div class="wline">2019 = 1.000 × 20 = <span class="wresult">20.000</span></div>
+          <div class="wline">2020 = 1.000 × 20 = <span class="wresult">20.000</span></div>
+          <div class="wline">2021 = 1.000 × 25 = <span class="wresult">25.000</span></div>
+        </div>
+
+        <div class="callout">
+          <strong>Baca perbandingannya:</strong> dari 2020 ke 2021, PDB ADHB terlihat stagnan (tetap 30.000)
+          — seolah ekonomi tidak tumbuh. Namun PDB ADHK justru naik dari 20.000 ke 25.000 (produksi riil
+          naik 25%), yang tertutupi karena harga per unit justru turun dari 1.500 ke 1.200 di ADHB.
+          Inilah sebabnya analis ekonomi selalu memakai <strong>PDB riil</strong>, bukan nominal, untuk
+          menilai pertumbuhan yang sesungguhnya.
+        </div>
+      </section>
+
+      <!-- ================= 13 GLOSARIUM ================= -->
+      <section class="block" id="glosarium">
+        <div class="section-eyebrow">13 — Referensi Cepat</div>
+        <h2 class="section-title">Glosarium &amp; Rumus</h2>
+        <p class="section-intro">Ringkasan seluruh istilah &amp; rumus dalam satu halaman untuk dibaca ulang sebelum ujian.</p>
+
+        <dl class="gloss">
+          <dt>Inflasi</dt><dd>Kenaikan harga barang/jasa secara umum &amp; terus-menerus dalam jangka panjang.</dd>
+          <dt>Deflasi</dt><dd>Kebalikan inflasi — harga turun karena uang beredar tak sanggup mengimbangi volume transaksi; menandakan ekonomi lesu.</dd>
+          <dt>IHK</dt><dd>Indeks Harga Konsumen — indeks harga barang/jasa yang dibeli konsumen, dasar perhitungan inflasi.</dd>
+          <dt>IHP</dt><dd>Indeks Harga Produsen — perubahan harga di tingkat produsen, indikator dini inflasi.</dd>
+          <dt>Deflator PDB</dt><dd>(PDB Nominal ÷ PDB Riil) × 100 — cakupan inflasi paling luas, meliputi semua barang &amp; jasa.</dd>
+          <dt>Suku bunga nominal (i)</dt><dd>Persentase pertambahan uang tabungan sesuai kesepakatan bank, sebelum dikurangi inflasi.</dd>
+          <dt>Suku bunga riil (r)</dt><dd>Pertambahan daya beli sesungguhnya: i = r + π.</dd>
+          <dt>PDB</dt><dd>Nilai pasar semua barang &amp; jasa final yang diproduksi di dalam suatu negara pada periode tertentu.</dd>
+          <dt>Nilai tambah</dt><dd>Selisih harga jual dengan biaya input pada tiap tahap produksi — dasar penghitungan PDB pendekatan produksi.</dd>
+          <dt>NFIA</dt><dd>Net Factor Income Abroad — produk warga negara di luar negeri dikurangi produk warga asing di dalam negeri.</dd>
+          <dt>PNB (GNP)</dt><dd>Produk Nasional Bruto = PDB + NFIA; berbasis kewarganegaraan.</dd>
+          <dt>NNP</dt><dd>Net National Product = PNB − depresiasi (penyusutan aset modal).</dd>
+          <dt>NI</dt><dd>National Income = NNP + subsidi − pajak tidak langsung.</dd>
+          <dt>PI</dt><dd>Personal Income = NI − pajak perusahaan − laba ditahan + transfer payment.</dd>
+          <dt>DI (Y<sub>D</sub>)</dt><dd>Disposable Income = PI − pajak langsung; setara take-home pay / gaji bersih.</dd>
+          <dt>PDB Nominal (ADHB)</dt><dd>Atas Dasar Harga Berlaku — memakai harga periode berjalan, masih terpengaruh inflasi.</dd>
+          <dt>PDB Riil (ADHK)</dt><dd>Atas Dasar Harga Konstan — memakai harga tahun dasar, murni mencerminkan volume produksi.</dd>
+          <dt>Pertumbuhan ekonomi</dt><dd>G<sub>t</sub> = [(PDB<sub>t</sub> − PDB<sub>t-1</sub>) ÷ PDB<sub>t-1</sub>] × 100%.</dd>
+        </dl>
+
+        <div class="source-box">
+          <div class="slabel">Untuk pendalaman lebih lanjut</div>
+          Bandingkan konsep di dokumen ini dengan bab "Measuring the Cost of Living" dan "Measuring a Nation's
+          Income" pada buku teks <em>Principles of Economics</em> (N. Gregory Mankiw) — dua bab tersebut
+          menjadi rujukan standar internasional untuk materi IHK, deflator PDB, dan tiga pendekatan
+          penghitungan PDB di atas.
+        </div>
+
+        <div class="callout" style="margin-top:24px;">
+          <strong>Ada bagian yang belum jelas?</strong> Tanyakan langsung ke saya — misalnya minta
+          contoh soal tambahan untuk pendekatan pendapatan, atau penjelasan ulang alur PDB → DI dengan
+          angka konkret.
+        </div>
+      </section>
+
+    </div>
+
+    <footer class="doc-footer">
+      Disusun dari materi slide "Pertemuan 15 — Inflasi, PDB, Pendapatan Nasional, Pertumbuhan Ekonomi,
+      PDB Nominal vs PDB Riil", dengan tambahan penjelasan &amp; contoh untuk memperjelas alur logika
+      antar-konsep. Dokumen ini responsif — buka di HP atau laptop, tampilannya tetap satu tata letak.
+    </footer>
+  </main>
+
+</div>
+
+<script>
+  // ---------- toggle sidebar (mobile off-canvas) ----------
+  const sidebarEl = document.getElementById('sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+  function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); }
+  function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+
+  hamburgerBtn.addEventListener('click', () => {
+    sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlayEl.addEventListener('click', closeSidebar);
+
+  // close sidebar automatically after tapping a nav link (no-op on desktop)
+  document.querySelectorAll('nav.toc a, .hero-map a').forEach(link => {
+    link.addEventListener('click', closeSidebar);
+  });
+
+  // ---------- scroll-spy: highlight active section in sidebar ----------
+  const sections = document.querySelectorAll('section.block[id]');
+  const navLinks = document.querySelectorAll('nav.toc a');
+
+  const spy = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id = entry.target.getAttribute('id');
+      const link = document.querySelector('nav.toc a[href="#' + id + '"]');
+      if (!link) return;
+      if (entry.isIntersecting) {
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+
+  sections.forEach(sec => spy.observe(sec));
+</script>
+</body>
+</html>

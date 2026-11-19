@@ -62,6 +62,14 @@
     <a class="btn btn-main" href="pdf/Panduan_Prasyarat_Penggunaan_Virtual_Lab_Ekonomi_Teknik_Untuk_Mahasiswa.pdf" target="_blank" rel="noopener">📄 Panduan Prasyarat (PDF)</a>
   </section>
 
+  <h2 class="sec">Materi kuliah</h2>
+  <section class="la" id="materi">
+    <div class="la-head">
+      <div><b>Materi per pertemuan</b>Dashboard materi interaktif, dari kontrak kuliah sampai inflasi. Pelajari materinya di sini, lalu praktikkan di modul virtual lab.</div>
+    </div>
+    <div class="la-list" id="materiList"></div>
+  </section>
+
   <h2 class="sec">Modul praktikum</h2>
   <section class="grid" id="grid"></section>
 
@@ -107,6 +115,17 @@
     ["11","Lease vs Buy / Make vs Buy","Keputusan sewa/beli dan produksi sendiri/outsource berbasis relevant cash flow.","11_Lease_vs_Buy_Make_vs_Buy_Learning_Assistant.html","Modul_11_Lease_vs_Buy_Make_vs_Buy_Ekonomi_Teknik.pdf"],
     ["12","Analisis Penggantian Aset","Replacement analysis, sunk cost, dan umur ekonomis aset.","12_Analisis_Penggantian_Aset_Learning_Assistant.html","Modul_12_Analisis_Penggantian_Aset_Ekonomi_Teknik.pdf"]
   ];
+  const MATERI = [
+    ["m01-kontrak-kuliah","Kontrak Perkuliahan","P1"],["m02-pendahuluan","Pengantar Ekonomi Teknik","P2"],
+    ["m03-rumus-bunga","Rumus-Rumus Bunga","P4"],["m04-contoh-rumus-bunga","Contoh Penggunaan Rumus Bunga","P5"],
+    ["m05-tabel-bantu-excel","Solusi Bunga via Tabel Bantu & Excel","P6"],["m06-present-worth","Analisis Present Worth","P7"],
+    ["m07-nilai-tahunan","Analisis Nilai Tahunan (Annual Worth)","P9"],["m08-rate-of-return","Tingkat Pengembalian (Rate of Return)","P10"],
+    ["m09-irr-payback","IRR & Payback Period","P11"],["m10-break-even-point","Break Even Point & Target Income","P12"],
+    ["m11-manfaat-biaya","Analisis Manfaat-Biaya & Sektor Publik",""],["m12-depresiasi","Metode Depresiasi",""],
+    ["m13-inflasi","Inflasi, PDB & Pendapatan Nasional","P15"]
+  ];
+  document.getElementById("materiList").innerHTML = MATERI.map(([f,t,p])=>
+    `<a href="materi/${f}.html"><b>${p||"•"}</b>${t}</a>`).join("");
   const LA_FILES = ["01_tvm","02_single","03_compare","04_breakeven","05_depreciation","06_inflation","07_tax","08_sensitivity","09_bond","10_bcr","11_lease","12_replacement"];
   document.getElementById("laList").innerHTML = MODULES.map(([n,title],i)=>
     `<a href="learning-assistant/${LA_FILES[i]}_Learning_Assistant.html"><b>${n}</b>${title}</a>`).join("");

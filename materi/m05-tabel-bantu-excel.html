@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solusi Bunga via Tabel Bantu & Excel — Pertemuan 6</title>
+<style>
+/* ===========================================================
+   Shared stylesheet — Workspace: Ekonomi Teknik
+   Dipakai ulang oleh semua lesson/reference dalam workspace ini
+   =========================================================== */
+
+:root {
+  --navy: #0b2559;
+  --red: #c81e1e;
+  --red-dark: #8f1414;
+  --gold: #f5b301;
+  --sky: #1aa7d8;
+  --green: #5a8f3c;
+  --ink: #1c2530;
+  --paper: #fbfaf7;
+  --paper-alt: #f0eee7;
+  --line: #dedad0;
+  --radius: 10px;
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+}
+
+.doc {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 28px 80px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  background: linear-gradient(180deg, var(--navy) 0%, #123069 100%);
+  color: #fff;
+  padding: 64px 28px 56px;
+  margin-bottom: 8px;
+  border-bottom: 6px solid var(--red);
+}
+.hero .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  color: #b9c6e6;
+  margin: 0 0 10px;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 2.6rem;
+  margin: 0 0 6px;
+  max-width: 760px;
+}
+.hero .sub {
+  color: #d7deee;
+  font-size: 1.05rem;
+  margin: 0;
+}
+.hero .meta {
+  margin-top: 22px;
+  font-size: 0.9rem;
+  color: #9fb0d6;
+}
+
+/* ---------- Section scaffolding ---------- */
+section {
+  padding: 44px 0;
+  border-bottom: 1px solid var(--line);
+}
+section:last-of-type { border-bottom: none; }
+
+.kicker {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  margin: 0 0 18px;
+  color: var(--navy);
+}
+h3 {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin: 0 0 8px;
+  color: var(--navy);
+}
+p { margin: 0 0 14px; }
+.lede {
+  font-size: 1.08rem;
+  color: #3a4658;
+}
+
+/* ---------- Callout / definition box ---------- */
+.callout {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.55;
+}
+.callout b, .callout strong { color: var(--gold); }
+.callout .accent { color: #ffcf6b; }
+
+/* ---------- Card grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.card {
+  background: var(--paper-alt);
+  border-left: 5px solid var(--sky);
+  border-radius: 6px;
+  padding: 16px 18px;
+}
+.card h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+.card p { margin: 0; font-size: 0.92rem; color: #43506180; color:#435061; }
+.card.red { border-left-color: var(--red); }
+.card.gold { border-left-color: var(--gold); }
+.card.green { border-left-color: var(--green); }
+
+/* ---------- Flow / chain diagram ---------- */
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  margin: 24px 0;
+}
+.flow .step {
+  flex: 1 1 140px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--red);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  position: relative;
+}
+.flow .step + .step { margin-left: 18px; }
+.flow .step::before {
+  content: "→";
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--red);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.flow .step:first-child::before { content: ""; }
+.flow .step .n {
+  display: inline-block;
+  background: var(--navy);
+  color: #fff;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 22px;
+  margin-bottom: 8px;
+}
+
+/* ---------- Numbered list decisions ---------- */
+.decision-list { list-style: none; margin: 18px 0 0; padding: 0; }
+.decision-list li {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.decision-list li:last-child { border-bottom: none; }
+.decision-list .tag {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+}
+.decision-list .body b { color: var(--navy); }
+
+/* ---------- Cash-flow timeline ---------- */
+.timeline {
+  margin: 22px 0 10px;
+  padding: 18px 10px 30px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.timeline svg { display: block; margin: 0 auto; }
+
+/* ---------- Analysis / synthesis box ---------- */
+.analysis {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--green);
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-top: 16px;
+  font-size: 0.96rem;
+}
+.analysis h4 { margin: 0 0 8px; color: var(--green); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em;}
+
+/* ---------- Table ---------- */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 14px;
+}
+table.clean {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+table.clean th, table.clean td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: normal;
+}
+table.clean th {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+}
+table.clean tr:nth-child(even) td { background: var(--paper-alt); }
+
+/* ---------- Equation blocks (notasi matematis tanpa gambar) ---------- */
+.eq {
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  margin: 18px 0;
+  overflow-x: auto;
+}
+.eq .frac {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+  margin: 0 6px;
+  text-align: center;
+  font-size: 0.92em;
+  line-height: 1.2;
+}
+.eq .frac .num { border-bottom: 1.5px solid var(--ink); padding: 0 8px 2px; }
+.eq .frac .den { padding: 2px 8px 0; }
+.eq .brace { font-size: 1.6em; font-weight: 300; }
+
+.deriv {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-family: var(--serif);
+  font-size: 1rem;
+  overflow-x: auto;
+}
+.deriv .line { white-space: nowrap; padding: 3px 0; }
+.deriv .tag { color: var(--red); font-size: 0.8rem; margin-left: 10px; }
+
+.symbolic {
+  background: var(--paper-alt);
+  border-left: 5px solid var(--gold);
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  margin: 16px 0;
+}
+.symbolic .label { display:block; font-family: var(--sans); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#7a6a2a; margin-bottom:6px; }
+
+/* ---------- Factor summary cards ---------- */
+.factor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.factor-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.factor-card .sym {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--navy);
+  font-weight: bold;
+}
+.factor-card .name-en { font-size: 0.82rem; color: #7a8496; font-style: italic; margin: 4px 0 8px; }
+.factor-card p { margin: 0; font-size: 0.9rem; }
+/* ---------- Verification box (cek ulang angka faktor bunga) ---------- */
+.verify {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--sky);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-top: 14px;
+  font-size: 0.94rem;
+}
+.verify h4 { margin: 0 0 8px; color: var(--sky); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.verify .calc { font-family: var(--serif); font-size: 1rem; overflow-x: auto; }
+.verify .calc .line { white-space: nowrap; padding: 2px 0; }
+
+/* ---------- Example card ---------- */
+.example {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin-top: 20px;
+}
+.example .ex-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.example .ex-num {
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-family: var(--serif);
+}
+.example .ex-soal { font-size: 0.96rem; }
+.example .ex-answer {
+  margin-top: 12px;
+  background: var(--paper-alt);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: var(--serif);
+  font-size: 1rem;
+}
+.example .badge {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* ---------- Code / formula (Excel) ---------- */
+.code-block {
+  background: #1c2530;
+  color: #e8ecf3;
+  font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+  font-size: 0.95rem;
+  padding: 14px 18px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+.code-block .comment { color: #8a95a8; }
+.code-inline {
+  font-family: "Consolas", "SFMono-Regular", Menlo, monospace;
+  background: var(--paper-alt);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+.arg-table td:first-child, .arg-table th:first-child { font-family: "Consolas", monospace; }
+
+.followup {
+  background: var(--paper-alt);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-top: 10px;
+  font-size: 0.94rem;
+}
+.followup h3 { margin-bottom: 8px; }
+.sources { font-size: 0.82rem; color: #66707f; margin-top: 30px; }
+.sources a { color: var(--sky); }
+
+/* ---------- Print ---------- */
+@media print {
+  .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  section { break-inside: avoid; }
+}
+
+/* ---------- Mobile (dokumen ini tanpa sidebar: cukup rapikan grid/flow/tabel) ---------- */
+@media (max-width: 880px) {
+  .doc { padding: 0 18px 60px; }
+  .hero { padding: 44px 18px 36px; }
+  .hero h1 { font-size: 1.9rem; }
+  .hero .sub { font-size: 0.98rem; }
+  section { padding: 32px 0; }
+  h2 { font-size: 1.4rem; }
+  .callout { padding: 20px 18px; font-size: 1.02rem; }
+
+  /* Diagram alur: dari baris horizontal jadi tumpukan vertikal dengan panah ke bawah */
+  .flow {
+    flex-direction: column;
+  }
+  .flow .step {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .flow .step + .step { margin-left: 0; margin-top: 22px; }
+  .flow .step::before {
+    content: "↓";
+    left: 50%;
+    top: -22px;
+    transform: translateX(-50%);
+  }
+
+  /* Kartu & daftar keputusan tetap 1 kolom otomatis lewat auto-fit, hanya kecilkan padding */
+  .card { padding: 14px 15px; }
+  .decision-list li { gap: 10px; }
+
+  /* Diagram arus kas: biarkan bisa digeser jika sangat sempit, jangan terpotong */
+  .timeline { padding: 14px 6px 22px; }
+
+  /* Persamaan & derivasi matematis: kecilkan sedikit & pastikan bisa discroll, jangan overflow ke luar layar */
+  .eq { font-size: 1rem; }
+  .deriv { font-size: 0.9rem; padding: 14px 14px; }
+  .symbolic { font-size: 0.96rem; padding: 12px 14px; }
+
+  /* Contoh soal: kecilkan padding, header contoh tetap sejajar tapi lebih rapat */
+  .example { padding: 16px 16px; }
+  .example .ex-head { gap: 10px; }
+  .verify { padding: 12px 14px; }
+  .code-block { font-size: 0.84rem; padding: 12px 14px; }
+}
+
+@media (max-width: 400px) {
+  .hero h1 { font-size: 1.6rem; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="eyebrow">Pertemuan 6 &middot; Ekonomi Teknik</p>
+  <h1>Solusi Bunga via Tabel Bantu dan Komputer (Excel)</h1>
+  <p class="sub">Dari menghitung manual (Pertemuan 4–5) menuju cara praktis: tabel faktor bunga dan fungsi finansial Excel.</p>
+  <p class="meta">Dokumen ini menyambungkan rumus (F/P), (P/F), (F/A), (A/F), (P/A), (A/P) yang sudah dipelajari sebelumnya
+  dengan dua alat bantu praktis, lengkap analisis kenapa keduanya bisa "mempersingkat" rumus yang sama.</p>
+</div>
+
+<div class="doc">
+
+  <!-- ============ 1. DUA PENDEKATAN ============ -->
+  <section id="dua-cara">
+    <span class="kicker">01 &middot; Konteks</span>
+    <h2>Dari Rumus ke Alat Bantu</h2>
+    <p class="lede">Pada Pertemuan 4 dan 5, setiap nilai faktor bunga — misalnya (F/P ; 15% ; 10) = 4,0456 — dihitung manual
+    memakai rumus (1+i)ⁿ. Slide Pertemuan 6 ini memperkenalkan dua cara agar tidak perlu menghitung pangkat manual setiap
+    kali: <b>tabel bantu</b> (tabel faktor bunga yang sudah dicetak) dan <b>fungsi finansial di Excel</b>.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h4>Tabel Bantu</h4>
+        <p>Tabel berisi nilai faktor (F/P), (P/F), (F/A), (A/F), (P/A), (A/P) yang sudah dihitung sebelumnya untuk berbagai
+        kombinasi i% dan n — tinggal dicari di baris/kolom yang sesuai.</p>
+      </div>
+      <div class="card gold">
+        <h4>Excel</h4>
+        <p>Lima fungsi finansial bawaan (PV, FV, PMT, NPER, RATE) yang menghitung P, F, A, n, atau i secara otomatis dari
+        empat variabel lain yang diketahui.</p>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Kedua alat ini sebenarnya <b>tidak memperkenalkan konsep baru</b> — keduanya hanya cara lain untuk sampai pada
+      angka yang sama seperti rumus manual di Pertemuan 4. Perbedaannya ada pada trade-off praktis: tabel bantu cepat
+      dibaca tapi terbatas pada nilai i dan n yang tercetak (perlu interpolasi bila i atau n tidak persis ada di tabel),
+      sedangkan Excel bisa menghitung kombinasi i dan n <i>berapa pun</i> secara presisi, bahkan bisa membalik arah
+      pencarian ke <b>n</b> dan <b>i</b> — dua variabel yang jauh lebih sulit dicari manual karena posisinya di dalam pangkat.</p>
+    </div>
+  </section>
+
+  <!-- ============ 2. TABEL BANTU ============ -->
+  <section id="tabel-bantu">
+    <span class="kicker">02 &middot; Tabel Bantu</span>
+    <h2>Cara Kerja Tabel Faktor Bunga</h2>
+    <p>Slide sumber mengarahkan ke sebuah tabel bantu yang bisa diunduh (tautan pada slide asli tidak dapat direproduksi
+    di sini). Secara prinsip, tabel semacam ini disusun seperti berikut untuk setiap nilai i% (satu tabel per suku bunga):</p>
+
+    <div class="table-wrap">
+      <table class="clean">
+        <tr><th>n</th><th>(F/P)</th><th>(P/F)</th><th>(F/A)</th><th>(A/F)</th><th>(P/A)</th><th>(A/P)</th></tr>
+        <tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+        <tr><td>10</td><td>4,0456</td><td>0,2472</td><td>20,304</td><td>0,0493</td><td>5,019</td><td>0,1993</td></tr>
+        <tr><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td><td>…</td></tr>
+      </table>
+    </div>
+    <p style="font-size:0.85rem; color:#66707f;">*Baris n = 10 pada i = 15% ditampilkan sebagai ilustrasi format — angka (F/P) = 4,0456 ini sama persis dengan yang dihitung manual pada Soal 1 Pertemuan 5.</p>
+
+    <div class="analysis">
+      <h4>Analisis: bagaimana bila nilai i atau n tidak tercetak di tabel?</h4>
+      <p>Ini adalah keterbatasan utama tabel bantu yang jarang dijelaskan eksplisit: tabel biasanya hanya mencetak i% bulat
+      (1%, 2%, …) dan n bulat. Bila soal meminta i = 15,5% atau n = 10,5, dipakai <b>interpolasi linear</b>:</p>
+      <div class="eq">
+        Faktor(x) ≈ Faktor(x₁) + <span class="frac"><span class="num">(x − x₁)</span><span class="den">(x₂ − x₁)</span></span> × [Faktor(x₂) − Faktor(x₁)]
+      </div>
+      <p>di mana x₁ dan x₂ adalah dua nilai terdekat yang tercetak di tabel (satu di bawah, satu di atas nilai x yang dicari).
+      Interpolasi ini hanya <b>pendekatan</b> karena faktor bunga sebenarnya bersifat eksponensial, bukan linear — sehingga
+      hasilnya punya sedikit galat (error), berbeda dengan hasil Excel yang selalu presisi karena dihitung langsung dari
+      rumus, bukan dibaca dari tabel cetak.</p>
+    </div>
+  </section>
+
+  <!-- ============ 3. EXCEL: PEMETAAN ============ -->
+  <section id="excel-peta">
+    <span class="kicker">03 &middot; Excel</span>
+    <h2>Lima Fungsi Finansial, Lima Variabel Ekonomi Teknik</h2>
+    <p>Excel menyediakan lima fungsi keuangan bawaan yang masing-masing menghitung satu dari lima variabel dasar
+    (i, n, P, F, A) — tepat sama dengan lima notasi yang diperkenalkan di Pertemuan 4.</p>
+
+    <div class="table-wrap">
+      <table class="clean">
+        <tr><th>Variabel dicari</th><th>Fungsi Excel</th><th>Argumen wajib</th></tr>
+        <tr><td>P (Present)</td><td class="code-inline">PV(rate; nper; pmt; [fv]; [type])</td><td>rate, nper</td></tr>
+        <tr><td>F (Future)</td><td class="code-inline">FV(rate; nper; pmt; [pv]; [type])</td><td>rate, nper</td></tr>
+        <tr><td>A (Annual)</td><td class="code-inline">PMT(rate; nper; pv; [fv]; [type])</td><td>rate, nper, pv</td></tr>
+        <tr><td>n (jumlah periode)</td><td class="code-inline">NPER(rate; pmt; pv; [fv]; [type])</td><td>rate, pv atau fv</td></tr>
+        <tr><td>i (suku bunga)</td><td class="code-inline">RATE(nper; pmt; pv; [fv]; [type]; [guess])</td><td>nper, pv atau fv</td></tr>
+      </table>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis pola argumen</h4>
+      <p>Perhatikan pola berulang: nama argumen dalam fungsi Excel (rate, nper, pmt, pv, fv) hanyalah <b>istilah bahasa
+      Inggris untuk i, n, A, P, F</b>. Argumen dalam tanda kurung siku <span class="code-inline">[ ]</span> bersifat opsional
+      — jika tidak diisi, Excel menganggapnya nol. Ini penting: pada fungsi PV misalnya, jika [fv] tidak diisi, artinya
+      soal tidak melibatkan nilai F sama sekali (hanya P dan A), begitu pula sebaliknya.</p>
+    </div>
+  </section>
+
+  <!-- ============ 4. FUNGSI SATU PER SATU ============ -->
+  <section id="excel-detail">
+    <span class="kicker">04 &middot; Sintaks & Contoh</span>
+    <h2>Menguji Kelima Fungsi dengan Soal dari Pertemuan 5</h2>
+    <p>Agar tidak sekadar hafalan sintaks, kelima fungsi berikut diuji ulang memakai angka-angka yang sudah pernah dihitung
+    manual di Pertemuan 5 — untuk membuktikan hasilnya identik.</p>
+
+    <h3>1) PV — mencari P</h3>
+    <div class="code-block">=PV(rate; nper; pmt; [fv]; [type])</div>
+    <div class="verify">
+      <h4>Uji dengan Soal 2 (Pertemuan 5)</h4>
+      <div class="calc">
+        <div class="line">Manual: P = F (P/F ; 20% ; 5) = Rp 4.019.000</div>
+        <div class="line"><span class="code-inline">=PV(20%; 5; 0; -10000000)</span> → <b>Rp 4.019.000</b> ✓ cocok</div>
+        <div class="line" style="color:#7a8496; font-size:0.85em;">(pmt = 0 karena tidak ada setoran berkala; fv diberi tanda negatif — lihat analisis tanda di bawah)</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px;">2) FV — mencari F</h3>
+    <div class="code-block">=FV(rate; nper; pmt; [pv]; [type])</div>
+    <div class="verify">
+      <h4>Uji dengan Soal 1 (Pertemuan 5)</h4>
+      <div class="calc">
+        <div class="line">Manual: F = P (F/P ; 15% ; 10) = Rp 4.045.600</div>
+        <div class="line"><span class="code-inline">=FV(15%; 10; 0; -1000000)</span> → <b>Rp 4.045.600</b> ✓ cocok</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px;">3) PMT — mencari A</h3>
+    <div class="code-block">=PMT(rate; nper; pv; [fv]; [type])</div>
+    <div class="verify">
+      <h4>Uji dengan Soal 3 (Pertemuan 5)</h4>
+      <div class="calc">
+        <div class="line">Manual: A = P (A/P ; 25% ; 6) = Rp 3.388.200</div>
+        <div class="line"><span class="code-inline">=PMT(25%; 6; -10000000)</span> → <b>Rp 3.388.200</b> ✓ cocok</div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:26px;">4) NPER — mencari n</h3>
+    <div class="code-block">=NPER(rate; pmt; pv; [fv]; [type])</div>
+    <p>Catatan penting dari slide: <b>"tanda pv dan fv berlawanan tanda"</b> — akan dibahas mendalam di bagian berikutnya,
+    karena inilah bagian tersulit saat pertama kali memakai fungsi ini.</p>
+
+    <h3 style="margin-top:26px;">5) RATE — mencari i</h3>
+    <div class="code-block">=RATE(nper; pmt; pv; [fv]; [type]; [guess])</div>
+    <div class="analysis">
+      <h4>Analisis: kenapa RATE butuh argumen [guess]?</h4>
+      <p>Berbeda dari PV, FV, dan PMT yang bisa dihitung langsung dari rumus aljabar biasa, mencari <b>i</b> berarti
+      menyelesaikan persamaan di mana i berada di dalam pangkat <i>sekaligus</i> di luar pangkat (lihat rumus A/P dan P/A
+      di Pertemuan 4) — secara matematis, ini tidak punya solusi aljabar tertutup untuk n besar. Excel mengatasinya dengan
+      <b>iterasi numerik</b> (mirip metode Newton-Raphson): menebak nilai i, mengecek seberapa dekat hasilnya, lalu
+      memperbaiki tebakan berulang kali hingga konvergen. Argumen [guess] adalah tebakan awal (default 10% bila dikosongkan)
+      — pada kasus tertentu (arus kas tidak biasa/bertukar tanda berkali-kali), tebakan awal yang buruk bisa membuat Excel
+      gagal konvergen dan mengembalikan error <span class="code-inline">#NUM!</span>.</p>
+    </div>
+  </section>
+
+  <!-- ============ 5. ANALISIS TANDA ============ -->
+  <section id="tanda">
+    <span class="kicker">05 &middot; Analisis Kunci</span>
+    <h2>Mengapa "Tanda pv dan fv Harus Berlawanan"?</h2>
+    <p>Ini catatan singkat di slide asli, tapi merupakan sumber kesalahan paling umum bagi pemula memakai fungsi finansial
+    Excel — dan sebenarnya berlaku untuk <b>semua</b> fungsi finansial Excel (PV, FV, PMT, NPER, RATE), bukan hanya NPER.</p>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Excel memakai <b>konvensi arus kas (cash flow sign convention)</b>: uang yang <i>keluar dari kantong Anda</i>
+      (disetorkan/dipinjamkan) diberi tanda <b>negatif</b>, dan uang yang <i>masuk ke kantong Anda</i> (diterima/ditarik)
+      diberi tanda <b>positif</b> — dilihat dari sudut pandang satu pihak yang konsisten sepanjang soal.</p>
+      <p>Kenapa pv dan fv harus berlawanan tanda? Karena dalam skenario menabung, <b>P adalah uang yang Anda keluarkan</b>
+      (setoran ke bank → negatif) sementara <b>F adalah uang yang Anda terima kembali</b> di masa depan (penarikan dari
+      bank → positif). Jika pv dan fv diberi tanda yang <i>sama</i>, secara matematis itu berarti "saya menyetor uang, dan
+      uang itu tidak pernah berpindah arah" — yang tidak masuk akal secara finansial, sehingga Excel akan mengembalikan
+      hasil yang salah tanda atau error.</p>
+
+      <div class="code-block">
+<span class="comment">// Contoh benar (sesuai Soal 1: menabung P, menerima F di masa depan)</span>
+=FV(15%; 10; 0; -1000000)   <span class="comment">→ 4.045.600  (positif = uang diterima)</span>
+
+<span class="comment">// Contoh salah (pv dan fv searah tanda)</span>
+=FV(15%; 10; 0; 1000000)    <span class="comment">→ -4.045.600 (tanda terbalik, membingungkan)</span>
+      </div>
+
+      <p>Aturan praktis: <b>tentukan dulu satu sudut pandang</b> (biasanya "sudut pandang orang yang menabung/meminjam"),
+      lalu konsisten sepanjang rumus — semua yang keluar dari sudut pandang itu negatif, semua yang masuk positif. Argumen
+      <span class="code-inline">pmt</span> (nilai A) juga mengikuti aturan tanda yang sama; hanya karena pada beberapa
+      contoh di atas pmt = 0, isu tanda pada pmt belum terlihat.</p>
+    </div>
+  </section>
+
+  <!-- ============ 6. SINTESIS ============ -->
+  <section id="sintesis">
+    <span class="kicker">06 &middot; Sintesis</span>
+    <h2>Tiga Pertemuan, Satu Kerangka yang Sama</h2>
+    <p>Menyambungkan Pertemuan 4, 5, dan 6 menjadi satu alur belajar utuh:</p>
+
+    <div class="flow">
+      <div class="step"><span class="n">P4</span>Rumus dasar (F/P), (P/F), (F/A), (A/F), (P/A), (A/P) diturunkan dari nol.</div>
+      <div class="step"><span class="n">P5</span>Rumus dipakai manual pada 6 soal nyata — dihitung tangan/kalkulator.</div>
+      <div class="step"><span class="n">P6</span>Perhitungan yang sama dipercepat lewat tabel bantu atau fungsi Excel.</div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis penutup</h4>
+      <p>Poin yang perlu digarisbawahi: mempelajari <b>tabel bantu dan Excel bukan pengganti</b> pemahaman rumus manual di
+      Pertemuan 4, melainkan <i>percepatan</i> setelah konsepnya dikuasai. Seseorang yang langsung memakai
+      <span class="code-inline">=PV(...)</span> tanpa memahami apa itu (P/F) atau (P/A) akan kesulitan saat: (1) memutuskan
+      argumen mana yang harus diisi 0 atau dikosongkan, (2) menentukan tanda pv/fv/pmt dengan benar, dan (3) memvalidasi
+      apakah hasil yang dikeluarkan Excel masuk akal atau justru karena kesalahan input. Karena itu, urutan belajar
+      "rumus manual dulu, baru alat bantu" pada Pertemuan 4→5→6 ini bukan kebetulan — melainkan cara paling efektif
+      membangun pemahaman yang benar-benar melekat.</p>
+    </div>
+  </section>
+
+  <div class="followup">
+    <h3>Pertanyaan lanjutan?</h3>
+    <p>Kalau ingin mencoba fungsi PV/FV/PMT/NPER/RATE dengan angka soal lain, atau masih bingung menentukan tanda
+    positif/negatif pada kasus tertentu (misalnya cicilan pinjaman, bukan tabungan), silakan tanyakan — saya bisa bantu
+    susun rumusnya langkah demi langkah.</p>
+  </div>
+
+  <p class="sources">Disusun ulang dari slide "Solusi Bunga via Tabel Bantu & Excel — Pertemuan 6", dengan verifikasi silang terhadap contoh soal Pertemuan 5 dan analisis tambahan mengenai interpolasi tabel serta konvensi tanda arus kas di Excel.</p>
+
+</div>
+</body>
+</html>

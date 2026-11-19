@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contoh-Contoh Penggunaan Rumus Bunga — Pertemuan 5</title>
+<style>
+/* ===========================================================
+   Shared stylesheet — Workspace: Ekonomi Teknik
+   Dipakai ulang oleh semua lesson/reference dalam workspace ini
+   =========================================================== */
+
+:root {
+  --navy: #0b2559;
+  --red: #c81e1e;
+  --red-dark: #8f1414;
+  --gold: #f5b301;
+  --sky: #1aa7d8;
+  --green: #5a8f3c;
+  --ink: #1c2530;
+  --paper: #fbfaf7;
+  --paper-alt: #f0eee7;
+  --line: #dedad0;
+  --radius: 10px;
+  --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  --sans: "Segoe UI", -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.6;
+}
+
+.doc {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 28px 80px;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  background: linear-gradient(180deg, var(--navy) 0%, #123069 100%);
+  color: #fff;
+  padding: 64px 28px 56px;
+  margin-bottom: 8px;
+  border-bottom: 6px solid var(--red);
+}
+.hero .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.78rem;
+  color: #b9c6e6;
+  margin: 0 0 10px;
+}
+.hero h1 {
+  font-family: var(--serif);
+  font-size: 2.6rem;
+  margin: 0 0 6px;
+  max-width: 760px;
+}
+.hero .sub {
+  color: #d7deee;
+  font-size: 1.05rem;
+  margin: 0;
+}
+.hero .meta {
+  margin-top: 22px;
+  font-size: 0.9rem;
+  color: #9fb0d6;
+}
+
+/* ---------- Section scaffolding ---------- */
+section {
+  padding: 44px 0;
+  border-bottom: 1px solid var(--line);
+}
+section:last-of-type { border-bottom: none; }
+
+.kicker {
+  display: inline-block;
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 1.7rem;
+  margin: 0 0 18px;
+  color: var(--navy);
+}
+h3 {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  margin: 0 0 8px;
+  color: var(--navy);
+}
+p { margin: 0 0 14px; }
+.lede {
+  font-size: 1.08rem;
+  color: #3a4658;
+}
+
+/* ---------- Callout / definition box ---------- */
+.callout {
+  background: var(--navy);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  line-height: 1.55;
+}
+.callout b, .callout strong { color: var(--gold); }
+.callout .accent { color: #ffcf6b; }
+
+/* ---------- Card grid ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.card {
+  background: var(--paper-alt);
+  border-left: 5px solid var(--sky);
+  border-radius: 6px;
+  padding: 16px 18px;
+}
+.card h4 {
+  margin: 0 0 6px;
+  font-size: 0.95rem;
+  color: var(--navy);
+}
+.card p { margin: 0; font-size: 0.92rem; color: #43506180; color:#435061; }
+.card.red { border-left-color: var(--red); }
+.card.gold { border-left-color: var(--gold); }
+.card.green { border-left-color: var(--green); }
+
+/* ---------- Flow / chain diagram ---------- */
+.flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0;
+  margin: 24px 0;
+}
+.flow .step {
+  flex: 1 1 140px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--red);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  position: relative;
+}
+.flow .step + .step { margin-left: 18px; }
+.flow .step::before {
+  content: "→";
+  position: absolute;
+  left: -22px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--red);
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.flow .step:first-child::before { content: ""; }
+.flow .step .n {
+  display: inline-block;
+  background: var(--navy);
+  color: #fff;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 22px;
+  margin-bottom: 8px;
+}
+
+/* ---------- Numbered list decisions ---------- */
+.decision-list { list-style: none; margin: 18px 0 0; padding: 0; }
+.decision-list li {
+  display: flex;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--line);
+}
+.decision-list li:last-child { border-bottom: none; }
+.decision-list .tag {
+  flex: 0 0 auto;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--navy);
+  font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+}
+.decision-list .body b { color: var(--navy); }
+
+/* ---------- Cash-flow timeline ---------- */
+.timeline {
+  margin: 22px 0 10px;
+  padding: 18px 10px 30px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.timeline svg { display: block; margin: 0 auto; }
+
+/* ---------- Analysis / synthesis box ---------- */
+.analysis {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--green);
+  border-radius: 6px;
+  padding: 18px 20px;
+  margin-top: 16px;
+  font-size: 0.96rem;
+}
+.analysis h4 { margin: 0 0 8px; color: var(--green); font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.04em;}
+
+/* ---------- Table ---------- */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 14px;
+}
+table.clean {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+table.clean th, table.clean td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: normal;
+}
+table.clean th {
+  background: var(--navy);
+  color: #fff;
+  font-weight: 600;
+}
+table.clean tr:nth-child(even) td { background: var(--paper-alt); }
+
+/* ---------- Equation blocks (notasi matematis tanpa gambar) ---------- */
+.eq {
+  text-align: center;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  margin: 18px 0;
+  overflow-x: auto;
+}
+.eq .frac {
+  display: inline-flex;
+  flex-direction: column;
+  vertical-align: middle;
+  margin: 0 6px;
+  text-align: center;
+  font-size: 0.92em;
+  line-height: 1.2;
+}
+.eq .frac .num { border-bottom: 1.5px solid var(--ink); padding: 0 8px 2px; }
+.eq .frac .den { padding: 2px 8px 0; }
+.eq .brace { font-size: 1.6em; font-weight: 300; }
+
+.deriv {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 16px 20px;
+  font-family: var(--serif);
+  font-size: 1rem;
+  overflow-x: auto;
+}
+.deriv .line { white-space: nowrap; padding: 3px 0; }
+.deriv .tag { color: var(--red); font-size: 0.8rem; margin-left: 10px; }
+
+.symbolic {
+  background: var(--paper-alt);
+  border-left: 5px solid var(--gold);
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  margin: 16px 0;
+}
+.symbolic .label { display:block; font-family: var(--sans); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:#7a6a2a; margin-bottom:6px; }
+
+/* ---------- Factor summary cards ---------- */
+.factor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.factor-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px 18px;
+}
+.factor-card .sym {
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  color: var(--navy);
+  font-weight: bold;
+}
+.factor-card .name-en { font-size: 0.82rem; color: #7a8496; font-style: italic; margin: 4px 0 8px; }
+.factor-card p { margin: 0; font-size: 0.9rem; }
+/* ---------- Verification box (cek ulang angka faktor bunga) ---------- */
+.verify {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--sky);
+  border-radius: 6px;
+  padding: 16px 18px;
+  margin-top: 14px;
+  font-size: 0.94rem;
+}
+.verify h4 { margin: 0 0 8px; color: var(--sky); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.verify .calc { font-family: var(--serif); font-size: 1rem; overflow-x: auto; }
+.verify .calc .line { white-space: nowrap; padding: 2px 0; }
+
+/* ---------- Example card ---------- */
+.example {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px 24px;
+  margin-top: 20px;
+}
+.example .ex-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+.example .ex-num {
+  flex: 0 0 auto;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-family: var(--serif);
+}
+.example .ex-soal { font-size: 0.96rem; }
+.example .ex-answer {
+  margin-top: 12px;
+  background: var(--paper-alt);
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: var(--serif);
+  font-size: 1rem;
+}
+.example .badge {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--navy);
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.followup {
+  background: var(--paper-alt);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-top: 10px;
+  font-size: 0.94rem;
+}
+.followup h3 { margin-bottom: 8px; }
+.sources { font-size: 0.82rem; color: #66707f; margin-top: 30px; }
+.sources a { color: var(--sky); }
+
+/* ---------- Print ---------- */
+@media print {
+  .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  section { break-inside: avoid; }
+}
+
+/* ---------- Mobile (dokumen ini tanpa sidebar: cukup rapikan grid/flow/tabel) ---------- */
+@media (max-width: 880px) {
+  .doc { padding: 0 18px 60px; }
+  .hero { padding: 44px 18px 36px; }
+  .hero h1 { font-size: 1.9rem; }
+  .hero .sub { font-size: 0.98rem; }
+  section { padding: 32px 0; }
+  h2 { font-size: 1.4rem; }
+  .callout { padding: 20px 18px; font-size: 1.02rem; }
+
+  /* Diagram alur: dari baris horizontal jadi tumpukan vertikal dengan panah ke bawah */
+  .flow {
+    flex-direction: column;
+  }
+  .flow .step {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+  .flow .step + .step { margin-left: 0; margin-top: 22px; }
+  .flow .step::before {
+    content: "↓";
+    left: 50%;
+    top: -22px;
+    transform: translateX(-50%);
+  }
+
+  /* Kartu & daftar keputusan tetap 1 kolom otomatis lewat auto-fit, hanya kecilkan padding */
+  .card { padding: 14px 15px; }
+  .decision-list li { gap: 10px; }
+
+  /* Diagram arus kas: biarkan bisa digeser jika sangat sempit, jangan terpotong */
+  .timeline { padding: 14px 6px 22px; }
+
+  /* Persamaan & derivasi matematis: kecilkan sedikit & pastikan bisa discroll, jangan overflow ke luar layar */
+  .eq { font-size: 1rem; }
+  .deriv { font-size: 0.9rem; padding: 14px 14px; }
+  .symbolic { font-size: 0.96rem; padding: 12px 14px; }
+
+  /* Contoh soal: kecilkan padding, header contoh tetap sejajar tapi lebih rapat */
+  .example { padding: 16px 16px; }
+  .example .ex-head { gap: 10px; }
+  .verify { padding: 12px 14px; }
+}
+
+@media (max-width: 400px) {
+  .hero h1 { font-size: 1.6rem; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <p class="eyebrow">Pertemuan 5 &middot; Ekonomi Teknik</p>
+  <h1>Contoh-Contoh Penggunaan Rumus Bunga</h1>
+  <p class="sub">Enam soal dari slide, dibedah lengkap dengan diagram, verifikasi angka faktor bunga, dan analisis pola di baliknya.</p>
+  <p class="meta">Melanjutkan Pertemuan 4 (Rumus-Rumus Bunga) — dokumen ini menunjukkan bagaimana keenam faktor bunga benar-benar dipakai pada soal nyata.</p>
+</div>
+
+<div class="doc">
+
+  <!-- ============ INTRO ============ -->
+  <section id="intro">
+    <span class="kicker">Sekilas</span>
+    <h2>Sebelum Masuk ke Soal</h2>
+    <p class="lede">Keenam soal pada slide ini bukan kumpulan soal acak. Setiap soal memakai <b>tepat satu</b> dari enam faktor
+    bunga yang sudah dibahas di Pertemuan 4 (F/P, P/F, F/A, A/F, P/A, A/P) — dan sengaja disusun agar keenamnya muncul
+    masing-masing satu kali. Ini akan dibuktikan pada bagian sintesis di akhir dokumen.</p>
+    <p>Satu kebiasaan penting yang dipakai konsisten di semua soal: <b>tahun pertama terjadinya transaksi dihitung sebagai
+    periode ke-1 (t = 1), bukan periode ke-0</b>. Titik t = 0 selalu jatuh satu tahun sebelum transaksi pertama. Perhatikan
+    pola ini di setiap soal berikut.</p>
+  </section>
+
+  <!-- ============ SOAL 1 ============ -->
+  <section id="soal1">
+    <span class="kicker">Soal 1 &middot; Mencari F dari P</span>
+    <h2>Nilai Tabungan di Masa Depan</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">1</div>
+        <div class="ex-soal">Rp 1.000.000 ditabung pada <b>1-1-1994</b> dengan suku bunga <b>15% per tahun</b>. Berapa nilai
+        tabungan itu pada <b>1-1-2004</b>? <span class="badge">(F/P ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="90" x2="360" y2="90" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,90 348,84 348,96" fill="#0b2559"/>
+          <line x1="60" y1="85" x2="60" y2="95" stroke="#0b2559"/><text x="60" y="112" text-anchor="middle" font-size="12" font-family="Segoe UI">0</text>
+          <text x="90" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">1</text>
+          <text x="120" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">2</text>
+          <text x="150" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">3</text>
+          <line x1="330" y1="85" x2="330" y2="95" stroke="#0b2559"/><text x="330" y="112" text-anchor="middle" font-size="12" font-family="Segoe UI">10</text>
+          <line x1="60" y1="90" x2="60" y2="40" stroke="#1aa7d8" stroke-width="3"/>
+          <polygon points="60,40 55,50 65,50" fill="#1aa7d8"/>
+          <text x="60" y="30" text-anchor="middle" fill="#1aa7d8" font-size="12">P = 1.000.000</text>
+          <line x1="330" y1="90" x2="330" y2="135" stroke="#c81e1e" stroke-width="3"/>
+          <polygon points="330,135 325,125 335,125" fill="#c81e1e"/>
+          <text x="330" y="148" text-anchor="middle" fill="#c81e1e" font-size="12">F = ?</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 2004 − 1994 = 10 tahun<br>
+        F = P (F/P ; 15% ; 10) = 1.000.000 × 4,0456 = <b>Rp 4.045.600,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (F/P ; 15% ; 10)</h4>
+        <div class="calc">
+          <div class="line">(F/P ; i ; n) = (1 + i)ⁿ</div>
+          <div class="line">(1 + 0,15)¹⁰ = (1,15)¹⁰ ≈ 4,0456 ✓ cocok dengan angka pada slide</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Ini adalah kasus paling sederhana dari hubungan P–F: satu setoran tunggal, tumbuh secara majemuk selama 10 tahun.
+      Kelipatan 4,0456× dalam 10 tahun pada bunga 15% menunjukkan betapa cepatnya nilai uang tumbuh dibanding intuisi awam
+      — banyak orang mengira 15% × 10 tahun = 150% (F = 2,5×P), padahal karena efek bunga majemuk hasilnya justru lebih
+      dari 4×P.</p>
+    </div>
+  </section>
+
+  <!-- ============ SOAL 2 ============ -->
+  <section id="soal2">
+    <span class="kicker">Soal 2 &middot; Mencari P dari F</span>
+    <h2>Berapa yang Harus Ditabung Sekarang</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">2</div>
+        <div class="ex-soal">Berapa harus ditabung pada <b>1-1-1995</b> dengan suku bunga <b>20% per tahun</b> agar nilai
+        tabungan menjadi <b>Rp 10.000.000</b> pada <b>1-1-2000</b>? <span class="badge">(P/F ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 150" width="100%" height="150" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="90" x2="360" y2="90" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,90 348,84 348,96" fill="#0b2559"/>
+          <line x1="60" y1="85" x2="60" y2="95" stroke="#0b2559"/><text x="60" y="112" text-anchor="middle" font-size="12" font-family="Segoe UI">0</text>
+          <text x="90" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">1</text>
+          <text x="120" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">2</text>
+          <text x="150" y="112" text-anchor="middle" font-size="11" font-family="Segoe UI">3</text>
+          <line x1="330" y1="85" x2="330" y2="95" stroke="#0b2559"/><text x="330" y="112" text-anchor="middle" font-size="12" font-family="Segoe UI">5</text>
+          <line x1="60" y1="90" x2="60" y2="40" stroke="#1aa7d8" stroke-width="3"/>
+          <polygon points="60,40 55,50 65,50" fill="#1aa7d8"/>
+          <text x="60" y="30" text-anchor="middle" fill="#1aa7d8" font-size="12">P = ?</text>
+          <line x1="330" y1="90" x2="330" y2="135" stroke="#c81e1e" stroke-width="3"/>
+          <polygon points="330,135 325,125 335,125" fill="#c81e1e"/>
+          <text x="330" y="148" text-anchor="middle" fill="#c81e1e" font-size="12">F = 10.000.000</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 2000 − 1995 = 5 tahun<br>
+        P = F (P/F ; 20% ; 5) = 10.000.000 × 0,4019 = <b>Rp 4.019.000,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (P/F ; 20% ; 5)</h4>
+        <div class="calc">
+          <div class="line">(P/F ; i ; n) = 1 / (1 + i)ⁿ</div>
+          <div class="line">1 / (1,20)⁵ = 1 / 2,48832 ≈ 0,4019 ✓ cocok</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Soal ini kebalikan logika dari Soal 1: yang diketahui adalah nilai masa depan (target Rp 10.000.000), yang dicari
+      adalah setoran awal. Ini pola pikir <b>"backward planning"</b> yang sangat umum dalam perencanaan keuangan — misalnya
+      menghitung berapa yang harus disisihkan sekarang untuk mencapai target dana pendidikan anak 15 tahun lagi.</p>
+    </div>
+  </section>
+
+  <!-- ============ SOAL 3 ============ -->
+  <section id="soal3">
+    <span class="kicker">Soal 3 &middot; Mencari A dari P</span>
+    <h2>Mencairkan Tabungan Secara Merata (Capital Recovery)</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">3</div>
+        <div class="ex-soal">Rp 10.000.000 ditabung pada <b>1-1-1999</b> dengan suku bunga <b>25% per tahun</b>. Berapa yang
+        bisa diambil tiap tahun (jumlah sama besar) dari <b>1-1-2000</b> sampai <b>1-1-2005</b> sehingga sisa tabungan
+        persis habis? <span class="badge">(A/P ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="60" x2="360" y2="60" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,60 348,54 348,66" fill="#0b2559"/>
+          <line x1="60" y1="55" x2="60" y2="65" stroke="#0b2559"/><text x="60" y="45" text-anchor="middle" font-size="12">0</text>
+          <line x1="140" y1="55" x2="140" y2="65" stroke="#0b2559"/><text x="140" y="80" text-anchor="middle" font-size="11">1</text>
+          <line x1="210" y1="55" x2="210" y2="65" stroke="#0b2559"/><text x="210" y="80" text-anchor="middle" font-size="11">2</text>
+          <text x="270" y="80" text-anchor="middle" font-size="13">…</text>
+          <line x1="330" y1="55" x2="330" y2="65" stroke="#0b2559"/><text x="330" y="80" text-anchor="middle" font-size="11">6</text>
+          <line x1="60" y1="60" x2="60" y2="20" stroke="#1aa7d8" stroke-width="3"/>
+          <polygon points="60,20 55,30 65,30" fill="#1aa7d8"/>
+          <text x="60" y="14" text-anchor="middle" fill="#1aa7d8" font-size="12">P = 10.000.000</text>
+          <g stroke="#c81e1e" stroke-width="3" fill="#c81e1e">
+            <line x1="140" y1="60" x2="140" y2="110"/><polygon points="140,110 135,100 145,100"/>
+            <line x1="210" y1="60" x2="210" y2="110"/><polygon points="210,110 205,100 215,100"/>
+            <line x1="330" y1="60" x2="330" y2="110"/><polygon points="330,110 325,100 335,100"/>
+          </g>
+          <text x="230" y="128" text-anchor="middle" fill="#c81e1e" font-size="12">A = ?</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 2005 − 1999 = 6 tahun (penarikan di t = 1 s.d. t = 6)<br>
+        A = P (A/P ; 25% ; 6) = 10.000.000 × 0,33882 = <b>Rp 3.388.200,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (A/P ; 25% ; 6)</h4>
+        <div class="calc">
+          <div class="line">(A/P ; i ; n) = i(1+i)ⁿ / ((1+i)ⁿ − 1)</div>
+          <div class="line">(1,25)⁶ ≈ 3,8147</div>
+          <div class="line">0,25 × 3,8147 / (3,8147 − 1) = 0,9537 / 2,8147 ≈ 0,3388 ✓ cocok</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Inilah rumus yang secara diam-diam dipakai bank untuk menghitung <b>angsuran pinjaman tetap</b> — P di sini bisa
+      dibayangkan sebagai pokok pinjaman, dan A sebagai cicilan per tahun. Bedanya, dalam konteks soal ini P adalah tabungan
+      milik sendiri, bukan utang, sehingga "A = ?" berarti "jatah tarik tunai tahunan" yang membuat saldo persis nol di
+      akhir periode ke-6 — sama seperti logika anuitas pada dana pensiun.</p>
+    </div>
+  </section>
+
+  <!-- ============ SOAL 4 ============ -->
+  <section id="soal4">
+    <span class="kicker">Soal 4 &middot; Mencari F dari A</span>
+    <h2>Total Tabungan Berkala di Masa Depan</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">4</div>
+        <div class="ex-soal">Rp 1.000.000 ditabung tiap tahun dari <b>1-1-1999</b> sampai <b>1-1-2005</b> dengan suku bunga
+        <b>12% per tahun</b>. Berapa nilai tabungan itu pada 2005? <span class="badge">(F/A ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="110" x2="360" y2="110" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,110 348,104 348,116" fill="#0b2559"/>
+          <text x="60" y="130" text-anchor="middle" font-size="12">0</text>
+          <g stroke="#5a8f3c" stroke-width="3" fill="#5a8f3c">
+            <line x1="100" y1="110" x2="100" y2="65"/><polygon points="100,65 95,75 105,75"/>
+            <line x1="150" y1="110" x2="150" y2="65"/><polygon points="150,65 145,75 155,75"/>
+          </g>
+          <text x="100" y="130" text-anchor="middle" font-size="11">1</text>
+          <text x="150" y="130" text-anchor="middle" font-size="11">2</text>
+          <text x="230" y="130" text-anchor="middle" font-size="13">…</text>
+          <line x1="330" y1="105" x2="330" y2="115" stroke="#0b2559"/><text x="330" y="130" text-anchor="middle" font-size="11">7</text>
+          <line x1="330" y1="110" x2="330" y2="65" stroke="#5a8f3c" stroke-width="3"/>
+          <polygon points="330,65 325,75 335,75" fill="#5a8f3c"/>
+          <text x="215" y="55" text-anchor="middle" fill="#5a8f3c" font-size="12">A = 1.000.000</text>
+          <line x1="330" y1="110" x2="330" y2="150" stroke="#c81e1e" stroke-width="3"/>
+          <polygon points="330,150 325,140 335,140" fill="#c81e1e"/>
+          <text x="330" y="160" text-anchor="middle" fill="#c81e1e" font-size="12" dy="10">F = ?</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 7 (setoran tahun 1999 s.d. 2005 = 7 kali setoran, t = 1 s.d. t = 7)<br>
+        F = A (F/A ; 12% ; 7) = 1.000.000 × 10,089 = <b>Rp 10.089.600,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (F/A ; 12% ; 7)</h4>
+        <div class="calc">
+          <div class="line">(F/A ; i ; n) = ((1+i)ⁿ − 1) / i</div>
+          <div class="line">(1,12)⁷ ≈ 2,2107</div>
+          <div class="line">(2,2107 − 1) / 0,12 ≈ 10,089 ✓ cocok</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Perhatikan n = 7, padahal rentang tahun 1999–2005 "terlihat" seperti 6 tahun. Ini karena <b>setoran pertama pada
+      1-1-1999 dihitung sebagai periode ke-1</b> (bukan periode ke-0), sehingga tahun 1999, 2000, …, 2005 = 7 titik setoran.
+      Ini konsisten dengan catatan di bagian pembuka dokumen — kesalahan paling umum pada soal semacam ini adalah salah
+      menghitung n karena bingung antara "selisih tahun" dan "jumlah transaksi".</p>
+    </div>
+  </section>
+
+  <!-- ============ SOAL 5 ============ -->
+  <section id="soal5">
+    <span class="kicker">Soal 5 &middot; Mencari A dari F</span>
+    <h2>Sinking Fund: Menabung untuk Mencapai Target</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">5</div>
+        <div class="ex-soal">Berapa harus ditabung sejumlah sama besar tiap tahun dari <b>1-1-1992</b> sampai <b>1-1-2000</b>
+        dengan suku bunga <b>15% per tahun</b>, agar nilai tabungan menjadi <b>Rp 10.000.000</b> pada tahun 2000?
+        <span class="badge">(A/F ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 160" width="100%" height="160" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="110" x2="360" y2="110" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,110 348,104 348,116" fill="#0b2559"/>
+          <text x="60" y="130" text-anchor="middle" font-size="12">0</text>
+          <g stroke="#5a8f3c" stroke-width="3" fill="#5a8f3c">
+            <line x1="100" y1="110" x2="100" y2="65"/><polygon points="100,65 95,75 105,75"/>
+            <line x1="150" y1="110" x2="150" y2="65"/><polygon points="150,65 145,75 155,75"/>
+          </g>
+          <text x="100" y="130" text-anchor="middle" font-size="11">1</text>
+          <text x="150" y="130" text-anchor="middle" font-size="11">2</text>
+          <text x="230" y="130" text-anchor="middle" font-size="13">…</text>
+          <line x1="330" y1="105" x2="330" y2="115" stroke="#0b2559"/><text x="330" y="130" text-anchor="middle" font-size="11">9</text>
+          <line x1="330" y1="110" x2="330" y2="65" stroke="#5a8f3c" stroke-width="3"/>
+          <polygon points="330,65 325,75 335,75" fill="#5a8f3c"/>
+          <text x="215" y="55" text-anchor="middle" fill="#5a8f3c" font-size="12">A = ?</text>
+          <line x1="330" y1="110" x2="330" y2="150" stroke="#c81e1e" stroke-width="3"/>
+          <polygon points="330,150 325,140 335,140" fill="#c81e1e"/>
+          <text x="330" y="160" text-anchor="middle" fill="#c81e1e" font-size="12" dy="10">F = 10.000.000</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 9 (setoran tahun 1992 s.d. 2000 = 9 kali setoran, t = 1 s.d. t = 9)<br>
+        A = F (A/F ; 15% ; 9) = 10.000.000 × 0,05957 = <b>Rp 595.700,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (A/F ; 15% ; 9)</h4>
+        <div class="calc">
+          <div class="line">(A/F ; i ; n) = i / ((1+i)ⁿ − 1)</div>
+          <div class="line">(1,15)⁹ ≈ 3,5179</div>
+          <div class="line">0,15 / (3,5179 − 1) = 0,15 / 2,5179 ≈ 0,05957 ✓ cocok</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Soal 4 dan Soal 5 adalah pasangan sempurna: Soal 4 memakai (F/A) untuk mencari <i>hasil akhir</i> dari setoran
+      tetap, sementara Soal 5 memakai (A/F) — kebalikannya — untuk mencari <i>besar setoran</i> yang dibutuhkan mencapai
+      target tertentu. Nilai A yang jauh lebih kecil (Rp 595.700) dibanding F (Rp 10.000.000) pada n = 9 tahun ini
+      mengilustrasikan kekuatan bunga majemuk pada rencana tabungan jangka panjang: prinsip yang sama dipakai reksadana
+      atau dana pensiun dengan setoran rutin ("dollar-cost averaging").</p>
+    </div>
+  </section>
+
+  <!-- ============ SOAL 6 ============ -->
+  <section id="soal6">
+    <span class="kicker">Soal 6 &middot; Mencari P dari A</span>
+    <h2>Nilai Sekarang dari Penarikan Berkala</h2>
+
+    <div class="example">
+      <div class="ex-head">
+        <div class="ex-num">6</div>
+        <div class="ex-soal">Berapa harus ditabung pada <b>1-1-1997</b> dengan suku bunga <b>20% per tahun</b>, agar bisa
+        diambil Rp 1.000.000 tiap tahun dari <b>1-1-1998</b> sampai <b>1-1-2005</b>? <span class="badge">(P/A ; i ; n)</span></div>
+      </div>
+
+      <div class="timeline">
+        <svg viewBox="0 0 400 170" width="100%" height="170" xmlns="http://www.w3.org/2000/svg">
+          <line x1="30" y1="60" x2="360" y2="60" stroke="#0b2559" stroke-width="2"/>
+          <polygon points="360,60 348,54 348,66" fill="#0b2559"/>
+          <line x1="60" y1="55" x2="60" y2="65" stroke="#0b2559"/><text x="60" y="45" text-anchor="middle" font-size="12">0</text>
+          <line x1="140" y1="55" x2="140" y2="65" stroke="#0b2559"/><text x="140" y="80" text-anchor="middle" font-size="11">1</text>
+          <line x1="210" y1="55" x2="210" y2="65" stroke="#0b2559"/><text x="210" y="80" text-anchor="middle" font-size="11">2</text>
+          <text x="270" y="80" text-anchor="middle" font-size="13">…</text>
+          <line x1="330" y1="55" x2="330" y2="65" stroke="#0b2559"/><text x="330" y="80" text-anchor="middle" font-size="11">8</text>
+          <line x1="60" y1="60" x2="60" y2="20" stroke="#1aa7d8" stroke-width="3"/>
+          <polygon points="60,20 55,30 65,30" fill="#1aa7d8"/>
+          <text x="60" y="14" text-anchor="middle" fill="#1aa7d8" font-size="12">P = ?</text>
+          <g stroke="#c81e1e" stroke-width="3" fill="#c81e1e">
+            <line x1="140" y1="60" x2="140" y2="110"/><polygon points="140,110 135,100 145,100"/>
+            <line x1="210" y1="60" x2="210" y2="110"/><polygon points="210,110 205,100 215,100"/>
+            <line x1="330" y1="60" x2="330" y2="110"/><polygon points="330,110 325,100 335,100"/>
+          </g>
+          <text x="230" y="128" text-anchor="middle" fill="#c81e1e" font-size="12">A = 1.000.000</text>
+        </svg>
+      </div>
+
+      <div class="ex-answer">
+        n = 8 (penarikan tahun 1998 s.d. 2005 = 8 kali, t = 1 s.d. t = 8)<br>
+        P = A (P/A ; 20% ; 8) = 1.000.000 × 3,837 = <b>Rp 3.837.000,-</b>
+      </div>
+
+      <div class="verify">
+        <h4>Verifikasi faktor (P/A ; 20% ; 8)</h4>
+        <div class="calc">
+          <div class="line">(P/A ; i ; n) = ((1+i)ⁿ − 1) / (i(1+i)ⁿ)</div>
+          <div class="line">(1,20)⁸ ≈ 4,2998</div>
+          <div class="line">(4,2998 − 1) / (0,20 × 4,2998) = 3,2998 / 0,85997 ≈ 3,837 ✓ cocok</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis</h4>
+      <p>Soal ini adalah kebalikan logis dari Soal 3: pada Soal 3, P diketahui dan A dicari (Capital Recovery); di sini A
+      (rencana penarikan) sudah ditentukan lebih dulu, dan P (setoran awal yang dibutuhkan) yang dicari. Inilah perhitungan
+      di balik produk keuangan seperti <b>anuitas pensiun</b>: "saya ingin menerima Rp 1.000.000/tahun selama 8 tahun,
+      berapa dana yang harus saya setorkan sekarang?"</p>
+    </div>
+  </section>
+
+  <!-- ============ SINTESIS ============ -->
+  <section id="sintesis">
+    <span class="kicker">Sintesis</span>
+    <h2>Enam Soal, Enam Faktor — Tidak Ada yang Kebetulan</h2>
+    <p>Menyusun ulang keenam soal berdasarkan faktor bunga yang dipakai, polanya menjadi jelas:</p>
+
+    <div class="table-wrap">
+      <table class="clean">
+        <tr><th>Soal</th><th>Faktor dipakai</th><th>Diketahui → Dicari</th><th>Nama faktor (Pertemuan 4)</th></tr>
+        <tr><td>1</td><td>(F/P ; 15% ; 10)</td><td>P → F</td><td>Single Payment Compound Amount Factor</td></tr>
+        <tr><td>2</td><td>(P/F ; 20% ; 5)</td><td>F → P</td><td>Single Payment Present Worth Factor</td></tr>
+        <tr><td>3</td><td>(A/P ; 25% ; 6)</td><td>P → A</td><td>Capital Recovery Factor</td></tr>
+        <tr><td>4</td><td>(F/A ; 12% ; 7)</td><td>A → F</td><td>Uniform Series Compound Amount Factor</td></tr>
+        <tr><td>5</td><td>(A/F ; 15% ; 9)</td><td>F → A</td><td>Sinking Fund Factor</td></tr>
+        <tr><td>6</td><td>(P/A ; 20% ; 8)</td><td>A → P</td><td>Uniform Series Present Worth Factor</td></tr>
+      </table>
+    </div>
+
+    <div class="analysis">
+      <h4>Analisis penutup</h4>
+      <p>Keenam faktor dari Pertemuan 4 muncul <b>tepat satu kali</b>, dan tiga pasangan kebalikannya juga hadir berdampingan
+      secara tidak langsung: Soal 1↔2 (hubungan P–F), Soal 4↔5 (hubungan F–A), dan Soal 3↔6 (hubungan A–P). Pola ini
+      menunjukkan bahwa mengerjakan soal Ekonomi Teknik pada dasarnya adalah proses <b>tiga langkah</b>:</p>
+      <ol style="margin:10px 0 0; padding-left:20px;">
+        <li>Identifikasi dua dari tiga variabel (P, F, A) yang <i>diketahui</i> dan satu yang <i>dicari</i>.</li>
+        <li>Tentukan n dengan hati-hati — hitung <i>jumlah transaksi</i>, bukan sekadar selisih tahun kalender (lihat catatan Soal 4).</li>
+        <li>Pilih notasi faktor yang sesuai (huruf sebelum "/" = dicari, sesudah "/" = diketahui), lalu kalikan dengan nilai
+        faktornya — yang bisa dihitung manual seperti pada kotak "Verifikasi", atau diambil dari tabel faktor bunga.</li>
+      </ol>
+    </div>
+  </section>
+
+  <div class="followup">
+    <h3>Pertanyaan lanjutan?</h3>
+    <p>Kalau ada soal serupa yang ingin dicoba sendiri, atau bagian penentuan n yang masih membingungkan, silakan tanyakan —
+    saya bisa bantu membuat diagram arus kasnya dan mengecek jawabannya langkah demi langkah.</p>
+  </div>
+
+  <p class="sources">Disusun ulang dari slide "Contoh-Contoh Penggunaan Rumus Bunga — Pertemuan 5", dengan diagram arus kas, verifikasi angka faktor bunga, dan analisis pola tambahan.</p>
+
+</div>
+</body>
+</html>

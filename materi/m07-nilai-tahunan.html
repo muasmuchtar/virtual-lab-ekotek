@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Annual Worth Analysis — Materi Pertemuan 9</title>
+<style>
+  :root{
+    --navy:#241226;
+    --navy-2:#331a3a;
+    --magenta:#c31577;
+    --magenta-2:#e91e8c;
+    --ink:#2b2530;
+    --muted:#6b6470;
+    --line:#e7e1ea;
+    --bg-card:#ffffff;
+    --bg-page:#faf8fb;
+    --plus:#1a7f4b;
+    --minus:#b3261e;
+    --warn-bg:#fff6e6;
+    --warn-line:#e0a63c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background:var(--bg-page); color:var(--ink); line-height:1.6;
+  }
+  h1,h2,h3{font-family:'Segoe UI Semibold', 'Segoe UI', sans-serif; font-weight:600; margin-top:0;}
+  .shell{display:flex; min-height:100vh;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:280px; flex:0 0 280px;
+    background:linear-gradient(160deg, var(--navy) 0%, var(--magenta) 130%);
+    color:#f1e8f3;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    padding:26px 0 30px;
+  }
+  .sidebar .brand{
+    padding:0 22px 20px; border-bottom:1px solid rgba(255,255,255,0.18); margin-bottom:14px;
+  }
+  .sidebar .brand .tag{font-size:11px; letter-spacing:2px; opacity:0.75; text-transform:uppercase;}
+  .sidebar .brand h1{font-size:19px; margin:4px 0 2px; line-height:1.3;}
+  .sidebar .brand .sub{font-size:12.5px; opacity:0.8;}
+  .nav-group{margin-bottom:6px;}
+  .nav-label{
+    font-size:10.5px; letter-spacing:1.5px; text-transform:uppercase; opacity:0.55;
+    padding:14px 22px 6px;
+  }
+  .nav-btn{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    background:none; border:none; color:#f1e8f3; font-size:14px;
+    padding:10px 22px; cursor:pointer; opacity:0.85; border-left:3px solid transparent;
+    font-family:inherit;
+  }
+  .nav-btn .num{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:50%; background:rgba(255,255,255,0.15);
+    font-size:11px; flex:0 0 auto;
+  }
+  .nav-btn:hover{opacity:1; background:rgba(255,255,255,0.06);}
+  .nav-btn.active{opacity:1; background:rgba(255,255,255,0.14); border-left-color:#fff; font-weight:600;}
+
+  /* ---------- MAIN ---------- */
+  main{flex:1; min-width:0; padding:42px 48px 70px;}
+  .view{display:none; max-width:900px; margin:0 auto; animation:fade .25s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+  .eyebrow{font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--magenta); font-weight:700; margin-bottom:6px;}
+  .view h2{font-size:28px; margin-bottom:6px;}
+  .lede{color:var(--muted); font-size:15.5px; margin-bottom:26px;}
+
+  .card{
+    background:var(--bg-card); border:1px solid var(--line); border-radius:14px;
+    padding:22px 26px; margin-bottom:20px; box-shadow:0 1px 2px rgba(30,10,30,0.03);
+  }
+  .card h3{font-size:16px; color:var(--navy-2); margin-bottom:10px;}
+  .card p{margin:0 0 10px;}
+  .card p:last-child{margin-bottom:0;}
+
+  .callout{
+    border-left:4px solid var(--magenta); background:#fdf1f8;
+    border-radius:0 10px 10px 0; padding:16px 20px; margin:18px 0;
+  }
+  .callout.formula{background:#f4f0fb; border-left-color:#6a3fb5;}
+  .callout.warn{background:var(--warn-bg); border-left-color:var(--warn-line);}
+  .callout .label{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--magenta); font-weight:700; margin-bottom:6px;}
+  .callout.formula .label{color:#6a3fb5;}
+  .callout.warn .label{color:#9c6b12;}
+
+  .formula-box{
+    font-family:'Cambria Math', Georgia, serif; font-size:16.5px; text-align:center;
+    background:#f4f0fb; border:1px dashed #c9b8e8; border-radius:10px; padding:14px; margin:12px 0;
+  }
+  .formula-box .plus{color:var(--plus); font-weight:700;}
+  .formula-box .minus{color:var(--minus); font-weight:700;}
+  .formula-box .eq-num{float:right; color:#8a76b5; font-size:13px;}
+
+  ul.tight{margin:8px 0; padding-left:20px;}
+  ul.tight li{margin-bottom:6px;}
+  ol.tight{margin:8px 0; padding-left:20px;}
+  ol.tight li{margin-bottom:6px;}
+
+  .table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:14px 0;}
+  table{width:100%; min-width:480px; border-collapse:collapse; font-size:14px;}
+  th, td{padding:9px 12px; border-bottom:1px solid var(--line); text-align:left;}
+  th{background:#f6f1f7; color:var(--navy-2); font-weight:600; font-size:13px;}
+  td.num, th.num{text-align:right; font-variant-numeric:tabular-nums;}
+
+  .badge{
+    display:inline-block; font-size:11.5px; font-weight:700; padding:3px 10px;
+    border-radius:20px; background:#e8f7ee; color:var(--plus); margin-left:6px;
+  }
+  .badge.warn{background:var(--warn-bg); color:#9c6b12;}
+
+  /* cash-flow diagram */
+  .cfd{width:100%; max-width:640px; display:block; margin:14px auto;}
+  .cfd .axis{stroke:#3a3140; stroke-width:1.5;}
+  .cfd .cost{stroke:var(--minus); stroke-width:2.2;}
+  .cfd .income{stroke:var(--plus); stroke-width:2.2;}
+  .cfd .aw{stroke:#6a3fb5; stroke-width:2.2;}
+  .cfd text{font-size:12px; fill:#3a3140; font-family:inherit;}
+  .cfd .val{font-size:11.5px; font-weight:600;}
+  .cfd-caption{text-align:center; font-size:12.5px; color:var(--muted); margin-top:-4px;}
+
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .mini-card{background:#f9f6fa; border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+  .mini-card h4{margin:0 0 6px; font-size:13.5px; color:var(--navy-2);}
+  .mini-card .pw{font-size:19px; font-weight:700; margin-top:6px;}
+  .mini-card .pw.minus{color:var(--minus);}
+  .mini-card .foot{font-size:12px; color:var(--muted); margin-top:4px;}
+
+  details.reveal{
+    border:1px solid var(--line); border-radius:10px; margin-top:12px; overflow:hidden;
+  }
+  details.reveal summary{
+    cursor:pointer; list-style:none; padding:12px 16px; background:#f6f1f7;
+    font-weight:600; font-size:14px; color:var(--navy-2); display:flex; align-items:center; gap:8px;
+  }
+  details.reveal summary::-webkit-details-marker{display:none;}
+  details.reveal summary::before{content:"▸"; transition:transform .18s ease;}
+  details.reveal[open] summary::before{transform:rotate(90deg);}
+  details.reveal .reveal-body{padding:16px 18px;}
+
+  .footer-note{margin-top:34px; padding-top:16px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted);}
+
+  /* ---------- topbar & hamburger: hidden on desktop ---------- */
+  .mobile-topbar{display:none;}
+  .hamburger-btn{
+    display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px;
+    width:36px; height:36px; background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25); border-radius:6px; cursor:pointer; padding:0;
+  }
+  .hamburger-btn span{display:block; width:16px; height:1.6px; background:#fff;}
+  .sidebar-overlay{display:none;}
+
+  /* ---------- MOBILE MODE ---------- */
+  @media(max-width:880px){
+    .shell{display:block;}
+    .mobile-topbar{
+      display:flex; align-items:center; gap:14px;
+      position:sticky; top:0; z-index:40;
+      background:linear-gradient(120deg, var(--navy), var(--magenta));
+      padding:14px 16px; color:#fff;
+    }
+    .mobile-topbar .m-title{font-size:14.5px; font-weight:600;}
+    .sidebar{
+      position:fixed; top:0; left:0; z-index:60; width:82%; max-width:300px;
+      transform:translateX(-100%); transition:transform .28s ease;
+      box-shadow:2px 0 28px rgba(0,0,0,0.35);
+    }
+    .sidebar.open{transform:translateX(0);}
+    .sidebar-overlay{
+      position:fixed; inset:0; background:rgba(9,15,19,0.5); z-index:55;
+    }
+    .sidebar-overlay.show{display:block;}
+    main{width:100%; min-width:0; padding:22px 16px 60px;}
+    .view h2{font-size:22px;}
+    .grid-3, .grid-2{grid-template-columns:1fr;}
+    .card{padding:18px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="mobile-topbar">
+    <button class="hamburger-btn" id="hamburgerBtn" aria-label="Buka menu navigasi">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="m-title">Annual Worth Analysis</div>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="tag">Ekonomi Teknik · Pertemuan 9</div>
+      <h1>Analisis Nilai Tahunan</h1>
+      <div class="sub">Annual Worth (AW) Analysis</div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Konsep Dasar</div>
+      <button class="nav-btn active" data-target="pendahuluan"><span class="num">1</span> Pendahuluan &amp; Istilah Lain</button>
+      <button class="nav-btn" data-target="karakteristik"><span class="num">2</span> Karakteristik Metode AW</button>
+      <button class="nav-btn" data-target="keuntungan"><span class="num">3</span> Keuntungan AW Analysis</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Rumus Inti</div>
+      <button class="nav-btn" data-target="rumus-cr"><span class="num">4</span> Capital Recovery (CR) &amp; AW</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Contoh Terselesaikan</div>
+      <button class="nav-btn" data-target="contoh1"><span class="num">5</span> Contoh 1 — Satu vs Dua Siklus</button>
+      <button class="nav-btn" data-target="contoh2"><span class="num">6</span> Contoh 5.2 — Lockheed Martin</button>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-label">Latihan</div>
+      <button class="nav-btn" data-target="latihan"><span class="num">7</span> Latihan — Investasi Telekomunikasi</button>
+    </div>
+  </aside>
+
+  <main id="mainArea">
+
+    <!-- 1. PENDAHULUAN -->
+    <section class="view active" id="view-pendahuluan">
+      <div class="eyebrow">Bagian 1</div>
+      <h2>Analisis Nilai Tahunan (Annual Worth Analysis)</h2>
+      <p class="lede">Metode kedua dalam keluarga analisis ekuivalensi setelah Present Worth (PW) — mengonversi seluruh arus kas menjadi nilai tahunan yang seragam.</p>
+
+      <div class="card">
+        <h3>Mengapa AW Dipelajari Setelah PW?</h3>
+        <p>AW analisis umumnya <strong>lebih disukai</strong> dibanding analisis PW, karena <strong>lebih mudah dalam perhitungannya</strong> — terutama saat membandingkan alternatif dengan umur proyek yang berbeda-beda.</p>
+      </div>
+
+      <div class="card">
+        <h3>Nama Lain Analisis Ini</h3>
+        <p>Di berbagai literatur ekonomi teknik, metode Annual Worth (AW) juga dikenal dengan istilah:</p>
+        <ol class="tight">
+          <li><strong>EAW</strong> (Equivalent Annual Worth)</li>
+          <li><strong>EAC</strong> (Equivalent Annual Cost)</li>
+          <li><strong>AE</strong> (Annual Equivalent)</li>
+          <li><strong>EUAC</strong> (Equivalent Uniform Annual Cost)</li>
+        </ol>
+        <p>Semua istilah ini merujuk pada konsep yang sama: mengubah seluruh nilai investasi, biaya operasional, dan nilai sisa menjadi satu angka tahunan yang seragam (uniform) dan ekuivalen.</p>
+      </div>
+    </section>
+
+    <!-- 2. KARAKTERISTIK -->
+    <section class="view" id="view-karakteristik">
+      <div class="eyebrow">Bagian 2</div>
+      <h2>Karakteristik &amp; Prinsip Metode AW</h2>
+      <p class="lede">Tiga sifat kunci yang membedakan sekaligus menghubungkan AW dengan PW.</p>
+
+      <div class="card">
+        <h3>1. Hasil Keputusan Konsisten dengan PW</h3>
+        <p>Alternatif yang dipilih dengan metode AW akan <strong>sama hasilnya</strong> dengan alternatif yang diseleksi menggunakan metode PW. Kedua metode ini hanya berbeda dalam cara penyajian nilai (tahunan vs. sekaligus di t=0), bukan dalam kesimpulan mana yang terbaik.</p>
+      </div>
+
+      <div class="card">
+        <h3>2. Alat Pembanding Universal</h3>
+        <p>Metode AW umumnya digunakan untuk <strong>membandingkan semua alternatif</strong>, termasuk kasus-kasus yang secara struktur sulit dibandingkan langsung dengan PW.</p>
+      </div>
+
+      <div class="card">
+        <h3>3. Basis Satu Siklus Usia</h3>
+        <p>Semua aliran dana (biaya awal, biaya operasional, nilai sisa) dikonversi ke suatu <strong>jumlah tahunan sama rata (equivalent)</strong> yang dihitung pada satu siklus usia alternatif — bukan pada keseluruhan periode gabungan seperti pada PW untuk umur berbeda.</p>
+      </div>
+    </section>
+
+    <!-- 3. KEUNTUNGAN -->
+    <section class="view" id="view-keuntungan">
+      <div class="eyebrow">Bagian 3</div>
+      <h2>Keuntungan Annual Worth Analysis</h2>
+      <p class="lede">Inilah alasan utama mengapa AW menjadi metode yang lebih praktis dibanding PW ketika umur alternatif tidak sama.</p>
+
+      <div class="grid-2">
+        <div class="mini-card">
+          <h4>Tidak Perlu Menyamakan Umur</h4>
+          <p>Dalam menemukan solusi, alternatif <strong>tidak perlu dibedakan</strong> antara umur sama atau tidak sama — perlakuannya sama saja. Ini adalah keunggulan terbesar AW dibanding PW, yang mengharuskan penyamaan periode studi (KPK) untuk alternatif berumur beda.</p>
+        </div>
+        <div class="mini-card">
+          <h4>Relasi Perhitungan Lebih Mudah</h4>
+          <p>AW menggunakan relasi yang lebih sederhana untuk mengonversi nilai sekarang (PW) atau nilai masa depan (FW) ke bentuk tahunan.</p>
+        </div>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Rumus Dasar</div>
+        <div class="formula-box">AW = PW(A/P, i, n) = FW(A/F, i, n)</div>
+        <p style="margin-bottom:0; font-size:14px;">Nilai AW dapat diperoleh baik dari PW yang dikalikan faktor (A/P, i, n), maupun dari FW yang dikalikan faktor (A/F, i, n) — keduanya menghasilkan angka yang identik.</p>
+      </div>
+    </section>
+
+    <!-- 4. RUMUS CR -->
+    <section class="view" id="view-rumus-cr">
+      <div class="eyebrow">Bagian 4</div>
+      <h2>Perhitungan Capital Recovery dan Nilai AW</h2>
+      <p class="lede">Dua rumus inti yang menjadi tulang punggung seluruh perhitungan pada bab ini.</p>
+
+      <div class="card">
+        <h3>Rumus Terkait</h3>
+        <div class="formula-box">AW = CR + A <span class="eq-num">[6.2]</span></div>
+        <div class="formula-box">CR = −P(A/P, i, n) + S(A/F, i, n) <span class="eq-num">[6.3]</span></div>
+        <ul class="tight">
+          <li><strong>CR</strong> (Capital Recovery) — biaya tahunan ekuivalen untuk mengembalikan investasi awal (P) ditambah return yang disyaratkan, dikurangi kontribusi nilai sisa (S).</li>
+          <li><strong>A</strong> — biaya (atau pendapatan) operasional tahunan yang seragam, di luar biaya awal dan nilai sisa.</li>
+          <li><strong>AW</strong> — total nilai tahunan ekuivalen, gabungan antara CR dan arus kas operasional tahunan A.</li>
+        </ul>
+      </div>
+
+      <div class="callout">
+        <div class="label">Intuisi</div>
+        <p>CR menjawab pertanyaan: <em>"Berapa yang harus dihasilkan setiap tahun hanya untuk menutup biaya investasi awal dan memenuhi tingkat pengembalian (i) yang disyaratkan?"</em> Sedangkan AW total baru diperoleh setelah biaya operasional tahunan (A) ditambahkan ke CR.</p>
+      </div>
+    </section>
+
+    <!-- 5. CONTOH 1 -->
+    <section class="view" id="view-contoh1">
+      <div class="eyebrow">Contoh Terselesaikan · 1</div>
+      <h2>Peralatan Digital Scanning — Satu vs Dua Siklus Usia</h2>
+      <p class="lede">Membuktikan bahwa nilai AW satu siklus usia berlaku untuk siklus usia berikutnya (berulang).</p>
+
+      <div class="card">
+        <h3>Soal</h3>
+        <p><em>New digital scanning graphics equipment is expected to cost $20,000, to be used for 3 years, and to have an annual operating cost (AOC) of $8000. Determine the AW values for one and two life cycles at i = 22% per year.</em></p>
+      </div>
+
+      <div class="card">
+        <h3>Diagram Arus Kas</h3>
+        <svg class="cfd" viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg">
+          <line class="axis" x1="30" y1="60" x2="610" y2="60"/>
+          <line class="cost" x1="30" y1="60" x2="30" y2="20"/>
+          <text x="10" y="15" class="val">$20.000</text>
+          <g class="cost">
+            <line x1="130" y1="60" x2="130" y2="95"/><line x1="230" y1="60" x2="230" y2="95"/>
+            <line x1="330" y1="60" x2="330" y2="95"/><line x1="430" y1="60" x2="430" y2="95"/>
+            <line x1="530" y1="60" x2="530" y2="95"/><line x1="590" y1="60" x2="590" y2="95"/>
+          </g>
+          <text x="290" y="112" class="val">$8.000 /thn</text>
+          <line class="cost" x1="330" y1="60" x2="330" y2="20"/>
+          <text x="310" y="15" class="val">$20.000</text>
+          <text x="25" y="75">0</text><text x="125" y="75">1</text><text x="225" y="75">2</text>
+          <text x="325" y="75">3</text><text x="425" y="75">4</text><text x="525" y="75">5</text>
+          <text x="585" y="75">6</text><text x="600" y="75">Year</text>
+        </svg>
+        <p class="cfd-caption">Investasi $20.000 diulang pada akhir tahun ke-3 (menjadi t=0 untuk siklus kedua) apabila proyek dilanjutkan selama 2 siklus (6 tahun).</p>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi — Satu Siklus (3 Tahun)</div>
+        <div class="formula-box">AW = −20.000(A/P,22%,3) − 8.000 = <strong class="minus">$−17.793</strong></div>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi — Dua Siklus (6 Tahun)</div>
+        <p style="margin-bottom:6px; font-size:14px;">Pembelian ulang untuk siklus kedua terjadi di akhir tahun ke-3, yang berlaku sebagai tahun-0 bagi siklus kedua.</p>
+        <div class="formula-box" style="text-align:left;">
+          AW = −20.000(A/P,22%,6) − 20.000(P/F,22%,3)(A/P,22%,6) − 8.000<br>
+          &nbsp;&nbsp;&nbsp;= <strong class="minus">$−17.793</strong>
+        </div>
+      </div>
+
+      <div class="callout">
+        <div class="label">Kesimpulan Penting</div>
+        <p>Nilai AW yang sama diperoleh untuk berapa pun jumlah siklus usia yang dihitung. Ini membuktikan bahwa <strong>nilai AW untuk satu siklus mewakili nilai tahunan ekuivalen alternatif tersebut untuk setiap siklus</strong> — inilah dasar mengapa AW tidak perlu menyamakan umur antar alternatif (lihat Bagian 3).</p>
+      </div>
+    </section>
+
+    <!-- 6. CONTOH 5.2 -->
+    <section class="view" id="view-contoh2">
+      <div class="eyebrow">Contoh Terselesaikan · 5.2</div>
+      <h2>Lockheed Martin — Sistem Pelacak (Tracker System)</h2>
+      <p class="lede">Penerapan rumus Capital Recovery (CR) dan AW total pada kasus investasi tunggal dengan nilai sisa.</p>
+
+      <div class="card">
+        <h3>Soal</h3>
+        <p><em>Lockheed Martin is increasing its booster thrust power in order to win more satellite launch contracts from European companies interested in new global communications markets. A piece of earth-based tracking equipment is expected to require an investment of $13 million. Annual operating costs for the system are expected to start the first year and continue at $0.9 million per year. The useful life of the tracker is 8 years with a salvage value of $0.5 million. Calculate the AW value for the system if the corporate MARR is currently 12% per year.</em></p>
+      </div>
+
+      <div class="card">
+        <h3>Diagram Arus Kas</h3>
+        <svg class="cfd" viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+          <line class="axis" x1="30" y1="80" x2="610" y2="80"/>
+          <line class="cost" x1="30" y1="80" x2="30" y2="30"/>
+          <text x="10" y="24" class="val">$13,0 jt</text>
+          <g class="cost">
+            <line x1="100" y1="80" x2="100" y2="115"/><line x1="170" y1="80" x2="170" y2="115"/>
+            <line x1="240" y1="80" x2="240" y2="115"/><line x1="310" y1="80" x2="310" y2="115"/>
+            <line x1="380" y1="80" x2="380" y2="115"/><line x1="450" y1="80" x2="450" y2="115"/>
+            <line x1="520" y1="80" x2="520" y2="115"/><line x1="590" y1="80" x2="590" y2="115"/>
+          </g>
+          <text x="215" y="132" class="val">$0,9 jt /thn</text>
+          <line class="income" x1="590" y1="80" x2="590" y2="30"/>
+          <text x="570" y="24" class="val">$0,5 jt</text>
+          <text x="25" y="95">0</text><text x="95" y="95">1</text><text x="235" y="95">4</text>
+          <text x="585" y="95">8</text>
+        </svg>
+        <p class="cfd-caption">Investasi $13 jt di t=0, AOC $0,9 jt/tahun (tahun 1–8), nilai sisa $0,5 jt di tahun ke-8 — dikonversi menjadi deret AW seragam sepanjang 8 tahun.</p>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi — Capital Recovery</div>
+        <div class="formula-box" style="text-align:left;">
+          CR = −13(A/P,12%,8) + 0,5(A/F,12%,8)<br>
+          &nbsp;&nbsp;&nbsp;= −13(0,2013) + 0,5(0,0813)<br>
+          &nbsp;&nbsp;&nbsp;= <strong class="minus">$−2,576 juta</strong>
+        </div>
+      </div>
+
+      <div class="callout formula">
+        <div class="label">Solusi — Annual Worth Total</div>
+        <div class="formula-box">AW = CR + A = −2,576 − 0,9 = <strong class="minus">$−3,476 juta / tahun</strong></div>
+      </div>
+
+      <div class="callout">
+        <div class="label">Interpretasi</div>
+        <p>Hasil ini bermakna penting bagi Lockheed Martin: setiap tahun selama 8 tahun, <strong>total pendapatan ekuivalen dari tracker harus minimal $2.576.000</strong> hanya untuk mengembalikan nilai investasi sekarang beserta return yang disyaratkan (12%) — belum termasuk AOC sebesar $0,9 juta/tahun. Nilai AW ini berlaku untuk seluruh siklus usia mendatang, selama biaya naik sesuai laju inflasi dan biaya/layanan tetap sama pada setiap siklus berikutnya.</p>
+      </div>
+    </section>
+
+    <!-- 7. LATIHAN -->
+    <section class="view" id="view-latihan">
+      <div class="eyebrow">Latihan</div>
+      <h2>Investasi Perusahaan Telekomunikasi</h2>
+      <p class="lede">Kasus investasi bertahap (dua kali penanaman modal) dengan perhitungan CR dan AW.</p>
+
+      <div class="card">
+        <h3>Soal</h3>
+        <p>Sebuah perusahaan telekomunikasi berinvestasi senilai $13 Jt, dengan rincian $8 Jt diinvestasikan sekarang dan sisanya ($5 Jt) diinvestasikan pada akhir tahun pertama. Biaya operasi tahunan investasi tersebut dimulai tahun pertama dan berlanjut sampai tahun ke-8 senilai $0,9 Jt per tahun. Diperkirakan nilai sisa investasi senilai $0,5 Jt setelah tahun ke-8. Bila diasumsikan suku bunga <strong>8% per tahun</strong>, hitunglah CR dan AW.</p>
+      </div>
+
+      <div class="card">
+        <h3>Diagram Arus Kas</h3>
+        <svg class="cfd" viewBox="0 0 640 170" xmlns="http://www.w3.org/2000/svg">
+          <line class="axis" x1="30" y1="80" x2="610" y2="80"/>
+          <line class="cost" x1="30" y1="80" x2="30" y2="30"/>
+          <text x="12" y="24" class="val">$8,0 jt</text>
+          <line class="cost" x1="100" y1="80" x2="100" y2="55"/>
+          <text x="80" y="48" class="val">$5,0 jt</text>
+          <g class="cost">
+            <line x1="170" y1="80" x2="170" y2="115"/><line x1="240" y1="80" x2="240" y2="115"/>
+            <line x1="310" y1="80" x2="310" y2="115"/><line x1="380" y1="80" x2="380" y2="115"/>
+            <line x1="450" y1="80" x2="450" y2="115"/><line x1="520" y1="80" x2="520" y2="115"/>
+            <line x1="590" y1="80" x2="590" y2="115"/>
+          </g>
+          <text x="240" y="132" class="val">$0,9 jt /thn</text>
+          <line class="income" x1="590" y1="80" x2="590" y2="30"/>
+          <text x="570" y="24" class="val">$0,5 jt</text>
+          <text x="25" y="95">0</text><text x="95" y="95">1</text><text x="585" y="95">8</text>
+        </svg>
+        <p class="cfd-caption">Dua penanaman modal awal ($8 jt di t=0, $5 jt di t=1) disatukan lebih dulu menjadi satu nilai P ekuivalen, sebelum dikonversi ke CR dan AW.</p>
+      </div>
+
+      <details class="reveal" open>
+        <summary>Pembahasan Sesuai Materi Asli</summary>
+        <div class="reveal-body">
+          <div class="callout formula">
+            <div class="label">Langkah 1 — Menyatukan Dua Investasi Awal ke P</div>
+            <div class="formula-box">P = 8 + 5(P/F,12%,1) = <strong>$12,46 juta</strong></div>
+          </div>
+          <div class="callout formula">
+            <div class="label">Langkah 2 — Capital Recovery</div>
+            <div class="formula-box" style="text-align:left;">
+              CR = −12,46(A/P,12%,8) + 0,5(A/F,12%,8)<br>
+              &nbsp;&nbsp;&nbsp;= −12,46(0,20130) + 0,5(0,08130)<br>
+              &nbsp;&nbsp;&nbsp;= <strong class="minus">$−2,47 juta</strong>
+            </div>
+          </div>
+          <div class="callout formula">
+            <div class="label">Langkah 3 — Annual Worth Total</div>
+            <div class="formula-box">AW = CR + A = −2,47 − 0,9 = <strong class="minus">$−3,37 juta / tahun</strong></div>
+          </div>
+
+          <div class="callout warn">
+            <div class="label">Catatan Analisis — Perhatikan Suku Bunga</div>
+            <p>Perhitungan pada slide sumber menggunakan faktor <strong>12%</strong> (P/F,12%,1 dan A/P,A/F,12%,8), padahal soal secara eksplisit menyebutkan suku bunga <strong>8% per tahun</strong>. Ini kemungkinan salinan yang terbawa dari Contoh 5.2 (yang memang menggunakan MARR 12%) dan belum diperbarui. Perhitungan ulang dengan i = 8% menghasilkan:</p>
+            <div class="formula-box" style="text-align:left;">
+              P = 8 + 5(P/F,8%,1) ≈ <strong>$12,63 juta</strong><br>
+              CR = −12,63(A/P,8%,8) + 0,5(A/F,8%,8) = −12,63(0,1740) + 0,5(0,0940) ≈ <strong class="minus">$−2,15 juta</strong><br>
+              AW = CR + A = −2,15 − 0,9 ≈ <strong class="minus">$−3,05 juta / tahun</strong>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <div class="footer-note">
+        Materi disusun ulang dalam format dashboard interaktif dari slide "Analisis Nilai Tahunan / Annual Worth Analysis" (Pertemuan 9). Rumus mengacu pada faktor bunga standar (A/P, i%, n) dan (A/F, i%, n) yang telah dibahas pada pertemuan-pertemuan sebelumnya, serta selaras dengan Persamaan [6.2] dan [6.3] pada materi.
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ---------- navigasi sidebar (swap section) ----------
+  const navButtons = document.querySelectorAll('.nav-btn');
+  const views = document.querySelectorAll('.view');
+
+  function showView(target){
+    views.forEach(v => v.classList.remove('active'));
+    const el = document.getElementById('view-' + target);
+    if(el) el.classList.add('active');
+    navButtons.forEach(b => b.classList.toggle('active', b.dataset.target === target));
+    document.getElementById('mainArea').scrollTo({top:0, behavior:'instant'});
+    window.scrollTo({top:0, behavior:'instant'});
+  }
+
+  navButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      showView(btn.dataset.target);
+      closeSidebar(); // tidak berefek di desktop
+    });
+  });
+
+  // ---------- toggle sidebar mobile (off-canvas) ----------
+  const sidebarEl = document.getElementById('sidebar');
+  const overlayEl = document.getElementById('sidebarOverlay');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+
+  function openSidebar(){ sidebarEl.classList.add('open'); overlayEl.classList.add('show'); }
+  function closeSidebar(){ sidebarEl.classList.remove('open'); overlayEl.classList.remove('show'); }
+
+  hamburgerBtn.addEventListener('click', ()=>{
+    sidebarEl.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlayEl.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
