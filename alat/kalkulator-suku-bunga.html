@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Suku Bunga Fungsional — Ekonomi Teknik</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-900:#0F2338;
+    --ink-800:#16324F;
+    --ink-600:#3C5674;
+    --ink-300:#8FA3B8;
+    --paper:#E9EEF1;
+    --card:#FFFFFF;
+    --line:#D3DCE3;
+    --amber:#C98A2B;
+    --amber-dark:#9C6A1C;
+    --money:#2F6F5E;
+    --money-dark:#20503F;
+    --money-tint:#E6F0EC;
+    --amber-tint:#FBF1E1;
+    --rust:#B23A2E;
+    --rust-tint:#FBEBE9;
+    --radius-s:6px;
+    --radius-m:10px;
+    --font-display:'Fraunces', serif;
+    --font-body:'IBM Plex Sans', sans-serif;
+    --font-mono:'IBM Plex Mono', monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink-800);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:var(--font-display);
+    font-weight:600;
+    color:var(--ink-900);
+    margin:0;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;}
+
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 20px;
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 44px),
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 44px),
+      linear-gradient(160deg, var(--ink-900), var(--ink-800) 65%);
+    color:#EFF3F6;
+    padding:44px 0 34px;
+    border-bottom:3px solid var(--amber);
+  }
+  .hero .eyebrow-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:var(--font-mono);
+    font-size:0.78rem;
+    color:var(--amber);
+    letter-spacing:0.02em;
+    margin-bottom:14px;
+  }
+  .hero .eyebrow-row .dot{
+    width:6px;height:6px;border-radius:50%;background:var(--amber);
+    flex:none;
+  }
+  .hero h1{
+    font-size:clamp(1.7rem, 4.4vw, 2.5rem);
+    line-height:1.15;
+    max-width:15ch;
+  }
+  .hero p{
+    max-width:56ch;
+    color:#C7D3DE;
+    font-size:1rem;
+    margin:14px 0 0;
+  }
+  .hero .live-strip{
+    margin-top:26px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:var(--radius-m);
+    padding:14px 18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px 22px;
+    font-family:var(--font-mono);
+    font-size:0.86rem;
+    color:#DCE5EC;
+  }
+  .hero .live-strip b{color:#fff; font-weight:600;}
+  .hero .live-strip .fp{color:var(--amber);}
+
+  /* ---------- TABS ---------- */
+  .tabbar{
+    max-width:960px;
+    margin:-22px auto 0;
+    padding:0 20px;
+    position:relative;
+    z-index:2;
+  }
+  .tabbar-inner{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    box-shadow:0 10px 26px rgba(15,35,56,0.14);
+    overflow:hidden;
+  }
+  .tab-btn{
+    border:none;
+    background:transparent;
+    padding:16px 10px;
+    font-size:0.92rem;
+    font-weight:600;
+    color:var(--ink-600);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border-bottom:3px solid transparent;
+    transition:background .15s ease, color .15s ease;
+  }
+  .tab-btn:hover{background:var(--paper);}
+  .tab-btn[aria-selected="true"]{color:var(--ink-900);}
+  .tab-btn[data-tab="faktor"][aria-selected="true"]{border-bottom-color:var(--amber);}
+  .tab-btn[data-tab="uang"][aria-selected="true"]{border-bottom-color:var(--money);}
+  .tab-btn .tag{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    padding:2px 6px;
+    border-radius:4px;
+    background:var(--paper);
+    color:var(--ink-600);
+  }
+  .tab-btn[aria-selected="true"] .tag{background:var(--ink-900); color:#fff;}
+
+  main{padding:30px 0 70px;}
+  .panel{display:none;}
+  .panel.active{display:block; animation:fadein .25s ease;}
+  @keyframes fadein{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:translateY(0);}}
+
+  .section-intro{margin-bottom:22px;}
+  .section-intro h2{font-size:1.35rem;}
+  .section-intro p{color:var(--ink-600); margin:8px 0 0; max-width:62ch;}
+
+  /* ---------- FORM CARD ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:22px;
+  }
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .field{display:flex; flex-direction:column; gap:6px;}
+  .field label{
+    font-size:0.82rem;
+    font-weight:600;
+    color:var(--ink-800);
+  }
+  .field .hint{font-size:0.76rem; color:var(--ink-300); font-weight:400;}
+  .field input, .field select{
+    font-family:var(--font-mono);
+    font-size:1.05rem;
+    padding:11px 12px;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-s);
+    background:#fff;
+    color:var(--ink-900);
+    width:100%;
+  }
+  .field input:focus, .field select:focus, button:focus-visible, .chip:focus-visible{
+    outline:3px solid #9BB7CE;
+    outline-offset:1px;
+    border-color:var(--ink-600);
+  }
+  .field input.invalid{border-color:var(--rust); background:var(--rust-tint);}
+  .error-msg{
+    font-size:0.78rem; color:var(--rust); min-height:1em; margin-top:2px;
+  }
+
+  /* ---------- RESULT GRID (mode 1) ---------- */
+  .result-grid{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:14px;
+  }
+  .factor-card{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:var(--radius-s);
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .factor-card .fname{
+    font-family:var(--font-mono);
+    font-size:0.95rem;
+    font-weight:600;
+    color:var(--amber-dark);
+  }
+  .factor-card .flabel{
+    font-size:0.78rem;
+    color:var(--ink-600);
+  }
+  .factor-card .fvalue{
+    font-family:var(--font-mono);
+    font-size:1.5rem;
+    font-weight:600;
+    color:var(--ink-900);
+    word-break:break-all;
+  }
+  .factor-card .fformula{
+    font-family:var(--font-mono);
+    font-size:0.72rem;
+    color:var(--ink-300);
+  }
+  .use-btn{
+    margin-top:4px;
+    align-self:flex-start;
+    background:none;
+    border:1px solid var(--amber);
+    color:var(--amber-dark);
+    font-size:0.76rem;
+    font-weight:600;
+    padding:6px 10px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .use-btn:hover{background:var(--amber-tint);}
+
+  .ref-badge{
+    margin-top:18px;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    background:var(--amber-tint);
+    border:1px solid #ECD8AE;
+    border-radius:var(--radius-s);
+    padding:12px 14px;
+    font-size:0.84rem;
+    color:var(--ink-800);
+  }
+  .ref-badge b{color:var(--amber-dark);}
+
+  /* ---------- MODE 2 : chips ---------- */
+  .chip-groups{
+    display:grid;
+    gap:16px;
+    grid-template-columns:1fr 1fr;
+    margin-bottom:20px;
+  }
+  .chip-group h3{
+    font-size:0.78rem;
+    text-transform:none;
+    color:var(--ink-600);
+    font-family:var(--font-body);
+    font-weight:600;
+    margin-bottom:8px;
+  }
+  .chip-list{display:flex; flex-wrap:wrap; gap:8px;}
+  .chip{
+    font-family:var(--font-mono);
+    font-size:0.88rem;
+    padding:9px 14px;
+    border-radius:20px;
+    border:1.5px solid var(--line);
+    background:#fff;
+    color:var(--ink-800);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--money);}
+  .chip.selected{
+    background:var(--money);
+    border-color:var(--money);
+    color:#fff;
+  }
+
+  .money-form{margin-top:18px;}
+  .money-result{
+    margin-top:22px;
+    background:var(--money-tint);
+    border:1px solid #BFDBCE;
+    border-radius:var(--radius-m);
+    padding:22px;
+  }
+  .money-result .rlabel{
+    font-size:0.82rem;
+    color:var(--money-dark);
+    font-weight:600;
+  }
+  .money-result .rvalue{
+    font-family:var(--font-mono);
+    font-size:clamp(1.6rem, 5vw, 2.3rem);
+    font-weight:600;
+    color:var(--ink-900);
+    margin:6px 0 14px;
+    word-break:break-word;
+  }
+  .money-result .breakdown{
+    font-family:var(--font-mono);
+    font-size:0.85rem;
+    color:var(--ink-800);
+    background:#fff;
+    border:1px solid #BFDBCE;
+    border-radius:var(--radius-s);
+    padding:12px 14px;
+    line-height:1.7;
+  }
+  .money-result .breakdown .muted{color:var(--ink-300);}
+  .empty-state{
+    margin-top:22px;
+    padding:22px;
+    border:1.5px dashed var(--line);
+    border-radius:var(--radius-m);
+    color:var(--ink-300);
+    font-size:0.9rem;
+    text-align:center;
+  }
+
+  /* ---------- PRECISION SELECTOR ---------- */
+  .precision-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px 18px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    padding:12px 16px;
+    margin-bottom:22px;
+  }
+  .precision-bar .pb-text{display:flex; flex-direction:column; gap:2px;}
+  .precision-bar .pb-title{font-size:0.86rem; font-weight:600; color:var(--ink-900);}
+  .precision-bar .pb-hint{font-size:0.76rem; color:var(--ink-600);}
+  .seg{
+    display:inline-flex;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+    background:#fff;
+  }
+  .seg-btn{
+    font-family:var(--font-mono);
+    font-size:0.95rem;
+    font-weight:500;
+    min-width:44px;
+    padding:9px 14px;
+    border:none;
+    border-left:1px solid var(--line);
+    background:#fff;
+    color:var(--ink-600);
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .seg-btn:first-child{border-left:none;}
+  .seg-btn:hover{background:var(--amber-tint); color:var(--ink-900);}
+  .seg-btn[aria-checked="true"]{
+    background:var(--ink-900);
+    color:#fff;
+    font-weight:600;
+  }
+  .seg-btn:focus-visible{outline-offset:-3px;}
+
+  /* ---------- GLOSSARY ---------- */
+  .glossary{
+    margin-top:40px;
+    border-top:1px solid var(--line);
+    padding-top:24px;
+  }
+  .glossary h2{font-size:1.05rem; margin-bottom:14px;}
+  .glossary dl{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(210px,1fr));
+    gap:14px;
+  }
+  .glossary .term{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    padding:12px 14px;
+  }
+  .glossary dt{
+    font-family:var(--font-mono);
+    font-weight:600;
+    color:var(--ink-900);
+    font-size:0.9rem;
+  }
+  .glossary dd{margin:4px 0 0; font-size:0.82rem; color:var(--ink-600);}
+
+  footer{
+    text-align:center;
+    padding:24px 20px 40px;
+    font-size:0.78rem;
+    color:var(--ink-300);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:720px){
+    .result-grid{grid-template-columns:1fr 1fr;}
+    .chip-groups{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .hero{padding:32px 0 28px;}
+    .field-row{grid-template-columns:1fr;}
+    .result-grid{grid-template-columns:1fr;}
+    .tab-btn{flex-direction:column; gap:4px; padding:12px 6px; font-size:0.82rem;}
+    .money-result{padding:18px;}
+    .precision-bar{flex-direction:column; align-items:stretch;}
+    .seg{display:grid; grid-template-columns:repeat(6, 1fr);}
+    .seg-btn{min-width:0; padding:11px 0;}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .panel.active{animation:none;}
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="eyebrow-row"><span class="dot"></span>ALAT BANTU HITUNG &middot; EKONOMI TEKNIK</div>
+    <h1>Kalkulator Suku Bunga Fungsional</h1>
+    <p>Berdasarkan Tabel Suku Bunga Fungsional (bunga majemuk). Tentukan faktor (F/P, P/F, A/F, F/A, P/A, A/P) untuk suku bunga dan periode berapa pun, lalu hitung langsung nilai uangnya dalam Rupiah (IDR) atau Dollar Amerika (USD).</p>
+    <div class="live-strip">
+      <span>i = <b id="heroI">12%</b></span>
+      <span>n = <b id="heroN">5</b></span>
+      <span class="fp"><span id="heroRelName">(F/P;</span><b id="heroLabel">12%;5</b>) = <b id="heroLive">1.762342</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tabbar-inner" role="tablist" aria-label="Pilih kalkulator">
+    <button class="tab-btn" data-tab="faktor" role="tab" aria-selected="true" id="tabbtn-faktor">
+      Faktor Bunga <span class="tag">i, n &rarr; semua faktor</span>
+    </button>
+    <button class="tab-btn" data-tab="uang" role="tab" aria-selected="false" id="tabbtn-uang">
+      Nilai Uang (IDR / USD) <span class="tag">P, F, A</span>
+    </button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- ================= KETELITIAN DESIMAL (berlaku untuk kedua tab) ================= -->
+  <div class="precision-bar">
+    <div class="pb-text">
+      <span class="pb-title" id="precLabel">Ketelitian faktor</span>
+      <span class="pb-hint" id="precHint">Faktor ditampilkan dengan 6 angka di belakang koma.</span>
+    </div>
+    <div class="seg" role="radiogroup" aria-labelledby="precLabel" id="precSeg">
+      <button type="button" class="seg-btn" role="radio" aria-checked="false" tabindex="-1" data-dec="1" aria-label="1 angka di belakang koma">1</button>
+      <button type="button" class="seg-btn" role="radio" aria-checked="false" tabindex="-1" data-dec="2" aria-label="2 angka di belakang koma">2</button>
+      <button type="button" class="seg-btn" role="radio" aria-checked="false" tabindex="-1" data-dec="3" aria-label="3 angka di belakang koma">3</button>
+      <button type="button" class="seg-btn" role="radio" aria-checked="false" tabindex="-1" data-dec="4" aria-label="4 angka di belakang koma">4</button>
+      <button type="button" class="seg-btn" role="radio" aria-checked="false" tabindex="-1" data-dec="5" aria-label="5 angka di belakang koma">5</button>
+      <button type="button" class="seg-btn" role="radio" aria-checked="true" tabindex="0" data-dec="6" aria-label="6 angka di belakang koma">6</button>
+    </div>
+  </div>
+
+  <!-- ================= PANEL 1: FAKTOR BUNGA ================= -->
+  <section class="panel active" id="panel-faktor" role="tabpanel" aria-labelledby="tabbtn-faktor">
+    <div class="section-intro">
+      <h2>Kalkulator Faktor Bunga</h2>
+      <p>Masukkan suku bunga (i) dan jumlah periode (n) untuk mendapatkan keenam faktor bunga fungsional sekaligus — sama seperti membaca satu baris pada tabel bunga, tapi untuk nilai i berapa pun, tidak terbatas pada 12%.</p>
+    </div>
+
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label for="fac-i">Suku bunga, i (% per periode)</label>
+          <input type="number" id="fac-i" value="12" step="0.01" min="0" inputmode="decimal">
+          <div class="error-msg" id="fac-i-err"></div>
+        </div>
+        <div class="field">
+          <label for="fac-n">Jumlah periode, n</label>
+          <input type="number" id="fac-n" value="5" step="1" min="1" max="200" inputmode="numeric">
+          <div class="error-msg" id="fac-n-err"></div>
+        </div>
+      </div>
+
+      <div class="result-grid" id="factorGrid"></div>
+
+      <div class="ref-badge" id="refBadge" hidden>
+        <span>&#10003;</span>
+        <span><b>Cocok dengan tabel referensi.</b> Nilai di atas untuk i=12%, n=<span id="refN"></span> sudah dicocokkan langsung dengan Tabel Suku Bunga Fungsional sumber (pada 6 desimal). Tampilan di atas dibulatkan sesuai ketelitian yang dipilih.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 2: NILAI UANG ================= -->
+  <section class="panel" id="panel-uang" role="tabpanel" aria-labelledby="tabbtn-uang">
+    <div class="section-intro">
+      <h2>Kalkulator Nilai Uang</h2>
+      <p>Pilih hubungan yang ingin dihitung, lalu masukkan nilai yang sudah diketahui. Kalkulator akan mengalikannya dengan faktor bunga yang sesuai untuk mendapatkan nilai uang yang dicari, lengkap dengan rincian perhitungannya.</p>
+    </div>
+
+    <div class="card">
+      <div class="chip-groups">
+        <div class="chip-group">
+          <h3>Pembayaran tunggal (single payment)</h3>
+          <div class="chip-list">
+            <button class="chip" data-rel="FP">(F/P;i;n) — cari F dari P</button>
+            <button class="chip" data-rel="PF">(P/F;i;n) — cari P dari F</button>
+          </div>
+        </div>
+        <div class="chip-group">
+          <h3>Anuitas / seri seragam (uniform series)</h3>
+          <div class="chip-list">
+            <button class="chip" data-rel="AF">(A/F;i;n) — cari A dari F</button>
+            <button class="chip" data-rel="FA">(F/A;i;n) — cari F dari A</button>
+            <button class="chip" data-rel="PA">(P/A;i;n) — cari P dari A</button>
+            <button class="chip" data-rel="AP">(A/P;i;n) — cari A dari P</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="money-form">
+        <div class="field-row">
+          <div class="field">
+            <label for="m-i">Suku bunga, i (% per periode)</label>
+            <input type="number" id="m-i" value="12" step="0.01" min="0" inputmode="decimal">
+            <div class="error-msg" id="m-i-err"></div>
+          </div>
+          <div class="field">
+            <label for="m-n">Jumlah periode, n</label>
+            <input type="number" id="m-n" value="5" step="1" min="1" max="200" inputmode="numeric">
+            <div class="error-msg" id="m-n-err"></div>
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:16px;">
+          <div class="field">
+            <label for="currency">Mata uang</label>
+            <select id="currency">
+              <option value="IDR" selected>Rupiah Indonesia (IDR / Rp)</option>
+              <option value="USD">Dollar Amerika Serikat (USD / $)</option>
+            </select>
+            <div class="hint">Pilihan mata uang mengubah simbol dan format hasil. Faktor bunga tidak berubah karena faktor bersifat tanpa satuan.</div>
+          </div>
+          <div class="field">
+            <label id="knownLabel" for="m-known">Nilai yang diketahui (Rp)</label>
+            <input type="number" id="m-known" value="10000000" step="0.01" min="0" inputmode="decimal">
+            <div class="error-msg" id="m-known-err"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <div class="hint" id="relHint">Pilih hubungan di atas untuk mulai menghitung.</div>
+        </div>
+      </div>
+
+      <div id="moneyEmpty" class="empty-state">Belum ada hubungan dipilih — klik salah satu tombol (F/P), (P/F), dst. di atas.</div>
+
+      <div class="money-result" id="moneyResult" hidden>
+        <div class="rlabel" id="rLabel">Hasil</div>
+        <div class="rvalue" id="rValue">Rp 0</div>
+        <div class="breakdown" id="rBreakdown"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="glossary">
+    <h2>Glosarium &amp; Penjelasan Notasi</h2>
+    <dl>
+      <div class="term"><dt>P — Present Worth / Present Value</dt><dd>Nilai sekarang, yaitu nilai ekuivalen uang pada waktu 0. Satuan mengikuti mata uang yang dipilih: IDR (Rp) atau USD ($).</dd></div>
+      <div class="term"><dt>F — Future Worth / Future Value</dt><dd>Nilai ekuivalen uang pada akhir periode ke-n setelah mengalami proses pemajemukan bunga.</dd></div>
+      <div class="term"><dt>A — Annual / Uniform Series</dt><dd>Besarnya pembayaran atau penerimaan seragam pada setiap periode. Periode dapat berupa tahun, bulan, kuartal, dan sebagainya, selama konsisten dengan i.</dd></div>
+      <div class="term"><dt>i — Interest Rate</dt><dd>Suku bunga efektif per periode. Contoh: i = 12% per tahun berarti setiap periode satu tahun menggunakan 12%.</dd></div>
+      <div class="term"><dt>n — Number of Periods</dt><dd>Jumlah periode pemajemukan. Jika i dinyatakan per tahun, n juga harus dinyatakan dalam jumlah tahun.</dd></div>
+      <div class="term"><dt>(F/P; i; n)</dt><dd>Compound Amount Factor. Mengubah P menjadi F: F = P(F/P;i;n) = P(1+i)^n.</dd></div>
+      <div class="term"><dt>(P/F; i; n)</dt><dd>Present Worth Factor. Mengubah F menjadi P: P = F(P/F;i;n) = F/(1+i)^n.</dd></div>
+      <div class="term"><dt>(A/F; i; n)</dt><dd>Sinking Fund Factor. Menentukan setoran seragam A yang diperlukan untuk mencapai nilai masa depan F.</dd></div>
+      <div class="term"><dt>(F/A; i; n)</dt><dd>Uniform Series Compound Amount Factor. Mengubah seri seragam A menjadi nilai masa depan F.</dd></div>
+      <div class="term"><dt>(P/A; i; n)</dt><dd>Uniform Series Present Worth Factor. Mengubah seri seragam A menjadi nilai sekarang P.</dd></div>
+      <div class="term"><dt>(A/P; i; n)</dt><dd>Capital Recovery Factor. Mengubah nilai sekarang P menjadi pembayaran seragam A per periode.</dd></div>
+      <div class="term"><dt>IDR / Rp</dt><dd>Indonesian Rupiah / Rupiah Indonesia. Format hasil menggunakan simbol Rp dan kaidah angka Indonesia.</dd></div>
+      <div class="term"><dt>USD / $</dt><dd>United States Dollar / Dollar Amerika Serikat. Format hasil menggunakan simbol $ dan kaidah angka Amerika.</dd></div>
+      <div class="term"><dt>Faktor bunga</dt><dd>Bilangan tanpa satuan yang hanya dipengaruhi oleh i dan n. Karena itu faktor yang sama berlaku untuk Rupiah maupun Dollar.</dd></div>
+      <div class="term"><dt>Konsistensi periode</dt><dd>Satuan waktu i dan n harus sama. Jika i adalah bunga per bulan, n harus berupa jumlah bulan; jika i per tahun, n berupa jumlah tahun.</dd></div>
+    </dl>
+  </div>
+</main>
+
+<footer>
+  Mengacu pada Tabel Suku Bunga Fungsional (i = 12%, n = 1–50). Faktor untuk nilai i dan n lain dihitung langsung dengan rumus bunga majemuk baku. Mendukung IDR (Rp) dan USD ($); pilihan mata uang hanya mengubah satuan/format tampilan, bukan nilai faktor bunga. Alat bantu belajar — bukan pengganti buku ajar ekonomi teknik.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- reference table: i = 0.12, n = 1..50 -> [n, FP, PF, AF, FA, PA, AP] ----------
+  var REF_TABLE = [[1,1.12,0.892857,1.0,1.0,0.892857,1.12],[2,1.2544,0.797194,0.471698,2.12,1.690051,0.591698],[3,1.404928,0.71178,0.296349,3.3744,2.401831,0.416349],[4,1.573519,0.635518,0.209234,4.779328,3.037349,0.329234],[5,1.762342,0.567427,0.15741,6.352847,3.604776,0.27741],[6,1.973823,0.506631,0.123226,8.115189,4.111407,0.243226],[7,2.210681,0.452349,0.099118,10.089012,4.563757,0.219118],[8,2.475963,0.403883,0.081303,12.299693,4.96764,0.201303],[9,2.773079,0.36061,0.067679,14.775656,5.32825,0.187679],[10,3.105848,0.321973,0.056984,17.548735,5.650223,0.176984],[11,3.47855,0.287476,0.048415,20.654583,5.937699,0.168415],[12,3.895976,0.256675,0.041437,24.133133,6.194374,0.161437],[13,4.363493,0.229174,0.035677,28.029109,6.423548,0.155677],[14,4.887112,0.20462,0.030871,32.392602,6.628168,0.150871],[15,5.473566,0.182696,0.026824,37.279715,6.810864,0.146824],[16,6.130394,0.163122,0.02339,42.75328,6.973986,0.14339],[17,6.866041,0.145644,0.020457,48.883674,7.11963,0.140457],[18,7.689966,0.13004,0.017937,55.749715,7.24967,0.137937],[19,8.612762,0.116107,0.015763,63.439681,7.365777,0.135763],[20,9.646293,0.103667,0.013879,72.052442,7.469444,0.133879],[21,10.803848,0.09256,0.01224,81.698736,7.562003,0.13224],[22,12.10031,0.082643,0.010811,92.502584,7.644646,0.130811],[23,13.552347,0.073788,0.00956,104.602894,7.718434,0.12956],[24,15.178629,0.065882,0.008463,118.155241,7.784316,0.128463],[25,17.000064,0.058823,0.0075,133.33387,7.843139,0.1275],[26,19.040072,0.052521,0.006652,150.333934,7.89566,0.126652],[27,21.324881,0.046894,0.005904,169.374007,7.942554,0.125904],[28,23.883866,0.041869,0.005244,190.698887,7.984423,0.125244],[29,26.74993,0.037383,0.00466,214.582754,8.021806,0.12466],[30,29.959922,0.033378,0.004144,241.332684,8.055184,0.124144],[31,33.555113,0.029802,0.003686,271.292606,8.084986,0.123686],[32,37.581726,0.026609,0.00328,304.847719,8.111594,0.12328],[33,42.091533,0.023758,0.00292,342.429446,8.135352,0.12292],[34,47.142517,0.021212,0.002601,384.520979,8.156564,0.122601],[35,52.79962,0.01894,0.002317,431.663496,8.175504,0.122317],[36,59.135574,0.01691,0.002064,484.463116,8.192414,0.122064],[37,66.231843,0.015098,0.00184,543.59869,8.207513,0.12184],[38,74.179664,0.013481,0.00164,609.830533,8.220993,0.12164],[39,83.081224,0.012036,0.001462,684.010197,8.23303,0.121462],[40,93.05097,0.010747,0.001304,767.09142,8.243777,0.121304],[41,104.217087,0.009595,0.001163,860.142391,8.253372,0.121163],[42,116.723137,0.008567,0.001037,964.359478,8.261939,0.121037],[43,130.729914,0.007649,0.000925,1081.082615,8.269589,0.120925],[44,146.417503,0.00683,0.000825,1211.812529,8.276418,0.120825],[45,163.987604,0.006098,0.000736,1358.230032,8.282516,0.120736],[46,183.666116,0.005445,0.000657,1522.217636,8.287961,0.120657],[47,205.70605,0.004861,0.000586,1705.883752,8.292822,0.120586],[48,230.390776,0.00434,0.000523,1911.589803,8.297163,0.120523],[49,258.037669,0.003875,0.000467,2141.980579,8.301038,0.120467],[50,289.00219,0.00346,0.000417,2400.018249,8.304498,0.120417]];
+
+  function factors(i, n){
+    // i as decimal (e.g. 0.12), n integer >= 1
+    if (i === 0){
+      return { FP:1, PF:1, AF:1/n, FA:n, PA:n, AP:1/n };
+    }
+    var pow = Math.pow(1+i, n);
+    var FP = pow;
+    var PF = 1/pow;
+    var AF = i/(pow-1);
+    var FA = (pow-1)/i;
+    var PA = (pow-1)/(i*pow);
+    var AP = (i*pow)/(pow-1);
+    return {FP:FP, PF:PF, AF:AF, FA:FA, PA:PA, AP:AP};
+  }
+
+  function fmt(x, d){
+    if (!isFinite(x)) return "—";
+    d = (d === undefined) ? 6 : d;
+    return x.toLocaleString('id-ID', {minimumFractionDigits:d, maximumFractionDigits:d});
+  }
+
+  // Ketelitian desimal faktor bunga (1-6), default 6 sesuai tabel referensi
+  var decimals = 6;
+
+  // Membulatkan x ke d desimal memakai mesin format yang sama dengan tampilan,
+  // sehingga angka yang ditampilkan dan angka yang dipakai menghitung selalu identik.
+  function roundTo(x, d){
+    if (!isFinite(x)) return x;
+    return parseFloat(x.toLocaleString('en-US', {useGrouping:false, minimumFractionDigits:d, maximumFractionDigits:d}));
+  }
+
+  function fmtTrim(x, maxD){
+    // formats a number with up to maxD decimals, dropping trailing zeros
+    if (!isFinite(x)) return "—";
+    return x.toLocaleString('id-ID', {minimumFractionDigits:0, maximumFractionDigits:maxD});
+  }
+
+  var currencyInput = document.getElementById('currency');
+  function currencyMeta(){
+    var code = currencyInput ? currencyInput.value : 'IDR';
+    if (code === 'USD') return {code:'USD', locale:'en-US', symbol:'$', step:'0.01'};
+    return {code:'IDR', locale:'id-ID', symbol:'Rp', step:'1'};
+  }
+  function moneyFmt(value){
+    var c = currencyMeta();
+    return new Intl.NumberFormat(c.locale, {style:'currency', currency:c.code, maximumFractionDigits:2}).format(value);
+  }
+
+  var FACTOR_META = [
+    {key:'FP', name:'(F/P;i;n)', label:'Compound Amount Factor — cari F dari P', formula:'(1+i)^n'},
+    {key:'PF', name:'(P/F;i;n)', label:'Present Worth Factor — cari P dari F', formula:'1 / (1+i)^n'},
+    {key:'AF', name:'(A/F;i;n)', label:'Sinking Fund Factor — cari A dari F', formula:'i / [(1+i)^n - 1]'},
+    {key:'FA', name:'(F/A;i;n)', label:'Compound Amount Factor (annuity) — cari F dari A', formula:'[(1+i)^n - 1] / i'},
+    {key:'PA', name:'(P/A;i;n)', label:'Present Worth Factor (annuity) — cari P dari A', formula:'[(1+i)^n - 1] / [i(1+i)^n]'},
+    {key:'AP', name:'(A/P;i;n)', label:'Capital Recovery Factor — cari A dari P', formula:'[i(1+i)^n] / [(1+i)^n - 1]'}
+  ];
+
+  // ---------- TABS ----------
+  var tabBtns = document.querySelectorAll('.tab-btn');
+  var panels = { faktor: document.getElementById('panel-faktor'), uang: document.getElementById('panel-uang') };
+
+  function switchTab(name){
+    tabBtns.forEach(function(btn){
+      var active = btn.getAttribute('data-tab') === name;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    Object.keys(panels).forEach(function(key){
+      panels[key].classList.toggle('active', key === name);
+    });
+    updateHero();
+  }
+  tabBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){ switchTab(btn.getAttribute('data-tab')); });
+  });
+
+  // ---------- PANEL 1: FAKTOR ----------
+  var facIInput = document.getElementById('fac-i');
+  var facNInput = document.getElementById('fac-n');
+  var facIErr = document.getElementById('fac-i-err');
+  var facNErr = document.getElementById('fac-n-err');
+  var factorGrid = document.getElementById('factorGrid');
+  var refBadge = document.getElementById('refBadge');
+  var refN = document.getElementById('refN');
+  var heroLive = document.getElementById('heroLive');
+  var heroI = document.getElementById('heroI');
+  var heroN = document.getElementById('heroN');
+  var heroLabel = document.getElementById('heroLabel');
+
+  function buildFactorCards(){
+    factorGrid.innerHTML = '';
+    FACTOR_META.forEach(function(meta){
+      var card = document.createElement('div');
+      card.className = 'factor-card';
+      card.innerHTML =
+        '<div class="fname">' + meta.name + '</div>' +
+        '<div class="flabel">' + meta.label + '</div>' +
+        '<div class="fvalue" id="fval-' + meta.key + '">—</div>' +
+        '<div class="fformula">' + meta.formula + '</div>' +
+        '<button class="use-btn" data-rel="' + meta.key + '">Pakai di Kalkulator Nilai Uang &rarr;</button>';
+      factorGrid.appendChild(card);
+    });
+    factorGrid.querySelectorAll('.use-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var rel = btn.getAttribute('data-rel');
+        var iVal = facIInput.value;
+        var nVal = facNInput.value;
+        document.getElementById('m-i').value = iVal;
+        document.getElementById('m-n').value = nVal;
+        switchTab('uang');
+        selectRelation(rel);
+        recomputeMoney();
+        var known = document.getElementById('m-known');
+        known.focus();
+      });
+    });
+  }
+
+  function validateFac(){
+    var iRaw = facIInput.value.trim();
+    var nRaw = facNInput.value.trim();
+    var iOk = true, nOk = true;
+    facIErr.textContent = ''; facNErr.textContent = '';
+    facIInput.classList.remove('invalid'); facNInput.classList.remove('invalid');
+
+    var i = parseFloat(iRaw);
+    var n = parseInt(nRaw, 10);
+
+    if (iRaw === '' || isNaN(i) || i < 0){
+      facIErr.textContent = 'Masukkan suku bunga \u2265 0.';
+      facIInput.classList.add('invalid');
+      iOk = false;
+    }
+    if (nRaw === '' || isNaN(n) || n < 1 || !Number.isInteger(Number(nRaw))){
+      facNErr.textContent = 'Masukkan periode bilangan bulat \u2265 1.';
+      facNInput.classList.add('invalid');
+      nOk = false;
+    } else if (n > 200) {
+      facNErr.textContent = 'Maksimum 200 periode.';
+      facNInput.classList.add('invalid');
+      nOk = false;
+    }
+    return { ok: iOk && nOk, i: i, n: n };
+  }
+
+  function recomputeFactors(){
+    var v = validateFac();
+    if (!v.ok){
+      FACTOR_META.forEach(function(meta){
+        document.getElementById('fval-' + meta.key).textContent = '—';
+      });
+      refBadge.hidden = true;
+      return;
+    }
+    var f = factors(v.i / 100, v.n);
+    FACTOR_META.forEach(function(meta){
+      document.getElementById('fval-' + meta.key).textContent = fmt(f[meta.key], decimals);
+    });
+
+    // reference table cross-check for i = 12%
+    if (Math.abs(v.i - 12) < 1e-9 && v.n >= 1 && v.n <= 50){
+      refBadge.hidden = false;
+      refN.textContent = v.n;
+    } else {
+      refBadge.hidden = true;
+    }
+  }
+
+  facIInput.addEventListener('input', recomputeFactors);
+  facNInput.addEventListener('input', recomputeFactors);
+
+  // ---------- PANEL 2: NILAI UANG ----------
+  var chips = document.querySelectorAll('.chip');
+  var selectedRel = null;
+  var mI = document.getElementById('m-i');
+  var mN = document.getElementById('m-n');
+  var mKnown = document.getElementById('m-known');
+  var currency = document.getElementById('currency');
+  var mIErr = document.getElementById('m-i-err');
+  var mNErr = document.getElementById('m-n-err');
+  var mKnownErr = document.getElementById('m-known-err');
+  var knownLabel = document.getElementById('knownLabel');
+  var relHint = document.getElementById('relHint');
+  var moneyEmpty = document.getElementById('moneyEmpty');
+  var moneyResult = document.getElementById('moneyResult');
+  var rLabel = document.getElementById('rLabel');
+  var rValue = document.getElementById('rValue');
+  var rBreakdown = document.getElementById('rBreakdown');
+
+  var REL_META = {
+    FP: {knownName:'Nilai Sekarang (P)', resultName:'Nilai yang Akan Datang (F)', factorKey:'FP', factorLabel:'(F/P;i;n)', hint:'F = P \u00d7 (F/P;i;n)'},
+    PF: {knownName:'Nilai yang Akan Datang (F)', resultName:'Nilai Sekarang (P)', factorKey:'PF', factorLabel:'(P/F;i;n)', hint:'P = F \u00d7 (P/F;i;n)'},
+    AF: {knownName:'Nilai yang Akan Datang (F)', resultName:'Anuitas per periode (A)', factorKey:'AF', factorLabel:'(A/F;i;n)', hint:'A = F \u00d7 (A/F;i;n)'},
+    FA: {knownName:'Anuitas per periode (A)', resultName:'Nilai yang Akan Datang (F)', factorKey:'FA', factorLabel:'(F/A;i;n)', hint:'F = A \u00d7 (F/A;i;n)'},
+    PA: {knownName:'Anuitas per periode (A)', resultName:'Nilai Sekarang (P)', factorKey:'PA', factorLabel:'(P/A;i;n)', hint:'P = A \u00d7 (P/A;i;n)'},
+    AP: {knownName:'Nilai Sekarang (P)', resultName:'Anuitas per periode (A)', factorKey:'AP', factorLabel:'(A/P;i;n)', hint:'A = P \u00d7 (A/P;i;n)'}
+  };
+
+  function selectRelation(rel){
+    selectedRel = rel;
+    chips.forEach(function(chip){
+      chip.classList.toggle('selected', chip.getAttribute('data-rel') === rel);
+    });
+    var meta = REL_META[rel];
+    var c = currencyMeta();
+    knownLabel.textContent = 'Nilai diketahui — ' + meta.knownName + ' (' + c.code + ' / ' + c.symbol + ')';
+    relHint.textContent = meta.hint + '. Hasil: ' + meta.resultName + '.';
+    moneyEmpty.hidden = true;
+  }
+
+  chips.forEach(function(chip){
+    chip.addEventListener('click', function(){
+      selectRelation(chip.getAttribute('data-rel'));
+      recomputeMoney();
+    });
+  });
+
+  function validateMoney(){
+    var iRaw = mI.value.trim();
+    var nRaw = mN.value.trim();
+    var kRaw = mKnown.value.trim();
+    var ok = true;
+    mIErr.textContent = ''; mNErr.textContent = ''; mKnownErr.textContent = '';
+    mI.classList.remove('invalid'); mN.classList.remove('invalid'); mKnown.classList.remove('invalid');
+
+    var i = parseFloat(iRaw);
+    var n = parseInt(nRaw, 10);
+    var k = parseFloat(kRaw);
+
+    if (iRaw === '' || isNaN(i) || i < 0){
+      mIErr.textContent = 'Suku bunga \u2265 0.'; mI.classList.add('invalid'); ok = false;
+    }
+    if (nRaw === '' || isNaN(n) || n < 1 || !Number.isInteger(Number(nRaw)) || n > 200){
+      mNErr.textContent = 'Periode bulat 1\u2013200.'; mN.classList.add('invalid'); ok = false;
+    }
+    if (kRaw === '' || isNaN(k) || k < 0){
+      mKnownErr.textContent = 'Masukkan nilai \u2265 0.'; mKnown.classList.add('invalid'); ok = false;
+    }
+    return { ok: ok, i: i, n: n, k: k };
+  }
+
+  function recomputeMoney(){
+    if (!selectedRel) return;
+    var v = validateMoney();
+    if (!v.ok){
+      moneyResult.hidden = true;
+      return;
+    }
+    var meta = REL_META[selectedRel];
+    var f = factors(v.i/100, v.n);
+    var factorExact = f[meta.factorKey];
+    // Faktor yang dibulatkan itulah yang dikalikan, seperti memakai faktor dari tabel.
+    var factorVal = roundTo(factorExact, decimals);
+    var result = v.k * factorVal;
+
+    var note = '';
+    if (decimals < 6){
+      note = ' <span class="muted">(dibulatkan ke ' + decimals + ' desimal dari ' + fmt(factorExact, 6) + ')</span>';
+    }
+    if (factorVal === 0){
+      note += '<br><span class="muted">Faktor terbulatkan menjadi 0. Naikkan ketelitian desimal agar hasil bermakna.</span>';
+    }
+
+    moneyResult.hidden = false;
+    rLabel.textContent = meta.resultName;
+    rValue.textContent = moneyFmt(result);
+    rBreakdown.innerHTML =
+      '<span class="muted">' + meta.factorLabel + ' pada i=' + fmt(v.i,2) + '%, n=' + v.n + '</span><br>' +
+      'faktor = ' + fmt(factorVal, decimals) + note + '<br>' +
+      moneyFmt(v.k) + ' &times; ' + fmt(factorVal, decimals) + ' = <b>' + moneyFmt(result) + '</b>';
+  }
+
+  [mI, mN, mKnown].forEach(function(el){
+    el.addEventListener('input', recomputeMoney);
+  });
+  function updateCurrencyUI(){
+    var c = currencyMeta();
+    if (selectedRel){
+      var meta = REL_META[selectedRel];
+      knownLabel.textContent = 'Nilai diketahui — ' + meta.knownName + ' (' + c.code + ' / ' + c.symbol + ')';
+    } else {
+      knownLabel.textContent = 'Nilai yang diketahui (' + c.code + ' / ' + c.symbol + ')';
+    }
+    mKnown.step = c.step;
+    recomputeMoney();
+  }
+  currency.addEventListener('change', updateCurrencyUI);
+
+
+  // ---------- init ----------
+  buildFactorCards();
+  recomputeFactors();
+
+  // hero live number follows whichever tab is currently active
+  var heroRelName = document.getElementById('heroRelName');
+  function updateHero(){
+    var onUang = panels.uang.classList.contains('active');
+    var i, n, factorKey, relName;
+
+    if (onUang && selectedRel){
+      var vm = validateMoney();
+      if (!vm.ok) return;
+      i = vm.i; n = vm.n;
+      factorKey = REL_META[selectedRel].factorKey;
+      relName = REL_META[selectedRel].factorLabel.split(';')[0];
+    } else {
+      var vf = validateFac();
+      if (!vf.ok) return;
+      i = vf.i; n = vf.n;
+      factorKey = 'FP';
+      relName = '(F/P';
+    }
+
+    var f = factors(i/100, n);
+    var iDisp = fmtTrim(i, 2) + '%';
+    heroI.textContent = iDisp;
+    heroN.textContent = n;
+    heroRelName.textContent = relName + ';';
+    heroLabel.textContent = iDisp + ';' + n;
+    heroLive.textContent = fmt(f[factorKey], decimals);
+  }
+
+  // ---------- KETELITIAN DESIMAL ----------
+  var precSeg = document.getElementById('precSeg');
+  var precHint = document.getElementById('precHint');
+  var precBtns = Array.prototype.slice.call(precSeg.querySelectorAll('.seg-btn'));
+
+  function setDecimals(d, focusBtn){
+    decimals = d;
+    precBtns.forEach(function(btn){
+      var on = parseInt(btn.getAttribute('data-dec'), 10) === d;
+      btn.setAttribute('aria-checked', on ? 'true' : 'false');
+      btn.tabIndex = on ? 0 : -1;
+      if (on && focusBtn) btn.focus();
+    });
+    precHint.textContent = 'Faktor ditampilkan dengan ' + d + ' angka di belakang koma' +
+      (d === 6 ? ' (sesuai tabel referensi).' : '.');
+    recomputeFactors();
+    recomputeMoney();
+    updateHero();
+  }
+
+  precBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setDecimals(parseInt(btn.getAttribute('data-dec'), 10), false);
+    });
+  });
+  precSeg.addEventListener('keydown', function(e){
+    var step = 0;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') step = 1;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') step = -1;
+    else return;
+    e.preventDefault();
+    var next = Math.min(6, Math.max(1, decimals + step));
+    setDecimals(next, true);
+  });
+  facIInput.addEventListener('input', updateHero);
+  facNInput.addEventListener('input', updateHero);
+  mI.addEventListener('input', updateHero);
+  mN.addEventListener('input', updateHero);
+  mKnown.addEventListener('input', updateHero);
+  chips.forEach(function(chip){ chip.addEventListener('click', updateHero); });
+  updateCurrencyUI();
+  updateHero();
+})();
+</script>
+</body>
+</html>
