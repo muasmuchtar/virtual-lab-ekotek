@@ -36,6 +36,14 @@
   .actions{display:flex;gap:8px;flex-wrap:wrap;}
   h2.sec{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--soft);margin:0 0 12px;}
   .card.tool{border-left:4px solid var(--yellow);}
+  .la{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:28px;}
+  .la-head{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+  .la-head div{flex:1;min-width:240px;font-size:13.5px;color:var(--soft);}
+  .la-head b{display:block;color:var(--ink);font-size:15px;}
+  .la-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;}
+  .la-list a{display:block;font-size:13.5px;color:var(--ink);text-decoration:none;padding:6px 0;border-bottom:1px dashed var(--line);}
+  .la-list a:hover{color:var(--cyan);}
+  .la-list b{font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;color:var(--cyan);margin-right:6px;}
   footer{border-top:1px solid var(--line);padding:18px 0 40px;font-size:12.5px;color:var(--soft);}
 </style>
 </head>
@@ -68,6 +76,15 @@
       </div>
     </article>
   </section>
+
+  <h2 class="sec">Versi Learning Assistant (langsung ke simulator)</h2>
+  <section class="la">
+    <div class="la-head">
+      <div><b>Tanpa halaman prasyarat</b>Versi ini langsung membuka simulator beserta Learning Assistant-nya. Cocok untuk latihan ulang setelah mahasiswa membaca prasyarat di versi utama.</div>
+      <a class="btn btn-main" href="learning-assistant/master-12-modul.html">📘 Master: 12 modul dalam satu halaman</a>
+    </div>
+    <div class="la-list" id="laList"></div>
+  </section>
 </main>
 
 <footer class="wrap">
@@ -90,6 +107,9 @@
     ["11","Lease vs Buy / Make vs Buy","Keputusan sewa/beli dan produksi sendiri/outsource berbasis relevant cash flow.","11_Lease_vs_Buy_Make_vs_Buy_Learning_Assistant.html","Modul_11_Lease_vs_Buy_Make_vs_Buy_Ekonomi_Teknik.pdf"],
     ["12","Analisis Penggantian Aset","Replacement analysis, sunk cost, dan umur ekonomis aset.","12_Analisis_Penggantian_Aset_Learning_Assistant.html","Modul_12_Analisis_Penggantian_Aset_Ekonomi_Teknik.pdf"]
   ];
+  const LA_FILES = ["01_tvm","02_single","03_compare","04_breakeven","05_depreciation","06_inflation","07_tax","08_sensitivity","09_bond","10_bcr","11_lease","12_replacement"];
+  document.getElementById("laList").innerHTML = MODULES.map(([n,title],i)=>
+    `<a href="learning-assistant/${LA_FILES[i]}_Learning_Assistant.html"><b>${n}</b>${title}</a>`).join("");
   const grid = document.getElementById("grid");
   MODULES.forEach(([n,title,desc,html,pdf])=>{
     const card = document.createElement("article");

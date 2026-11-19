@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Virtual Lab — Analisis Penggantian Aset</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#0d1b2d; --panel2:#10243b; --line:#23435f;
+  --text:#eef7ff; --muted:#9fb4c8; --cyan:#33d6ff; --blue:#4f8cff;
+  --green:#36d399; --amber:#ffb84d; --red:#ff6b6b; --white:#fff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#07111f,#0a1627 55%,#07111f);color:var(--text)}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.header{position:sticky;top:0;z-index:20;background:rgba(7,17,31,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 18px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.brand h1{font-size:20px;margin:0}.brand .sub{font-size:12px;color:var(--muted);margin-top:3px}
+.header-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#12253b;color:var(--text);padding:8px 11px;border-radius:9px}
+.btn:hover{border-color:var(--cyan)} .btn.primary{background:linear-gradient(135deg,#0a7ca8,#1656b8);border:none}
+.btn.good{background:#133a30}.btn.warn{background:#4a2d13}.btn.danger{background:#491f27}
+.shell{display:grid;grid-template-columns:320px minmax(0,1fr) 330px;gap:12px;padding:12px;max-width:1680px;margin:auto}
+.panel{background:linear-gradient(180deg,var(--panel),#0a1727);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);overflow:hidden}
+.panel h2,.panel h3{margin:0}.panel-head{padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:8px;align-items:center}
+.panel-body{padding:12px}
+.controls{display:grid;gap:10px}.field{display:grid;gap:5px}
+.field label{font-size:12px;color:var(--muted)} .field input,.field select{width:100%;border:1px solid var(--line);background:#091525;color:var(--text);border-radius:8px;padding:8px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.switch{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.switch input{width:auto}
+.stagebar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}
+.stagebtn{padding:9px 6px;border-radius:9px;border:1px solid var(--line);background:#0c1a2a;color:var(--muted);font-size:11px}
+.stagebtn.active{background:#14385a;color:white;border-color:var(--cyan)}
+.toolbar{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.canvas-wrap{background:#06101c;border:1px solid var(--line);border-radius:12px;padding:8px;min-height:330px}
+canvas{width:100%;height:310px;display:block}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.kpi{background:#0a1726;border:1px solid var(--line);border-radius:11px;padding:10px}
+.kpi .lab{font-size:11px;color:var(--muted)} .kpi .val{font-size:18px;font-weight:800;margin-top:4px}
+.kpi.good{border-color:#1f6b55}.kpi.warn{border-color:#7b5422}.kpi.bad{border-color:#7a3139}
+.status{display:flex;flex-wrap:wrap;gap:7px;padding:10px 12px;border-top:1px solid var(--line);font-size:11px}
+.badge{border:1px solid var(--line);background:#081523;padding:5px 7px;border-radius:999px;color:var(--muted)}
+.badge.good{color:#a9f6d9;border-color:#1f6b55}.badge.warn{color:#ffd49a;border-color:#7b5422}.badge.bad{color:#ffb2b2;border-color:#7a3139}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}.tab{font-size:11px;padding:6px 8px}
+.tab.active{border-color:var(--cyan);background:#14385a;color:#fff;box-shadow:0 0 0 1px rgba(51,214,255,.18) inset}
+.action-feedback{display:none;margin:0 0 10px;padding:9px 11px;border:1px solid #2b6c8e;background:#0b2940;border-radius:9px;color:#dff7ff;font-size:12px}
+.action-feedback.show{display:block}
+.stage-detail{margin:0 0 10px;padding:10px 12px;border:1px solid var(--line);background:#081522;border-radius:10px;font-size:12px;line-height:1.45;color:#cfe2f2}
+.run-year-box{display:none;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 10px;padding:9px;border:1px solid var(--line);background:#081522;border-radius:9px}
+.run-year-box.show{display:flex}
+.run-year-box input{width:90px;border:1px solid var(--line);background:#091525;color:var(--text);border-radius:7px;padding:7px}
+.section{margin-top:12px}.section-title{font-size:13px;font-weight:800;margin:0 0 8px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-size:12px;min-width:620px}
+th,td{border-bottom:1px solid #17334c;padding:7px 8px;text-align:right;white-space:nowrap}
+th{position:sticky;top:0;background:#10243b;color:#bcd4e8;z-index:1}
+th:first-child,td:first-child{text-align:left}
+tr.active-row{background:rgba(51,214,255,.09)}
+.flow{display:grid;gap:6px}.flow-step{border:1px solid var(--line);padding:8px;border-radius:8px;color:var(--muted);font-size:12px}
+.flow-step.active{border-color:var(--cyan);background:#0e2f48;color:white}
+.note{font-size:12px;line-height:1.5;color:#c1d4e6;background:#081522;border:1px solid var(--line);border-radius:10px;padding:10px}
+.warning{background:#2d1e12;border-color:#72491e;color:#ffd7a6}.error{background:#2a1418;border-color:#74313c;color:#ffbdc2}
+.schedule-editor{display:grid;grid-template-columns:45px 1fr 1fr;gap:5px;align-items:center}
+.schedule-editor .head{font-size:11px;color:var(--muted);font-weight:700}
+.schedule-editor input{width:100%;background:#081522;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px}
+.footer-area{max-width:1680px;margin:0 auto;padding:0 12px 18px;display:grid;grid-template-columns:1.15fr .85fr;gap:12px}
+.question{padding:9px;border:1px solid var(--line);border-radius:9px;margin-bottom:7px}
+.question label{display:block;font-size:12px;margin:4px 0;color:#d8e8f6}
+.small{font-size:11px;color:var(--muted)}
+.hidden{display:none!important}
+@media(max-width:1150px){.shell{grid-template-columns:290px 1fr}.rightcol{grid-column:1/-1}.footer-area{grid-template-columns:1fr}}
+@media(max-width:760px){.shell{grid-template-columns:1fr}.footer-area{grid-template-columns:1fr}.duo{grid-template-columns:1fr}.stagebar{grid-template-columns:1fr 1fr}.header{align-items:flex-start;flex-direction:column}}
+@media print{
+  .header,.leftcol .toolbar,.toolbar .btn{display:none!important}
+  body{background:white;color:#111}.panel{box-shadow:none;border:1px solid #bbb;background:white}.panel-head,.panel-body{background:white}.shell,.footer-area{display:block;padding:0}.panel{margin-bottom:12px}.canvas-wrap{background:white} .badge,.note{color:#111;background:white}
+}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="brand">
+    <h1 id="title">Asset Replacement Decision Studio</h1>
+    <div class="sub" id="subtitle">Virtual Lab — Analisis Penggantian Aset / Replacement Analysis</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="langBtn">EN</button>
+    <button class="btn" id="printBtn">Print Lab Report</button>
+    <button class="btn primary" id="autoBtn">Auto Generate Analysis</button>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="panel leftcol">
+    <div class="panel-head"><h3 id="ctrlTitle">Control Panel</h3><span class="small">IDR / year</span></div>
+    <div class="panel-body">
+      <div class="toolbar">
+        <button class="btn" id="preset1">Preset 1</button><button class="btn" id="preset2">Preset 2</button>
+        <button class="btn" id="preset3">Preset 3</button><button class="btn" id="preset4">Preset 4</button>
+        <button class="btn" id="preset5">Preset 5</button><button class="btn" id="preset6">Preset 6</button>
+      </div>
+      <div class="controls">
+        <div class="field"><label id="moduleLbl">Module</label>
+          <select id="module">
+            <option value="economic">Economic Life</option>
+            <option value="compare">Defender vs Challenger</option>
+            <option value="sunk">Sunk Cost Demo</option>
+            <option value="opp">Opportunity Cost Demo</option>
+            <option value="marginal">Marginal Cost / Timing</option>
+            <option value="all">All Modules</option>
+          </select>
+        </div>
+        <div class="duo">
+          <div class="field"><label>MV Defender</label><input id="mvD" type="number" min="1" step="1000000"></div>
+          <div class="field"><label>Original Cost D</label><input id="origD" type="number" min="0" step="1000000"></div>
+        </div>
+        <div class="duo">
+          <div class="field"><label>Book Value D</label><input id="bookD" type="number" min="0" step="1000000"></div>
+          <div class="field"><label>Initial Cost Challenger</label><input id="pC" type="number" min="1" step="1000000"></div>
+        </div>
+        <div class="duo">
+          <div class="field"><label>MARR (%)</label><input id="rate" type="number" min="0" max="50" step="0.5"></div>
+          <div class="field"><label>N max</label><input id="nmax" type="number" min="1" max="20" step="1"></div>
+        </div>
+        <div class="field"><label id="speedLbl">Animation Speed</label>
+          <input id="speed" type="range" min="250" max="1500" value="800" step="50">
+        </div>
+        <label class="switch"><input id="includeSunk" type="checkbox"> <span id="sunkToggleLbl">Include sunk cost (wrong / demo only)</span></label>
+        <label class="switch"><input id="applyOpp" type="checkbox" checked> <span id="oppToggleLbl">Apply opportunity cost (market value)</span></label>
+        <label class="switch"><input id="repeatability" type="checkbox" checked> <span id="repToggleLbl">Repeatability assumption</span></label>
+
+        <div class="section">
+          <div class="section-title" id="defSchedTitle">Defender Schedule</div>
+          <div class="schedule-editor" id="defSchedule"></div>
+        </div>
+        <div class="section">
+          <div class="section-title" id="chalSchedTitle">Challenger Schedule</div>
+          <div class="schedule-editor" id="chalSchedule"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel centercol">
+    <div class="panel-head">
+      <h3 id="simTitle">Simulation & Visualization</h3>
+      <div class="tabs">
+        <button class="btn tab" data-chart="economic">AW vs n</button>
+        <button class="btn tab" data-chart="comparison">D vs C</button>
+        <button class="btn tab" data-chart="marginal">MC vs t</button>
+        <button class="btn tab" data-chart="value">MV vs BV</button>
+        <button class="btn tab" data-chart="sensitivity">Sensitivity</button>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div id="actionFeedback" class="action-feedback"></div>
+      <div class="stagebar">
+        <button class="stagebtn active" data-stage="0">1. Defender & Challenger</button>
+        <button class="stagebtn" data-stage="1">2. Replacement Model</button>
+        <button class="stagebtn" data-stage="2">3. Economic Life Schedule</button>
+        <button class="stagebtn" data-stage="3">4. Decision & Impact</button>
+        <button class="stagebtn" data-stage="4">5. Interpretation</button>
+      </div>
+      <div id="stageDetail" class="stage-detail"></div>
+      <div id="runYearBox" class="run-year-box">
+        <span>Year n:</span>
+        <input id="runYearInput" type="number" min="1" max="20" value="1">
+        <button class="btn primary" id="runYearGo">Go</button>
+        <button class="btn" id="runYearCancel">Cancel</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" id="playBtn">▶ Play</button>
+        <button class="btn" id="pauseBtn">Ⅱ Pause</button>
+        <button class="btn" id="stepBtn">Step</button>
+        <button class="btn" id="resetBtn">Reset</button>
+        <button class="btn" id="runYearBtn">Run to Year n</button>
+        <button class="btn" id="compareBtn">Compare Modules</button>
+      </div>
+      <div class="canvas-wrap"><canvas id="chart"></canvas></div>
+      <div id="chartSummary" class="note" style="margin-top:9px"></div>
+
+      <div class="section">
+        <div class="section-title" id="awTableTitle">Economic Life Schedule</div>
+        <div class="table-wrap"><table id="awTable">
+          <thead><tr><th>n</th><th>CR</th><th>AW(O&M)</th><th>Total AW</th><th>Status</th></tr></thead><tbody></tbody>
+        </table></div>
+      </div>
+    </div>
+    <div class="status" id="statusBar"></div>
+  </section>
+
+  <section class="panel rightcol">
+    <div class="panel-head"><h3 id="resultTitle">Results & Decision</h3><span class="badge" id="validityBadge">VALID</span></div>
+    <div class="panel-body">
+      <div class="kpis">
+        <div class="kpi"><div class="lab">Economic Life n*</div><div class="val" id="kpiN">—</div></div>
+        <div class="kpi"><div class="lab">Minimum AW</div><div class="val" id="kpiMinAw">—</div></div>
+        <div class="kpi"><div class="lab">AW Defender</div><div class="val" id="kpiDefAw">—</div></div>
+        <div class="kpi"><div class="lab">AW Challenger*</div><div class="val" id="kpiChAw">—</div></div>
+        <div class="kpi"><div class="lab">Replacement Year</div><div class="val" id="kpiRepYear">—</div></div>
+        <div class="kpi" id="decisionKpi"><div class="lab">Decision</div><div class="val" id="kpiDecision">—</div></div>
+      </div>
+      <div class="section"><div class="section-title" id="reasonTitle">Reasoning Flow</div><div class="flow" id="flow"></div></div>
+      <div class="section"><div class="section-title" id="analysisTitle">Interpretation</div><div id="interpretation" class="note"></div></div>
+      <div class="section">
+        <div class="toolbar">
+          <button class="btn good" id="recordBtn">Record Data</button>
+          <button class="btn" id="clearBtn">Clear Data</button>
+          <button class="btn" id="csvBtn">Export CSV</button>
+        </div>
+        <div class="table-wrap"><table id="recordsTable"><thead><tr><th>ID</th><th>Preset</th><th>Module</th><th>n*</th><th>AW*</th><th>Decision</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<section class="footer-area">
+  <div class="panel">
+    <div class="panel-head"><h3 id="calcTitle">Step-by-Step Calculation</h3></div>
+    <div class="panel-body">
+      <div id="calcSteps" class="note"></div>
+      <div class="section"><div class="section-title" id="compareTitle">Module Comparison</div><div class="table-wrap"><table id="comparisonTable">
+        <thead><tr><th>Module</th><th>Basis</th><th>Key Output</th><th>Recommendation</th><th>Risk if wrong</th></tr></thead><tbody></tbody>
+      </table></div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3 id="quizTitle">Concept Questions / Challenge</h3></div>
+    <div class="panel-body">
+      <div id="quiz"></div>
+      <div class="toolbar"><button class="btn primary" id="checkQuizBtn">Check Answers</button><button class="btn" id="hintBtn">Hint</button></div>
+      <div id="quizFeedback" class="note">Jawab pertanyaan, lalu tekan “Check Answers”.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmt = v => {
+  if(!Number.isFinite(v)) return 'N/A';
+  return new Intl.NumberFormat(state.lang==='id'?'id-ID':'en-US',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v);
+};
+const clamp=(v,a,b)=>Math.min(Math.max(v,a),b);
+
+const presets = [
+ {name:'Aging CNC', mvD:400e6, origD:800e6, bookD:520e6, pC:650e6, rate:12,nmax:10,
+  defSalv:[340,289,246,209,178,151,128,109,93,79].map(x=>x*1e6), defOM:[30,40,50,60,70,80,90,100,110,120].map(x=>x*1e6),
+  chalSalv:[560,490,430,380,335,295,260,230,205,180].map(x=>x*1e6), chalOM:[22,25,28,32,36,41,46,52,58,65].map(x=>x*1e6)},
+ {name:'Old Lathe vs CNC',mvD:150e6,origD:500e6,bookD:180e6,pC:500e6,rate:12,nmax:10,
+  defSalv:[125,105,88,73,60,49,40,33,27,22].map(x=>x*1e6),defOM:[40,48,57,67,78,90,103,117,132,148].map(x=>x*1e6),
+  chalSalv:[440,390,345,305,270,240,213,190,169,150].map(x=>x*1e6),chalOM:[25,27,30,33,36,40,44,49,54,60].map(x=>x*1e6)},
+ {name:'Robotic Welding',mvD:300e6,origD:950e6,bookD:420e6,pC:900e6,rate:11,nmax:10,
+  defSalv:[260,220,180,145,115,90,70,54,41,31].map(x=>x*1e6),defOM:[55,68,84,103,125,150,178,210,245,285].map(x=>x*1e6),
+  chalSalv:[810,730,660,595,540,490,445,405,370,338].map(x=>x*1e6),chalOM:[32,35,39,43,48,54,60,67,75,84].map(x=>x*1e6)},
+ {name:'Forklift Fleet',mvD:120e6,origD:350e6,bookD:140e6,pC:320e6,rate:10,nmax:10,
+  defSalv:[105,90,75,60,48,38,29,22,16,12].map(x=>x*1e6),defOM:[10,15,20,25,30,35,40,45,50,55].map(x=>x*1e6),
+  chalSalv:[285,255,228,203,180,160,142,126,112,100].map(x=>x*1e6),chalOM:[12,14,16,18,21,24,28,32,37,43].map(x=>x*1e6)},
+ {name:'Sunk Cost Trap',mvD:250e6,origD:800e6,bookD:560e6,pC:520e6,rate:12,nmax:10,
+  defSalv:[215,185,160,138,119,103,89,77,67,58].map(x=>x*1e6),defOM:[38,47,58,70,83,98,115,134,155,178].map(x=>x*1e6),
+  chalSalv:[455,400,350,307,269,236,207,181,159,139].map(x=>x*1e6),chalOM:[24,27,30,34,38,43,48,54,61,69].map(x=>x*1e6)},
+ {name:'Integrated Case',mvD:210e6,origD:720e6,bookD:330e6,pC:610e6,rate:13,nmax:10,
+  defSalv:[180,151,126,104,85,69,56,45,36,29].map(x=>x*1e6),defOM:[34,42,52,64,78,94,112,132,154,178].map(x=>x*1e6),
+  chalSalv:[540,480,425,377,334,296,262,232,205,181].map(x=>x*1e6),chalOM:[26,29,32,36,40,45,50,56,63,71].map(x=>x*1e6)}
+];
+
+const state={lang:'id',preset:0,module:'economic',year:1,playing:false,timer:null,chart:'economic',records:[],stage:0,data:null};
+
+function A_P(i,n){ if(i===0) return 1/n; const x=(1+i)**n; return i*x/(x-1); }
+function P_F(i,n){ return 1/(1+i)**n; }
+function annualizeCashflows(cfs,i,n){
+  let pw=0; for(let t=1;t<=n;t++) pw += cfs[t-1]*P_F(i,t);
+  return pw*A_P(i,n);
+}
+function cr(P,S,i,n){ return (P-S)*A_P(i,n)+S*i; }
+
+function currentInputs(){
+  const N=clamp(parseInt($('#nmax').value)||1,1,20);
+  const dS=[],dO=[],cS=[],cO=[];
+  for(let t=1;t<=N;t++){
+    dS.push(Number(document.querySelector(`[data-kind="ds"][data-t="${t}"]`)?.value||0));
+    dO.push(Number(document.querySelector(`[data-kind="do"][data-t="${t}"]`)?.value||0));
+    cS.push(Number(document.querySelector(`[data-kind="cs"][data-t="${t}"]`)?.value||0));
+    cO.push(Number(document.querySelector(`[data-kind="co"][data-t="${t}"]`)?.value||0));
+  }
+  return {mvD:+$('#mvD').value,origD:+$('#origD').value,bookD:+$('#bookD').value,pC:+$('#pC').value,
+    i:+$('#rate').value/100,N,dS,dO,cS,cO,includeSunk:$('#includeSunk').checked,applyOpp:$('#applyOpp').checked,repeat:$('#repeatability').checked};
+}
+function validate(x){
+  const issues=[];
+  if(!(x.mvD>0))issues.push('MV Defender ≤ 0');
+  if(!(x.pC>0))issues.push('Initial cost Challenger ≤ 0');
+  if(x.i<0||x.i>.5)issues.push('MARR outside 0–50%');
+  if(x.N<1)issues.push('N max < 1');
+  [...x.dO,...x.cO].forEach((v,j)=>{if(v<0)issues.push('O&M negatif pada periode '+(j+1))});
+  return issues;
+}
+function calculate(){
+  const x=currentInputs(), issues=validate(x), i=x.i,N=x.N;
+  const baseD = x.applyOpp ? x.mvD : x.bookD;
+  const wrongBaseD = x.includeSunk ? baseD + Math.max(0,x.origD-x.mvD) : baseD;
+  const d=[],c=[];
+  for(let n=1;n<=N;n++){
+    const dcr=cr(wrongBaseD,x.dS[n-1]||0,i,n), dom=annualizeCashflows(x.dO,i,n);
+    const ccr=cr(x.pC,x.cS[n-1]||0,i,n), com=annualizeCashflows(x.cO,i,n);
+    d.push({n,cr:dcr,om:dom,aw:dcr+dom});
+    c.push({n,cr:ccr,om:com,aw:ccr+com});
+  }
+  const dMin=d.reduce((a,b)=>b.aw<a.aw?b:a), cMin=c.reduce((a,b)=>b.aw<a.aw?b:a);
+  const mc=[];
+  let prev=x.mvD;
+  for(let t=1;t<=N;t++){
+    const mv=x.dS[t-1]||0;
+    mc.push({t,mc:(prev-mv)+prev*i+(x.dO[t-1]||0)});
+    prev=mv;
+  }
+  let rep=mc.find(z=>z.mc>cMin.aw)?.t || null;
+  const decision = dMin.aw<=cMin.aw?'KEEP':'REPLACE';
+  state.data={x,issues,d,c,dMin,cMin,mc,rep,decision,baseD,wrongBaseD};
+  return state.data;
+}
+
+function buildScheduleEditors(){
+  const N=clamp(parseInt($('#nmax').value)||10,1,20), p=presets[state.preset];
+  const d=$('#defSchedule'), c=$('#chalSchedule');
+  d.innerHTML='<div class="head">Yr</div><div class="head">Salvage</div><div class="head">O&M</div>';
+  c.innerHTML='<div class="head">Yr</div><div class="head">Salvage</div><div class="head">O&M</div>';
+  for(let t=1;t<=N;t++){
+    const ds=p.defSalv[t-1] ?? Math.max(0,(p.defSalv.at(-1)||0)*(.85**(t-p.defSalv.length)));
+    const doo=p.defOM[t-1] ?? (p.defOM.at(-1)||0)*(1.08**(t-p.defOM.length));
+    const cs=p.chalSalv[t-1] ?? Math.max(0,(p.chalSalv.at(-1)||0)*(.88**(t-p.chalSalv.length)));
+    const co=p.chalOM[t-1] ?? (p.chalOM.at(-1)||0)*(1.07**(t-p.chalOM.length));
+    d.insertAdjacentHTML('beforeend',`<div>${t}</div><input data-kind="ds" data-t="${t}" type="number" step="1000000" value="${Math.round(ds)}"><input data-kind="do" data-t="${t}" type="number" step="1000000" value="${Math.round(doo)}">`);
+    c.insertAdjacentHTML('beforeend',`<div>${t}</div><input data-kind="cs" data-t="${t}" type="number" step="1000000" value="${Math.round(cs)}"><input data-kind="co" data-t="${t}" type="number" step="1000000" value="${Math.round(co)}">`);
+  }
+  $$('.schedule-editor input').forEach(el=>el.addEventListener('input',refresh));
+}
+function loadPreset(idx){
+  state.preset=idx; const p=presets[idx];
+  $('#mvD').value=p.mvD;$('#origD').value=p.origD;$('#bookD').value=p.bookD;$('#pC').value=p.pC;$('#rate').value=p.rate;$('#nmax').value=p.nmax;
+  $('#includeSunk').checked=false;$('#applyOpp').checked=true;$('#repeatability').checked=true;
+  buildScheduleEditors(); state.year=1; refresh();
+}
+function drawAxes(ctx,w,h,pad,yMin,yMax,xMax){
+  ctx.strokeStyle='#35506a';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,h-pad);ctx.lineTo(w-pad,h-pad);ctx.moveTo(pad,pad);ctx.lineTo(pad,h-pad);ctx.stroke();
+  ctx.fillStyle='#95abc0';ctx.font='11px Segoe UI';
+  for(let x=1;x<=xMax;x++){const px=pad+(w-2*pad)*(x-1)/(Math.max(1,xMax-1));ctx.fillText(x,px-3,h-pad+16)}
+  for(let k=0;k<=4;k++){const v=yMin+(yMax-yMin)*k/4, py=h-pad-(h-2*pad)*k/4;ctx.fillText((v/1e6).toFixed(0)+'M',4,py+4);ctx.strokeStyle='#17334c';ctx.beginPath();ctx.moveTo(pad,py);ctx.lineTo(w-pad,py);ctx.stroke()}
+}
+function lineSeries(ctx,arr,w,h,pad,yMin,yMax,maxYear,dash=false){
+  if(arr.length<1)return;
+  ctx.save();ctx.strokeStyle='#33d6ff';ctx.fillStyle='#33d6ff';ctx.lineWidth=2.2;ctx.setLineDash(dash?[7,5]:[]);
+  ctx.beginPath();
+  arr.forEach((o,j)=>{const x=pad+(w-2*pad)*(o.x-1)/(Math.max(1,maxYear-1)); const y=h-pad-(h-2*pad)*(o.y-yMin)/(yMax-yMin||1); if(j===0)ctx.moveTo(x,y);else ctx.lineTo(x,y)});
+  ctx.stroke();ctx.setLineDash([]);
+  arr.forEach(o=>{const x=pad+(w-2*pad)*(o.x-1)/(Math.max(1,maxYear-1)); const y=h-pad-(h-2*pad)*(o.y-yMin)/(yMax-yMin||1);ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill()});
+  ctx.restore();
+}
+function drawChart(){
+  const canvas=$('#chart'), rect=canvas.getBoundingClientRect(), dpr=window.devicePixelRatio||1;
+  canvas.width=Math.max(700,rect.width*dpr);canvas.height=310*dpr;const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const w=canvas.width/dpr,h=canvas.height/dpr,pad=50, data=state.data, N=data.x.N, upto=clamp(state.year,1,N);
+  ctx.clearRect(0,0,w,h);ctx.fillStyle='#06101c';ctx.fillRect(0,0,w,h);
+  let series=[],series2=[],title='';
+  if(state.chart==='economic'){series=data.d.slice(0,upto).map(z=>({x:z.n,y:z.aw}));title='Defender AW(n) — Economic Life';}
+  else if(state.chart==='comparison'){series=data.d.slice(0,upto).map(z=>({x:z.n,y:z.aw}));series2=Array.from({length:upto},(_,k)=>({x:k+1,y:data.cMin.aw}));title='Defender AW vs Challenger minimum AW';}
+  else if(state.chart==='marginal'){series=data.mc.slice(0,upto).map(z=>({x:z.t,y:z.mc}));series2=Array.from({length:upto},(_,k)=>({x:k+1,y:data.cMin.aw}));title='Marginal Cost vs Challenger AW*';}
+  else if(state.chart==='value'){series=data.x.dS.slice(0,upto).map((y,k)=>({x:k+1,y}));series2=Array.from({length:upto},(_,k)=>({x:k+1,y:Math.max(0,data.x.bookD-(data.x.bookD/(N+2))*(k+1))}));title='Market Value vs Book Value';}
+  else { // sensitivity
+    const vals=[];for(let r=0;r<=20;r+=2){const ii=r/100;let best=Infinity;for(let n=1;n<=N;n++){const aw=cr(data.x.pC,data.x.cS[n-1]||0,ii,n)+annualizeCashflows(data.x.cO,ii,n);best=Math.min(best,aw)}vals.push({x:vals.length+1,y:best,label:r});}series=vals.slice(0,upto>vals.length?vals.length:vals.length);N2=vals.length;title='Challenger minimum AW sensitivity to MARR';}
+  const all=[...series,...series2]; if(!all.length)return;
+  let yMin=Math.min(...all.map(o=>o.y)),yMax=Math.max(...all.map(o=>o.y));const span=Math.max(1,yMax-yMin);yMin=Math.max(0,yMin-span*.15);yMax+=span*.18;
+  const xMax=state.chart==='sensitivity'?series.length:N;drawAxes(ctx,w,h,pad,yMin,yMax,xMax);lineSeries(ctx,series,w,h,pad,yMin,yMax,xMax,false);
+  if(series2.length){ctx.save();ctx.strokeStyle='#ffb84d';ctx.beginPath();series2.forEach((o,j)=>{const x=pad+(w-2*pad)*(o.x-1)/(Math.max(1,xMax-1));const y=h-pad-(h-2*pad)*(o.y-yMin)/(yMax-yMin||1);if(!j)ctx.moveTo(x,y);else ctx.lineTo(x,y)});ctx.stroke();ctx.restore()}
+  ctx.fillStyle='#eef7ff';ctx.font='700 14px Segoe UI';ctx.fillText(title,pad,22);
+  ctx.fillStyle='#9fb4c8';ctx.font='11px Segoe UI';ctx.fillText('Y-axis: IDR/year',pad,38);
+  if(state.chart==='economic'){
+    const z=data.dMin, x=pad+(w-2*pad)*(z.n-1)/(Math.max(1,N-1)), y=h-pad-(h-2*pad)*(z.aw-yMin)/(yMax-yMin||1);
+    ctx.fillStyle='#36d399';ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);ctx.fill();ctx.fillText('n*='+z.n,x+8,y-8);
+  }
+  $('#chartSummary').textContent=chartSummary();
+}
+function chartSummary(){
+  const d=state.data;
+  if(state.chart==='economic') return `Economic life minimum pada n=${d.dMin.n}, AW=${fmt(d.dMin.aw)}. Kurva dibangun dari capital recovery + equivalent annual O&M.`;
+  if(state.chart==='comparison') return `Defender minimum AW ${fmt(d.dMin.aw)} dibanding challenger minimum AW ${fmt(d.cMin.aw)} → ${d.decision}.`;
+  if(state.chart==='marginal') return d.rep?`Marginal cost pertama kali melebihi AW Challenger* pada tahun ${d.rep}; ini menandai waktu penggantian optimal menurut aturan marginal.`:'Dalam horizon yang diuji, marginal cost belum melampaui AW Challenger*.';
+  if(state.chart==='value') return `Market value adalah basis ekonomi untuk defender; book value hanya referensi akuntansi dan termasuk sunk-cost context.`;
+  return `Sensitivity menunjukkan bagaimana minimum AW challenger berubah ketika MARR berubah.`;
+}
+function renderTable(){
+  const b=$('#awTable tbody');b.innerHTML='';
+  state.data.d.forEach(z=>{
+    const tr=document.createElement('tr');if(z.n===state.year)tr.className='active-row';
+    tr.innerHTML=`<td>${z.n}${z.n===state.data.dMin.n?' ★':''}</td><td>${fmt(z.cr)}</td><td>${fmt(z.om)}</td><td>${fmt(z.aw)}</td><td>${z.n===state.data.dMin.n?'ECONOMIC LIFE':''}</td>`;b.appendChild(tr);
+  })
+}
+function renderStatus(){
+  const d=state.data; const badges=[
+    ['PRESET',presets[state.preset].name,''],['MODULE',$('#module').selectedOptions[0].text,''],['YEAR',state.year,''],
+    ['MODEL',d.issues.length?'INVALID':'VALID',d.issues.length?'bad':'good'],
+    ['SUNK',d.x.includeSunk?'DETECTED':'EXCLUDED',d.x.includeSunk?'warn':'good'],
+    ['OPP COST',d.x.applyOpp?'APPLIED':'IGNORED',d.x.applyOpp?'good':'warn'],
+    ['DECISION',d.decision,d.decision==='KEEP'?'good':'warn'],
+    ['ANIMATION',state.playing?'PLAYING':'PAUSED','']
+  ];
+  $('#statusBar').innerHTML=badges.map(x=>`<span class="badge ${x[2]}">${x[0]}: ${x[1]}</span>`).join('');
+}
+function renderResults(){
+  const d=state.data;
+  $('#kpiN').textContent=d.dMin.n;$('#kpiMinAw').textContent=fmt(d.dMin.aw);$('#kpiDefAw').textContent=fmt(d.dMin.aw);$('#kpiChAw').textContent=fmt(d.cMin.aw);
+  $('#kpiRepYear').textContent=d.rep??'Beyond horizon';$('#kpiDecision').textContent=d.decision;
+  $('#decisionKpi').className='kpi '+(d.decision==='KEEP'?'good':'warn');
+  $('#validityBadge').textContent=d.issues.length?'INVALID INPUT':'VALID';$('#validityBadge').className='badge '+(d.issues.length?'bad':'good');
+  const flow=[
+    'Identify Defender & Challenger','Determine Current Market Value (not Book Value)','Exclude Sunk Cost',
+    'Apply Opportunity Cost of Defender MV','Estimate Salvage & O&M Schedule','Compute CR & AW per n',
+    'Identify Economic Life','Compute Marginal Cost','Compare Defender AW vs Challenger AW*','Decision: '+d.decision,'Financial / Engineering Interpretation'
+  ];
+  $('#flow').innerHTML=flow.map((x,i)=>`<div class="flow-step ${i===Math.min(10,state.stage*2)?'active':''}">${i+1}. ${x}</div>`).join('');
+  const bias=d.x.includeSunk?` Sunk cost sedang sengaja dimasukkan untuk demo sehingga hasil dapat bias.`:` Original cost dan book value dikecualikan dari keputusan.`;
+  const opp=d.x.applyOpp?` Defender dinilai pada current market value ${fmt(d.x.mvD)} sebagai opportunity cost.`:` Opportunity cost diabaikan dan book value dipakai; ini bukan basis ekonomi yang disarankan.`;
+  $('#interpretation').innerHTML=`<b>${d.decision}</b>. Minimum AW defender = ${fmt(d.dMin.aw)}, sedangkan minimum AW challenger = ${fmt(d.cMin.aw)}.${bias}${opp} ${d.rep?`Tahun penggantian marginal: ${d.rep}.`:''}`;
+}
+function renderCalc(){
+ const d=state.data,n=d.dMin.n,z=d.dMin;
+ $('#calcSteps').innerHTML=`
+ <b>GIVEN</b>: MV_D=${fmt(d.x.mvD)}, P_C=${fmt(d.x.pC)}, i=${(d.x.i*100).toFixed(2)}%, N=${d.x.N}.<br>
+ <b>VALUE BASIS</b>: ${d.x.applyOpp?'Market Value':'Book Value'} = ${fmt(d.baseD)}${d.x.includeSunk?` + sunk adjustment → ${fmt(d.wrongBaseD)}`:''}.<br>
+ <b>CR(${n})</b> = (P−S<sub>${n}</sub>)(A/P,i,n)+S<sub>${n}</sub>i = ${fmt(z.cr)}.<br>
+ <b>AW(O&M,1..${n})</b> = ${fmt(z.om)}.<br>
+ <b>AW(${n})</b> = ${fmt(z.aw)} → minimum defender at n*=${n}.<br>
+ <b>Challenger</b>: minimum AW at n*=${d.cMin.n} = ${fmt(d.cMin.aw)}.<br>
+ <b>Marginal rule</b>: MC<sub>t</sub>=(MV<sub>t−1</sub>−MV<sub>t</sub>)+i·MV<sub>t−1</sub>+O&M<sub>t</sub>. ${d.rep?`First MC > AW Challenger* at t=${d.rep}.`:'No crossing in current horizon.'}<br>
+ <b>DECISION</b>: ${d.decision}.`;
+}
+function renderComparison(){
+ const d=state.data,b=$('#comparisonTable tbody');b.innerHTML='';
+ const rows=[
+  ['Economic Life','MV/initial cost + salvage + O&M',`n*=${d.dMin.n}; AW=${fmt(d.dMin.aw)}`,'Minimize AW','Wrong timing / non-equivalent costs'],
+  ['Defender vs Challenger','MV_D vs P_C',`${fmt(d.dMin.aw)} vs ${fmt(d.cMin.aw)}`,d.decision,'Using book/original cost biases defender'],
+  ['Sunk Cost','Original cost & book value excluded',d.x.includeSunk?'Included (demo)':'Excluded','Exclude','Sunk-cost fallacy'],
+  ['Opportunity Cost','Current MV_D',d.x.applyOpp?fmt(d.x.mvD):'Ignored',d.x.applyOpp?'Apply':'Correct basis first','Defender appears artificially cheap'],
+  ['Marginal Cost','ΔMV + interest on MV + O&M',d.rep?`Replace year ${d.rep}`:'No crossing','Compare MC_t vs AW_C*','Late/early replacement']
+ ];
+ rows.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=r.map((v,i)=>`<td style="text-align:${i?'right':'left'}">${v}</td>`).join('');b.appendChild(tr)})
+}
+function renderRecords(){
+ const b=$('#recordsTable tbody');b.innerHTML='';
+ state.records.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.id}</td><td>${r.preset}</td><td>${r.module}</td><td>${r.n}</td><td>${fmt(r.aw)}</td><td>${r.decision}</td>`;b.appendChild(tr)})
+}
+
+function showFeedback(msg, kind='info'){
+  const el=$('#actionFeedback');
+  if(!el) return;
+  el.textContent=msg;
+  el.className='action-feedback show';
+  if(kind==='warn'){el.style.borderColor='#7b5422';el.style.background='#2d1e12';}
+  else if(kind==='good'){el.style.borderColor='#1f6b55';el.style.background='#103328';}
+  else {el.style.borderColor='#2b6c8e';el.style.background='#0b2940';}
+  clearTimeout(showFeedback._t);
+  showFeedback._t=setTimeout(()=>el.classList.remove('show'),2400);
+}
+function renderStageDetail(){
+  const d=state.data;
+  const items=[
+    `<b>Stage 1 — Defender & Challenger.</b> Current defender market value = ${fmt(d.x.mvD)}; challenger initial cost = ${fmt(d.x.pC)}. Edit data on the left panel to see all outputs update.`,
+    `<b>Stage 2 — Replacement Model.</b> Defender basis = ${d.x.applyOpp?'current market value (opportunity cost)':'book value (demo / not recommended)'}. Sunk cost is ${d.x.includeSunk?'INCLUDED for demonstration — result may be biased':'EXCLUDED from the decision'}.`,
+    `<b>Stage 3 — Economic Life Schedule.</b> Defender economic life n* = ${d.dMin.n} with minimum AW = ${fmt(d.dMin.aw)}. The table and AW-vs-n graph use the same calculation engine.`,
+    `<b>Stage 4 — Decision & Impact.</b> Defender AW* = ${fmt(d.dMin.aw)}; Challenger AW* = ${fmt(d.cMin.aw)} → <b>${d.decision}</b>. ${d.rep?`Marginal-cost crossing occurs at year ${d.rep}.`:'No marginal-cost crossing within the selected horizon.'}`,
+    `<b>Stage 5 — Interpretation.</b> Use market value, not book/original cost, for the defender. Exclude sunk cost. Compare equivalent annual costs and check the marginal replacement timing before concluding.`
+  ];
+  $('#stageDetail').innerHTML=items[state.stage]||items[0];
+}
+function setChart(which, feedback=true){
+  state.chart=which;
+  $$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.chart===which));
+  drawChart();
+  if(feedback){
+    const names={economic:'AW vs n',comparison:'Defender vs Challenger',marginal:'Marginal Cost vs t',value:'Market Value vs Book Value',sensitivity:'Sensitivity'};
+    showFeedback(`Chart switched to: ${names[which]||which}.`,'good');
+  }
+}
+function activateStage(idx){
+  state.stage=idx;
+  $$('.stagebtn').forEach(b=>b.classList.toggle('active',+b.dataset.stage===idx));
+  const chartByStage=['value','value','economic','comparison','marginal'];
+  setChart(chartByStage[idx],false);
+  renderStageDetail();
+  const labels=['Defender & Challenger','Replacement Model','Economic Life Schedule','Decision & Impact','Interpretation'];
+  showFeedback(`Stage ${idx+1} active: ${labels[idx]}.`,'good');
+}
+function refresh(){ calculate(); renderTable();renderStatus();renderResults();renderCalc();renderComparison();renderStageDetail();drawChart();}
+
+
+function play(){pause();state.playing=true;renderStatus();const ms=1750-(+$('#speed').value||800);state.timer=setInterval(()=>{
+  if(state.year>=state.data.x.N){pause();showFeedback('Animation reached the end of the analysis horizon.','good');return}
+  state.year++;
+  state.stage=Math.min(4,Math.floor((state.year-1)/Math.max(1,state.data.x.N/5)));
+  $$('.stagebtn').forEach(b=>b.classList.toggle('active',+b.dataset.stage===state.stage));
+  refresh();
+},Math.max(250,ms))}
+function pause(){if(state.timer)clearInterval(state.timer);state.timer=null;state.playing=false;renderStatus()}
+function reset(){pause();state.year=1;state.stage=0;$$('.stagebtn').forEach(b=>b.classList.toggle('active',+b.dataset.stage===0));refresh()}
+function exportCSV(){
+ const head='Trial ID,Preset,Module,Economic Life,Minimum AW,Decision,Sunk Cost Detected,Opportunity Cost Applied\n';
+ const body=state.records.map(r=>[r.id,r.preset,r.module,r.n,r.aw,r.decision,r.sunk,r.opp].join(',')).join('\n');
+ const blob=new Blob([head+body],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='replacement_analysis_records.csv';a.click();URL.revokeObjectURL(a.href)
+}
+function renderQuiz(){
+ const qs=[
+ ['Nilai defender yang relevan untuk keputusan penggantian?',['Harga beli awal','Nilai buku','Nilai pasar saat ini','Nilai asuransi'],2],
+ ['Economic life adalah umur yang…',['Memaksimumkan AW','Meminimumkan AW','Selalu sama useful life','Memaksimumkan book value'],1],
+ ['Yang termasuk sunk cost?',['Market value saat ini','O&M masa depan','Harga beli awal / book value','Salvage masa depan'],2],
+ ['Opportunity cost mempertahankan defender adalah…',['Biaya pajak','Nilai pasar yang hilang karena tidak dijual','O&M tahun ini','Harga challenger'],1],
+ ['Jika MC_t > AW Challenger* maka…',['Keep','Replace now','Ignore','Use book value'],1]
+ ];
+ $('#quiz').innerHTML=qs.map((q,qi)=>`<div class="question" data-answer="${q[2]}"><b>Q${qi+1}. ${q[0]}</b>${q[1].map((o,oi)=>`<label><input type="radio" name="q${qi}" value="${oi}"> ${o}</label>`).join('')}</div>`).join('')
+}
+function updateLanguage(){
+ state.lang=state.lang==='id'?'en':'id';$('#langBtn').textContent=state.lang==='id'?'EN':'ID';
+ const id=state.lang==='id';
+ $('#ctrlTitle').textContent=id?'Panel Kontrol':'Control Panel';
+ $('#simTitle').textContent=id?'Simulasi & Visualisasi':'Simulation & Visualization';
+ $('#resultTitle').textContent=id?'Hasil & Keputusan':'Results & Decision';
+ $('#analysisTitle').textContent=id?'Interpretasi':'Interpretation';
+ $('#reasonTitle').textContent=id?'Alur Pemikiran':'Reasoning Flow';
+ $('#calcTitle').textContent=id?'Perhitungan Langkah demi Langkah':'Step-by-Step Calculation';
+ $('#quizTitle').textContent=id?'Pertanyaan Konseptual / Tantangan':'Concept Questions / Challenge';
+ refresh();
+}
+function wire(){
+ ['mvD','origD','bookD','pC','rate','includeSunk','applyOpp','repeatability','module'].forEach(id=>$('#'+id).addEventListener('input',()=>{
+   state.module=$('#module').value;
+   refresh();
+   showFeedback('Input updated — calculations and charts refreshed.','good');
+ }));
+ $('#nmax').addEventListener('change',()=>{
+   buildScheduleEditors();state.year=1;refresh();
+   showFeedback('Analysis horizon updated and schedule rebuilt.','good');
+ });
+ $('#playBtn').onclick=()=>{
+   if(state.year>=state.data.x.N) state.year=1;
+   play();
+   showFeedback(`Animation running from year ${state.year}.`,'good');
+ };
+ $('#pauseBtn').onclick=()=>{pause();showFeedback(`Animation paused at year ${state.year}.`);};
+ $('#stepBtn').onclick=()=>{
+   pause();
+   state.year=state.year>=state.data.x.N?1:state.year+1;
+   refresh();
+   showFeedback(`Advanced to year ${state.year}.`,'good');
+ };
+ $('#resetBtn').onclick=()=>{reset();showFeedback('Simulation reset to year 1 and Stage 1.');activateStage(0);};
+ $('#autoBtn').onclick=()=>{
+   pause();state.year=state.data.x.N;state.stage=4;refresh();activateStage(4);
+   showFeedback('Full analysis generated. Review Results, Interpretation, and comparison table.','good');
+ };
+ $('#runYearBtn').onclick=()=>{
+   const box=$('#runYearBox');
+   $('#runYearInput').max=state.data.x.N;
+   $('#runYearInput').value=state.year;
+   box.classList.toggle('show');
+   if(box.classList.contains('show')) $('#runYearInput').focus();
+   showFeedback('Enter the target year and press Go.');
+ };
+ $('#runYearGo').onclick=()=>{
+   const n=clamp(parseInt($('#runYearInput').value)||1,1,state.data.x.N);
+   pause();state.year=n;refresh();$('#runYearBox').classList.remove('show');
+   showFeedback(`Simulation moved to year ${n}.`,'good');
+ };
+ $('#runYearCancel').onclick=()=>{$('#runYearBox').classList.remove('show');showFeedback('Run-to-year cancelled.');};
+ $('#compareBtn').onclick=()=>{
+   state.module='all';$('#module').value='all';setChart('comparison',false);refresh();
+   showFeedback('Comparison mode activated. Scroll to the Module Comparison table below.','good');
+   setTimeout(()=>document.querySelector('#comparisonTable').scrollIntoView({behavior:'smooth',block:'center'}),100);
+ };
+ $('#recordBtn').onclick=()=>{
+   const d=state.data;
+   state.records.push({id:state.records.length+1,preset:presets[state.preset].name,module:$('#module').selectedOptions[0].text,n:d.dMin.n,aw:d.dMin.aw,decision:d.decision,sunk:d.x.includeSunk,opp:d.x.applyOpp});
+   renderRecords();showFeedback(`Trial ${state.records.length} recorded. You can export it to CSV.`,'good');
+ };
+ $('#clearBtn').onclick=()=>{state.records=[];renderRecords();showFeedback('Recorded experiment data cleared.');};
+ $('#csvBtn').onclick=()=>{if(!state.records.length){showFeedback('No recorded experiment data yet. Press Record Data first.','warn');return;} exportCSV();showFeedback('CSV export created.','good');};
+ $('#printBtn').onclick=()=>window.print();
+ $('#langBtn').onclick=()=>{updateLanguage();showFeedback('Language switched without resetting simulation state.','good');};
+ $$('.stagebtn').forEach(b=>b.onclick=()=>activateStage(+b.dataset.stage));
+ $$('.tab').forEach(b=>b.onclick=()=>setChart(b.dataset.chart,true));
+ for(let i=1;i<=6;i++) $('#preset'+i).onclick=()=>{
+   loadPreset(i-1);
+   showFeedback(`Preset loaded: ${presets[i-1].name}.`,'good');
+ };
+ $('#checkQuizBtn').onclick=()=>{
+   let ok=0,total=0;
+   $$('.question').forEach((q,qi)=>{total++;const sel=q.querySelector('input:checked');if(sel && +sel.value===+q.dataset.answer){ok++;q.style.borderColor='#36d399'}else q.style.borderColor='#ff6b6b'});
+   $('#quizFeedback').textContent=`Score: ${ok}/${total}. ${ok===total?'Excellent — konsep utama sudah konsisten.':'Periksa kembali market value, sunk cost, economic life, dan marginal rule.'}`;
+   showFeedback(`Quiz checked: ${ok}/${total}.`,ok===total?'good':'warn');
+ };
+ $('#hintBtn').onclick=()=>{
+   $('#quizFeedback').textContent='Hint: gunakan future economic cash flows; defender berbasis current market value; economic life = minimum AW; replace ketika MC_t melampaui AW challenger optimum.';
+   showFeedback('Hint displayed in the Challenge panel.');
+ };
+ window.addEventListener('resize',()=>drawChart());
+}
+renderQuiz(); wire(); loadPreset(0); setChart('economic',false); renderStageDetail();
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Analisis Penggantian Aset</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction</button><button class="vlEduTab" data-p="explain">Explanation</button><button class="vlEduTab" data-p="gloss">Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint</button><button class="vlEduTab" data-p="summary">Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "replacement", "title": "Analisis Penggantian Aset", "objective": "Menentukan kapan aset dipertahankan atau diganti menggunakan defender–challenger dan economic life.", "prediction": "Dalam replacement analysis, biaya historis yang sudah terjadi dan tidak dapat dipulihkan disebut…", "predopts": ["Sunk cost", "Opportunity cost", "Annual worth"], "predans": 0, "explain": "Keputusan saat ini harus memakai cash flow relevan ke depan. Market value defender mewakili opportunity cost; original cost yang sudah terjadi biasanya sunk cost dan tidak semestinya mendistorsi keputusan.", "terms": {"Defender": "Aset yang saat ini dimiliki dan dipertimbangkan untuk dipertahankan.", "Challenger": "Aset calon pengganti.", "Sunk Cost": "Biaya masa lalu yang tidak dapat diubah oleh keputusan sekarang.", "Opportunity Cost": "Nilai manfaat terbaik yang dikorbankan akibat memilih suatu alternatif.", "Economic Life": "Umur yang meminimumkan biaya tahunan ekuivalen atau memaksimalkan kriteria ekonomi terkait.", "Market Value": "Nilai yang dapat diperoleh bila aset dijual saat ini."}, "quiz": [["Dalam keputusan penggantian, original cost defender yang tidak dapat dipulihkan adalah…", ["Sunk cost", "Future benefit", "Incremental revenue"], 0], ["Market value defender penting karena dapat merepresentasikan…", ["Opportunity cost", "Depresiasi wajib", "Coupon rate"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Pahami kasus','Baca tujuan, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Buat prediksi','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati hasil','Perhatikan grafik, timeline, result card, dan nilai keputusan yang berubah.'],
+  ['6. Jelaskan','Gunakan Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Uji & simpulkan','Kerjakan Checkpoint Quiz lalu buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide') body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">Lanjutkan tahap</button>`;
+   if(p==='next'){let i=Math.min(S.step,steps.length-1);body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">Tandai selesai & lanjut</button><div class="vlEduCard"><h4>Petunjuk cepat</h4><p>Jika bingung, ubah hanya satu parameter, jalankan simulasi, lalu bandingkan hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Explanation/Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('guide');msg('Tahap berikutnya dibuka.')};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('next')};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>

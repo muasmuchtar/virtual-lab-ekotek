@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asset Depreciation &amp; Book Value Studio</title>
+<style>
+  :root{
+    --navy-950:#0a1622;
+    --navy-900:#0f2033;
+    --navy-800:#16304a;
+    --navy-700:#1e3f60;
+    --steel-500:#5c7186;
+    --steel-300:#9fb0bf;
+    --paper-100:#eef1ec;
+    --paper-050:#f7f8f5;
+    --brass-500:#c2924a;
+    --brass-300:#e0bd80;
+    --teal-500:#2f8f9d;
+    --teal-300:#7bc4cf;
+    --amber-600:#c96a1f;
+    --red-500:#c1453a;
+    --green-600:#3f8f5c;
+    --line-hair:rgba(255,255,255,0.09);
+    --line-hair-dark:rgba(10,22,34,0.12);
+    --radius-s:3px;
+    --radius-m:6px;
+    --mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --sans: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+    --serif-head: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      linear-gradient(var(--line-hair) 1px, transparent 1px) 0 0/28px 28px,
+      linear-gradient(90deg, var(--line-hair) 1px, transparent 1px) 0 0/28px 28px,
+      var(--navy-950);
+    color:var(--paper-100);
+    font-family:var(--sans);
+    font-size:14px;
+    line-height:1.5;
+    min-height:100vh;
+  }
+  ::selection{ background:var(--brass-500); color:var(--navy-950); }
+
+  button{
+    font-family:var(--sans);
+    cursor:pointer;
+  }
+  input, select, textarea{
+    font-family:var(--mono);
+  }
+
+  a{ color:var(--teal-300); }
+
+  /* ---------- layout shell ---------- */
+  .app{
+    max-width:1440px;
+    margin:0 auto;
+    padding:18px 18px 60px;
+  }
+
+  header.top{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:16px;
+    border-bottom:1px solid var(--line-hair);
+    padding-bottom:14px;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .brandblock{ display:flex; flex-direction:column; gap:2px; }
+  .brand-kicker{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:0.14em;
+    color:var(--brass-300);
+  }
+  h1.title{
+    font-family:var(--serif-head);
+    font-size:26px;
+    font-weight:600;
+    margin:0;
+    color:var(--paper-050);
+  }
+  .subtitle{
+    font-size:12.5px;
+    color:var(--steel-300);
+    margin-top:2px;
+  }
+
+  .top-controls{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  select, .num-input{
+    background:var(--navy-800);
+    color:var(--paper-100);
+    border:1px solid var(--navy-700);
+    border-radius:var(--radius-s);
+    padding:7px 9px;
+    font-size:13px;
+  }
+  select:focus, .num-input:focus, button:focus-visible{
+    outline:2px solid var(--teal-300);
+    outline-offset:1px;
+  }
+
+  .lang-toggle{
+    display:flex;
+    border:1px solid var(--navy-700);
+    border-radius:var(--radius-s);
+    overflow:hidden;
+  }
+  .lang-toggle button{
+    background:var(--navy-800);
+    color:var(--steel-300);
+    border:none;
+    padding:7px 12px;
+    font-size:12px;
+    font-family:var(--mono);
+    letter-spacing:0.04em;
+  }
+  .lang-toggle button.active{
+    background:var(--brass-500);
+    color:var(--navy-950);
+    font-weight:700;
+  }
+
+  /* ---------- grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: 300px 1fr 300px;
+    gap:16px;
+    align-items:start;
+  }
+  @media (max-width: 1100px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background:linear-gradient(180deg, var(--navy-900), var(--navy-950));
+    border:1px solid var(--navy-700);
+    border-radius:var(--radius-m);
+    padding:14px;
+  }
+  .panel h2, .panel h3{
+    margin:0 0 10px;
+    font-size:12.5px;
+    letter-spacing:0.06em;
+    color:var(--brass-300);
+    text-transform:uppercase;
+    font-family:var(--mono);
+    border-bottom:1px solid var(--line-hair);
+    padding-bottom:8px;
+  }
+
+  .field{ margin-bottom:12px; }
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--steel-300);
+    margin-bottom:4px;
+  }
+  .field .hint{
+    font-size:10.5px;
+    color:var(--steel-500);
+    margin-top:3px;
+  }
+  .field input[type=number], .field select{
+    width:100%;
+  }
+  .field.inline{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .field.inline label{ margin:0; }
+
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .switch{
+    position:relative; width:40px; height:22px; flex:none;
+  }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .track{
+    position:absolute; inset:0; background:var(--navy-700); border-radius:20px; transition:background .15s;
+    border:1px solid var(--steel-500);
+  }
+  .switch .thumb{
+    position:absolute; top:2px; left:2px; width:16px; height:16px; background:var(--steel-300); border-radius:50%; transition:transform .15s;
+  }
+  .switch input:checked + .track{ background:var(--teal-500); border-color:var(--teal-500); }
+  .switch input:checked + .track .thumb{ transform:translateX(18px); background:var(--navy-950); }
+
+  fieldset{ border:1px dashed var(--navy-700); border-radius:var(--radius-s); padding:10px; margin:0 0 12px; }
+  legend{ font-size:11px; color:var(--teal-300); padding:0 6px; font-family:var(--mono); }
+
+  .unit-table{ max-height:160px; overflow-y:auto; border:1px solid var(--navy-700); border-radius:var(--radius-s); }
+  .unit-row{ display:grid; grid-template-columns:44px 1fr; gap:6px; align-items:center; padding:4px 8px; border-bottom:1px solid var(--line-hair); }
+  .unit-row:last-child{ border-bottom:none; }
+  .unit-row span{ color:var(--steel-300); font-family:var(--mono); font-size:11px; }
+  .unit-row input{ width:100%; padding:4px 6px; font-size:12px; }
+
+  /* buttons */
+  .btnrow{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+  .btn{
+    background:var(--navy-800);
+    border:1px solid var(--navy-700);
+    color:var(--paper-100);
+    padding:8px 12px;
+    border-radius:var(--radius-s);
+    font-size:12px;
+    letter-spacing:0.02em;
+  }
+  .btn:hover{ border-color:var(--teal-300); color:var(--teal-300); }
+  .btn.primary{ background:var(--brass-500); border-color:var(--brass-500); color:var(--navy-950); font-weight:700; }
+  .btn.primary:hover{ background:var(--brass-300); color:var(--navy-950); }
+  .btn.ghost{ background:transparent; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn[aria-pressed="true"]{ border-color:var(--teal-300); color:var(--teal-300); }
+
+  /* center column */
+  .center-col{ display:flex; flex-direction:column; gap:16px; }
+  .chart-toolbar{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:8px;}
+  .chart-toolbar .legend{ display:flex; gap:12px; flex-wrap:wrap; font-size:11px; color:var(--steel-300); }
+  .legend .dot{ display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px; vertical-align:middle;}
+
+  svg.chart{ width:100%; height:auto; display:block; background:var(--navy-950); border:1px solid var(--navy-700); border-radius:var(--radius-s); }
+  .chart-caption{ font-size:11px; color:var(--steel-500); margin-top:6px; }
+
+  .stage-flow{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .stage-info{
+    background:var(--navy-800);
+    border:1px solid var(--navy-700);
+    border-left:3px solid var(--teal-500);
+    border-radius:var(--radius-s);
+    padding:10px 12px;
+    margin-bottom:14px;
+    font-size:12.5px;
+    color:var(--paper-100);
+    line-height:1.55;
+  }
+  .stage-info b{ color:var(--brass-300); }
+  .stage-info .formula-line{ font-family:var(--mono); color:var(--teal-300); display:block; margin:4px 0; }
+  .stage-btn{
+    flex:1 1 auto;
+    background:var(--navy-800); border:1px solid var(--navy-700); color:var(--steel-300);
+    padding:8px 6px; font-size:10.5px; letter-spacing:0.03em; border-radius:var(--radius-s); text-align:center;
+  }
+  .stage-btn.active{ background:var(--teal-500); color:var(--navy-950); border-color:var(--teal-500); font-weight:700; }
+
+  /* result cards */
+  .cardgrid{ display:flex; flex-direction:column; gap:10px; }
+  .card{
+    background:var(--navy-800);
+    border:1px solid var(--navy-700);
+    border-radius:var(--radius-s);
+    padding:10px 12px;
+  }
+  .card .k{ font-size:10.5px; color:var(--steel-300); text-transform:uppercase; letter-spacing:0.05em; }
+  .card .v{ font-family:var(--mono); font-size:17px; color:var(--paper-050); margin-top:2px; }
+  .card .v.small{ font-size:13px; }
+  .card .v.warn{ color:var(--amber-600); }
+  .card .v.bad{ color:var(--red-500); }
+  .card .v.good{ color:var(--green-600); }
+
+  /* status bar */
+  .statusbar{
+    margin-top:16px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    align-items:center;
+    background:var(--navy-900);
+    border:1px solid var(--navy-700);
+    border-radius:var(--radius-m);
+    padding:10px 14px;
+    font-size:12px;
+    font-family:var(--mono);
+  }
+  .statusbar .item{ display:flex; align-items:center; gap:6px; color:var(--steel-300); }
+  .statusbar .item b{ color:var(--paper-050); font-weight:600; }
+  .pill{ display:inline-block; padding:2px 8px; border-radius:10px; font-size:10.5px; }
+  .pill.valid{ background:rgba(63,143,92,0.18); color:var(--green-600); }
+  .pill.invalid{ background:rgba(193,69,58,0.18); color:var(--red-500); }
+  .pill.warning{ background:rgba(201,106,31,0.18); color:var(--amber-600); }
+
+  /* tabs bottom */
+  .tabs-bottom{ margin-top:20px; }
+  .tabbar{ display:flex; gap:2px; border-bottom:1px solid var(--navy-700); flex-wrap:wrap; }
+  .tabbtn{
+    background:transparent; border:none; color:var(--steel-300);
+    padding:10px 16px; font-size:12.5px; letter-spacing:0.03em; border-bottom:2px solid transparent;
+  }
+  .tabbtn.active{ color:var(--paper-050); border-bottom-color:var(--brass-500); }
+  .tabpanel{ display:none; padding:16px 2px; }
+  .tabpanel.active{ display:block; }
+
+  table.schedule{ width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px; }
+  table.schedule th, table.schedule td{ padding:6px 8px; border-bottom:1px solid var(--line-hair); text-align:right; }
+  table.schedule th:first-child, table.schedule td:first-child{ text-align:left; }
+  table.schedule thead th{ color:var(--brass-300); border-bottom:1px solid var(--navy-700); text-transform:uppercase; font-size:10.5px; letter-spacing:0.04em;}
+  table.schedule tbody tr:hover{ background:var(--navy-800); }
+  table.schedule tr.current-row{ outline:1px solid var(--teal-300); }
+  table.schedule td.flag{ color:var(--amber-600); font-size:10px; text-align:left; }
+
+  .compare-table-wrap{ overflow-x:auto; }
+  table.compare{ width:100%; border-collapse:collapse; font-size:12px; min-width:820px; }
+  table.compare th, table.compare td{ border:1px solid var(--navy-700); padding:8px 10px; vertical-align:top; }
+  table.compare thead th{ background:var(--navy-800); color:var(--brass-300); font-family:var(--mono); font-size:11px; text-transform:uppercase; }
+  table.compare td.label{ color:var(--steel-300); font-family:var(--mono); font-size:11px; text-transform:uppercase; white-space:nowrap; }
+
+  .quiz-q{ border:1px solid var(--navy-700); border-radius:var(--radius-s); padding:12px; margin-bottom:10px; }
+  .quiz-q p.qtext{ margin:0 0 8px; font-size:13px; }
+  .quiz-opts{ display:flex; flex-direction:column; gap:6px; }
+  .quiz-opts button{ text-align:left; background:var(--navy-800); border:1px solid var(--navy-700); color:var(--paper-100); padding:7px 10px; border-radius:var(--radius-s); font-size:12.5px; }
+  .quiz-opts button:hover{ border-color:var(--teal-300); }
+  .quiz-opts button.correct{ border-color:var(--green-600); background:rgba(63,143,92,0.15); }
+  .quiz-opts button.wrong{ border-color:var(--red-500); background:rgba(193,69,58,0.15); }
+  .quiz-explain{ margin-top:8px; font-size:12px; color:var(--steel-300); display:none; }
+  .quiz-explain.show{ display:block; }
+
+  .worksheet textarea{
+    width:100%; min-height:70px; background:var(--navy-800); color:var(--paper-100);
+    border:1px solid var(--navy-700); border-radius:var(--radius-s); padding:8px; font-family:var(--sans); font-size:13px;
+  }
+  .worksheet .wq{ margin-bottom:14px; }
+  .worksheet .wq label{ display:block; font-size:12.5px; color:var(--brass-300); margin-bottom:6px; }
+
+  .info-note{ font-size:11.5px; color:var(--steel-500); border-left:2px solid var(--teal-500); padding-left:10px; margin:10px 0; }
+  .warn-note{ font-size:11.5px; color:var(--amber-600); border-left:2px solid var(--amber-600); padding-left:10px; margin:10px 0; }
+
+  .tooltip-term{ border-bottom:1px dotted var(--teal-300); cursor:help; position:relative; }
+  .tooltip-term:hover .tooltip-box, .tooltip-term:focus .tooltip-box{ display:block; }
+  .tooltip-box{
+    display:none; position:absolute; bottom:130%; left:0; z-index:20;
+    width:240px; background:var(--navy-950); border:1px solid var(--teal-300); color:var(--paper-100);
+    padding:8px 10px; font-size:11px; border-radius:var(--radius-s); box-shadow:0 4px 14px rgba(0,0,0,0.4);
+  }
+
+  footer.app-footer{ margin-top:26px; font-size:11px; color:var(--steel-500); border-top:1px solid var(--line-hair); padding-top:12px; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+
+  @media print{
+    body{ background:#fff; color:#111; }
+    .no-print{ display:none !important; }
+    .panel, .card, table.schedule, table.compare{ border-color:#999 !important; background:#fff !important; color:#111 !important; }
+    svg.chart{ background:#fff !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+  <header class="top">
+    <div class="brandblock">
+      <span class="brand-kicker" data-i18n="kicker">VIRTUAL LAB — ENGINEERING ASSET ACCOUNTING</span>
+      <h1 class="title" data-i18n="appTitle">Asset Depreciation &amp; Book Value Studio</h1>
+      <div class="subtitle" data-i18n="appSubtitle">Straight-Line · Declining Balance/DDB · Sum-of-Years-Digit · Unit-of-Production · MACRS</div>
+    </div>
+    <div class="top-controls no-print">
+      <select id="presetSelect" aria-label="Preset"></select>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button id="langID" class="active" data-lang="id">ID</button>
+        <button id="langEN" data-lang="en">EN</button>
+      </div>
+      <button class="btn" id="printBtn" data-i18n="printReport">🖶 Print Lab Report</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- LEFT: ASSET DATA CONTROLS -->
+    <div class="panel no-print" id="leftPanel">
+      <h2 data-i18n="assetData">Asset Data / Data Aset</h2>
+
+      <div class="field">
+        <label data-i18n="methodLabel">Method / Metode</label>
+        <select id="methodSelect">
+          <option value="SL">Straight-Line (SL)</option>
+          <option value="DB">Declining Balance / DDB</option>
+          <option value="SOYD">Sum-of-Years-Digit (SOYD)</option>
+          <option value="UOP">Unit-of-Production</option>
+          <option value="MACRS">MACRS (ilustratif)</option>
+          <option value="ALL">ALL METHODS (compare)</option>
+        </select>
+      </div>
+
+      <div class="row2">
+        <div class="field">
+          <label data-i18n="costBasis">Cost Basis (B)</label>
+          <input class="num-input" type="number" id="inputB" min="0" step="1000000">
+        </div>
+        <div class="field">
+          <label data-i18n="salvage">Salvage (S)</label>
+          <input class="num-input" type="number" id="inputS" min="0" step="1000000">
+        </div>
+      </div>
+
+      <div class="field" id="fieldN">
+        <label data-i18n="usefulLife">Useful Life N (tahun)</label>
+        <input class="num-input" type="number" id="inputN" min="1" step="1">
+      </div>
+
+      <fieldset id="fieldsetDB">
+        <legend data-i18n="dbSettings">DB / DDB Settings</legend>
+        <div class="field">
+          <label data-i18n="multiplier">Multiplier</label>
+          <select id="inputMultiplier">
+            <option value="1.25">125% DB</option>
+            <option value="1.5">150% DB</option>
+            <option value="2" selected>200% DB (DDB)</option>
+          </select>
+        </div>
+        <div class="field inline">
+          <label data-i18n="switchToSL">Switch-to-SL</label>
+          <label class="switch">
+            <input type="checkbox" id="inputSwitch" checked>
+            <span class="track"><span class="thumb"></span></span>
+          </label>
+        </div>
+        <p class="hint" data-i18n="switchHint">Bila aktif, berpindah ke SL saat SL menghasilkan depresiasi lebih besar dari DB pada sisa umur.</p>
+      </fieldset>
+
+      <fieldset id="fieldsetUOP">
+        <legend data-i18n="uopSettings">Unit-of-Production Settings</legend>
+        <div class="field">
+          <label data-i18n="totalUnits">Total Estimated Units</label>
+          <input class="num-input" type="number" id="inputTotalUnits" min="1" step="1000">
+        </div>
+        <div class="field">
+          <label data-i18n="unitsPerPeriod">Units per Period (editable)</label>
+          <div class="unit-table" id="unitTable"></div>
+        </div>
+      </fieldset>
+
+      <fieldset id="fieldsetMACRS">
+        <legend data-i18n="macrsSettings">MACRS Settings (ilustratif)</legend>
+        <div class="field">
+          <label data-i18n="propertyClass">Property Class</label>
+          <select id="inputPropertyClass">
+            <option value="3">3-year</option>
+            <option value="5" selected>5-year</option>
+            <option value="7">7-year</option>
+            <option value="10">10-year</option>
+          </select>
+        </div>
+        <div class="field">
+          <label data-i18n="convention">Convention</label>
+          <select id="inputConvention">
+            <option value="half-year" selected>Half-Year</option>
+            <option value="mid-quarter">Mid-Quarter (ilustratif, = half-year table)</option>
+          </select>
+        </div>
+        <p class="warn-note" data-i18n="macrsWarn">MACRS adalah metode PAJAK (AS), bukan metode pelaporan keuangan. Tabel persentase bersifat ILUSTRATIF — konsultasikan tabel IRS resmi untuk kepatuhan pajak sesungguhnya.</p>
+      </fieldset>
+
+      <div class="field">
+        <label data-i18n="currency">Currency Display</label>
+        <select id="inputCurrency">
+          <option value="IDR">IDR (Rp)</option>
+          <option value="GEN">Generic Monetary Unit</option>
+        </select>
+      </div>
+
+      <div class="btnrow">
+        <button class="btn primary" id="btnGenerate" data-i18n="generateSchedule">Generate Schedule</button>
+        <button class="btn" id="btnResetInputs" data-i18n="resetPreset">Reset Preset</button>
+      </div>
+    </div>
+
+    <!-- CENTER -->
+    <div class="center-col">
+
+      <div class="panel">
+        <h2 data-i18n="reasoningFlow">4-Stage Evaluation Flow</h2>
+        <div class="stage-flow" id="stageFlow">
+          <button class="stage-btn active" data-stage="1" data-i18n="stage1">1. REAL ASSET</button>
+          <button class="stage-btn" data-stage="2" data-i18n="stage2">2. DEPRECIATION MODEL</button>
+          <button class="stage-btn" data-stage="3" data-i18n="stage3">3. SCHEDULE</button>
+          <button class="stage-btn" data-stage="4" data-i18n="stage4">4. BOOK VALUE &amp; IMPACT</button>
+        </div>
+        <div class="stage-info" id="stageInfo"></div>
+
+        <div class="chart-toolbar no-print">
+          <div class="legend" id="chartLegend"></div>
+          <div class="btnrow" style="margin-top:0;">
+            <button class="btn" id="btnPlay" data-i18n="play">▶ Play</button>
+            <button class="btn" id="btnPause" data-i18n="pause">⏸ Pause</button>
+            <button class="btn" id="btnStep" data-i18n="step">⏭ Step</button>
+            <button class="btn" id="btnReset" data-i18n="reset">⟲ Reset</button>
+          </div>
+        </div>
+        <div id="chartHolder"></div>
+        <p class="chart-caption" id="chartCaption"></p>
+        <div class="row2 no-print" style="margin-top:8px;">
+          <div class="field" style="margin:0;">
+            <label data-i18n="animSpeed">Animation Speed</label>
+            <input type="range" id="animSpeed" min="200" max="2000" step="100" value="700" style="width:100%;">
+          </div>
+          <div class="field" style="margin:0;">
+            <label data-i18n="chartScale">Chart Scale</label>
+            <input type="range" id="chartScale" min="60" max="140" step="10" value="100" style="width:100%;">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT: RESULT CARDS -->
+    <div class="panel" id="rightPanel">
+      <h2 data-i18n="resultCards">Depreciation Result Cards</h2>
+      <div class="cardgrid" id="cardGrid"></div>
+    </div>
+  </div>
+
+  <div class="statusbar" id="statusBar" aria-live="polite"></div>
+
+  <!-- BOTTOM TABS -->
+  <div class="tabs-bottom panel">
+    <div class="tabbar" role="tablist">
+      <button class="tabbtn active" data-tab="schedule" data-i18n="tabSchedule">Schedule Table</button>
+      <button class="tabbtn" data-tab="compare" data-i18n="tabCompare">Compare Methods</button>
+      <button class="tabbtn" data-tab="sensitivity" data-i18n="tabSensitivity">Sensitivity</button>
+      <button class="tabbtn" data-tab="quiz" data-i18n="tabQuiz">Concept Quiz</button>
+      <button class="tabbtn" data-tab="worksheet" data-i18n="tabWorksheet">Lab Worksheet</button>
+      <button class="tabbtn" data-tab="experiment" data-i18n="tabExperiment">Experiment Log</button>
+    </div>
+
+    <div class="tabpanel active" id="tab-schedule">
+      <div style="overflow-x:auto;">
+        <table class="schedule" id="scheduleTable"></table>
+      </div>
+      <div class="btnrow no-print">
+        <button class="btn" id="btnExportCSV" data-i18n="exportCSV">⬇ Export Schedule CSV</button>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-compare">
+      <p class="info-note" data-i18n="compareNote">PW, AW, dan FW analog di sini: SL, DB/DDB, SOYD, dan Unit-of-Production menghasilkan total depresiasi (B−S) pada akhir umur penuh (kecuali floor/switch/estimate exceeded). MACRS mendepresiasi basis B penuh untuk tujuan pajak, terpisah dari pelaporan keuangan.</p>
+      <div class="compare-table-wrap">
+        <table class="compare" id="compareTable"></table>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-sensitivity">
+      <div class="row2">
+        <div class="field">
+          <label data-i18n="sensVar">Sensitivity Variable</label>
+          <select id="sensVarSelect">
+            <option value="N" data-i18n="sensN">Useful Life (N)</option>
+            <option value="S" data-i18n="sensS">Salvage Value (S)</option>
+            <option value="B" data-i18n="sensB">Cost Basis (B)</option>
+            <option value="mult" data-i18n="sensMult">DB Multiplier</option>
+          </select>
+        </div>
+      </div>
+      <div id="sensitivityChartHolder"></div>
+      <p class="chart-caption" data-i18n="sensCaption">Grafik menunjukkan Book Value pada akhir umur (BV_N) saat satu variabel diubah, variabel lain tetap.</p>
+    </div>
+
+    <div class="tabpanel" id="tab-quiz">
+      <div id="quizHolder"></div>
+    </div>
+
+    <div class="tabpanel worksheet" id="tab-worksheet">
+      <div class="wq">
+        <label data-i18n="wq1">1. Jelaskan aset yang dianalisis (jenis mesin, fungsi, konteks manufaktur):</label>
+        <textarea id="wq1"></textarea>
+      </div>
+      <div class="wq">
+        <label data-i18n="wq2">2. Prediksi Anda: metode mana yang akan memberi book value terendah pada tahun ke-2? Mengapa?</label>
+        <textarea id="wq2"></textarea>
+      </div>
+      <div class="wq">
+        <label data-i18n="wq3">3. Jalankan minimal 5 trial (metode berbeda / parameter berbeda) dan catat hasilnya di Experiment Log. Ringkas perbandingannya di sini:</label>
+        <textarea id="wq3"></textarea>
+      </div>
+      <div class="wq">
+        <label data-i18n="wq4">4. Apakah Anda menemukan kasus floor (DB/DDB) atau estimate exceeded (Unit-of-Production)? Jelaskan:</label>
+        <textarea id="wq4"></textarea>
+      </div>
+      <div class="wq">
+        <label data-i18n="wq5">5. Jelaskan perbedaan MACRS (tax) dengan metode book depreciation lainnya:</label>
+        <textarea id="wq5"></textarea>
+      </div>
+      <div class="wq">
+        <label data-i18n="wq6">6. Kesimpulan engineering/akuntansi Anda:</label>
+        <textarea id="wq6"></textarea>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tab-experiment">
+      <div class="btnrow no-print">
+        <button class="btn" id="btnRecord" data-i18n="recordData">＋ Record Data</button>
+        <button class="btn" id="btnClearLog" data-i18n="clearData">🗑 Clear Data</button>
+      </div>
+      <div style="overflow-x:auto; margin-top:10px;">
+        <table class="schedule" id="experimentTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="app-footer" data-i18n="footerNote">
+    Virtual lab ini mengasumsikan konvensi diskrit end-of-period (kecuali dinyatakan lain), tidak memodelkan pajak/inflasi/impairment kecuali eksplisit disebut, dan MACRS hanya bersifat ilustratif untuk tujuan edukasi.
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   I18N DICTIONARY
+============================================================ */
+const I18N = {
+  id: {
+    kicker: "VIRTUAL LAB — AKUNTANSI ASET TEKNIK",
+    appTitle: "Studio Depresiasi Aset & Nilai Buku",
+    appSubtitle: "Garis Lurus · Saldo Menurun/DDB · Jumlah Angka Tahun · Unit Produksi · MACRS",
+    printReport: "🖶 Cetak Laporan Lab",
+    assetData: "Data Aset",
+    methodLabel: "Metode",
+    costBasis: "Basis Biaya (B)",
+    salvage: "Nilai Sisa (S)",
+    usefulLife: "Umur Manfaat N (tahun)",
+    dbSettings: "Pengaturan DB / DDB",
+    multiplier: "Multiplier",
+    switchToSL: "Switch-to-SL",
+    switchHint: "Bila aktif, berpindah ke SL saat SL menghasilkan depresiasi lebih besar dari DB pada sisa umur.",
+    uopSettings: "Pengaturan Unit Produksi",
+    totalUnits: "Total Estimasi Unit",
+    unitsPerPeriod: "Unit per Periode (dapat diedit)",
+    macrsSettings: "Pengaturan MACRS (ilustratif)",
+    propertyClass: "Property Class",
+    convention: "Konvensi",
+    macrsWarn: "MACRS adalah metode PAJAK (AS), bukan metode pelaporan keuangan. Tabel persentase bersifat ILUSTRATIF — konsultasikan tabel IRS resmi untuk kepatuhan pajak sesungguhnya.",
+    currency: "Tampilan Mata Uang",
+    generateSchedule: "Buat Jadwal",
+    resetPreset: "Reset ke Preset",
+    reasoningFlow: "Alur Evaluasi 4-Tahap",
+    stage1: "1. ASET NYATA",
+    stage2: "2. MODEL DEPRESIASI",
+    stage3: "3. JADWAL",
+    stage4: "4. NILAI BUKU & DAMPAK",
+    play: "▶ Mainkan",
+    pause: "⏸ Jeda",
+    step: "⏭ Langkah",
+    reset: "⟲ Ulang",
+    animSpeed: "Kecepatan Animasi",
+    chartScale: "Skala Grafik",
+    resultCards: "Kartu Hasil Depresiasi",
+    tabSchedule: "Tabel Jadwal",
+    tabCompare: "Bandingkan Metode",
+    tabSensitivity: "Sensitivitas",
+    tabQuiz: "Kuis Konsep",
+    tabWorksheet: "Lembar Kerja Lab",
+    tabExperiment: "Log Eksperimen",
+    exportCSV: "⬇ Ekspor Jadwal CSV",
+    compareNote: "Analog PW/AW/FW: SL, DB/DDB, SOYD, dan Unit-of-Production menghasilkan total depresiasi (B−S) pada akhir umur penuh (kecuali floor/switch/estimate exceeded). MACRS mendepresiasi basis B penuh untuk tujuan pajak, terpisah dari pelaporan keuangan.",
+    sensVar: "Variabel Sensitivitas",
+    sensN: "Umur Manfaat (N)",
+    sensS: "Nilai Sisa (S)",
+    sensB: "Basis Biaya (B)",
+    sensMult: "Multiplier DB",
+    sensCaption: "Grafik menunjukkan Book Value pada akhir umur (BV_N) saat satu variabel diubah, variabel lain tetap.",
+    wq1: "1. Jelaskan aset yang dianalisis (jenis mesin, fungsi, konteks manufaktur):",
+    wq2: "2. Prediksi Anda: metode mana yang akan memberi book value terendah pada tahun ke-2? Mengapa?",
+    wq3: "3. Jalankan minimal 5 trial (metode berbeda / parameter berbeda) dan catat hasilnya di Experiment Log. Ringkas perbandingannya di sini:",
+    wq4: "4. Apakah Anda menemukan kasus floor (DB/DDB) atau estimate exceeded (Unit-of-Production)? Jelaskan:",
+    wq5: "5. Jelaskan perbedaan MACRS (tax) dengan metode book depreciation lainnya:",
+    wq6: "6. Kesimpulan engineering/akuntansi Anda:",
+    recordData: "＋ Rekam Data",
+    clearData: "🗑 Hapus Data",
+    footerNote: "Virtual lab ini mengasumsikan konvensi diskrit end-of-period (kecuali dinyatakan lain), tidak memodelkan pajak/inflasi/impairment kecuali eksplisit disebut, dan MACRS hanya bersifat ilustratif untuk tujuan edukasi.",
+    colPeriod:"Periode", colDep:"Depresiasi", colAccum:"Akumulasi", colBV:"Nilai Buku", colNote:"Catatan",
+    valid:"VALID", invalid:"TIDAK VALID", warning:"PERINGATAN",
+    statusModel:"Model", statusPeriod:"Periode", statusDep:"Depresiasi", statusBV:"Nilai Buku",
+    statusFloor:"Floor", statusSwitch:"Switch", statusEstimate:"Estimasi", statusClass:"Klasifikasi",
+    yes:"Ya", no:"Tidak", na:"N/A", tax:"PAJAK", book:"BUKU/KEUANGAN",
+    estimateExceeded:"ESTIMASI TERLAMPAUI",
+    switchedAt:"Switch di t=",
+    flooredNote:"Floor diterapkan",
+    correctFeedback:"Benar!", wrongFeedback:"Belum tepat.",
+    trial:"Trial", timestamp:"Waktu", noData:"Belum ada data.",
+    invalidInput: "INPUT TIDAK VALID:",
+    methodLimit: "BATAS METODE:",
+    stageAssetTitle: "Konteks Aset Nyata",
+    stageModelTitle: "Model Depresiasi",
+    stageScheduleTitle: "Jadwal Depresiasi",
+    stageScheduleNote: "Tabel periode-demi-periode kini disorot di tab \"Tabel Jadwal\" di bawah — lihat kolom depresiasi, akumulasi, dan nilai buku untuk setiap tahun.",
+    stageImpactTitle: "Nilai Buku & Dampak",
+    stageImpactNote: "Nilai buku pada akhir umur mencerminkan sisa nilai aset di neraca dan memengaruhi keputusan penggantian/pajak.",
+  },
+  en: {
+    kicker: "VIRTUAL LAB — ENGINEERING ASSET ACCOUNTING",
+    appTitle: "Asset Depreciation & Book Value Studio",
+    appSubtitle: "Straight-Line · Declining Balance/DDB · Sum-of-Years-Digit · Unit-of-Production · MACRS",
+    printReport: "🖶 Print Lab Report",
+    assetData: "Asset Data",
+    methodLabel: "Method",
+    costBasis: "Cost Basis (B)",
+    salvage: "Salvage (S)",
+    usefulLife: "Useful Life N (years)",
+    dbSettings: "DB / DDB Settings",
+    multiplier: "Multiplier",
+    switchToSL: "Switch-to-SL",
+    switchHint: "When enabled, switches to SL whenever SL yields a larger depreciation than DB over the remaining life.",
+    uopSettings: "Unit-of-Production Settings",
+    totalUnits: "Total Estimated Units",
+    unitsPerPeriod: "Units per Period (editable)",
+    macrsSettings: "MACRS Settings (illustrative)",
+    propertyClass: "Property Class",
+    convention: "Convention",
+    macrsWarn: "MACRS is a US TAX method, not a financial-reporting method. The percentage table is ILLUSTRATIVE — consult the official IRS table for real tax compliance.",
+    currency: "Currency Display",
+    generateSchedule: "Generate Schedule",
+    resetPreset: "Reset to Preset",
+    reasoningFlow: "4-Stage Evaluation Flow",
+    stage1: "1. REAL ASSET",
+    stage2: "2. DEPRECIATION MODEL",
+    stage3: "3. SCHEDULE",
+    stage4: "4. BOOK VALUE & IMPACT",
+    play: "▶ Play",
+    pause: "⏸ Pause",
+    step: "⏭ Step",
+    reset: "⟲ Reset",
+    animSpeed: "Animation Speed",
+    chartScale: "Chart Scale",
+    resultCards: "Depreciation Result Cards",
+    tabSchedule: "Schedule Table",
+    tabCompare: "Compare Methods",
+    tabSensitivity: "Sensitivity",
+    tabQuiz: "Concept Quiz",
+    tabWorksheet: "Lab Worksheet",
+    tabExperiment: "Experiment Log",
+    exportCSV: "⬇ Export Schedule CSV",
+    compareNote: "PW/AW/FW analogue: SL, DB/DDB, SOYD, and Unit-of-Production reach total depreciation (B−S) by the end of full life (unless floor/switch/estimate exceeded occurs). MACRS depreciates the full basis B for tax purposes, separate from financial reporting.",
+    sensVar: "Sensitivity Variable",
+    sensN: "Useful Life (N)",
+    sensS: "Salvage Value (S)",
+    sensB: "Cost Basis (B)",
+    sensMult: "DB Multiplier",
+    sensCaption: "Chart shows Book Value at end of life (BV_N) as one variable changes, others held fixed.",
+    wq1: "1. Describe the asset being analyzed (machine type, function, manufacturing context):",
+    wq2: "2. Your prediction: which method gives the lowest book value at year 2? Why?",
+    wq3: "3. Run at least 5 trials (different methods/parameters) and log them in Experiment Log. Summarize the comparison here:",
+    wq4: "4. Did you find a floor case (DB/DDB) or estimate-exceeded case (Unit-of-Production)? Explain:",
+    wq5: "5. Explain the difference between MACRS (tax) and other book depreciation methods:",
+    wq6: "6. Your engineering/accounting conclusion:",
+    recordData: "＋ Record Data",
+    clearData: "🗑 Clear Data",
+    footerNote: "This virtual lab assumes discrete end-of-period timing (unless stated otherwise), does not model taxes/inflation/impairment unless explicitly stated, and MACRS is illustrative only for educational purposes.",
+    colPeriod:"Period", colDep:"Depreciation", colAccum:"Accumulated", colBV:"Book Value", colNote:"Note",
+    valid:"VALID", invalid:"INVALID", warning:"WARNING",
+    statusModel:"Model", statusPeriod:"Period", statusDep:"Depreciation", statusBV:"Book Value",
+    statusFloor:"Floor", statusSwitch:"Switch", statusEstimate:"Estimate", statusClass:"Classification",
+    yes:"Yes", no:"No", na:"N/A", tax:"TAX", book:"BOOK/FINANCIAL",
+    estimateExceeded:"ESTIMATE EXCEEDED",
+    switchedAt:"Switched at t=",
+    flooredNote:"Floor applied",
+    correctFeedback:"Correct!", wrongFeedback:"Not quite.",
+    trial:"Trial", timestamp:"Time", noData:"No data recorded yet.",
+    invalidInput: "INVALID INPUT:",
+    methodLimit: "METHOD LIMIT:",
+    stageAssetTitle: "Real Asset Context",
+    stageModelTitle: "Depreciation Model",
+    stageScheduleTitle: "Depreciation Schedule",
+    stageScheduleNote: "The period-by-period table is now highlighted in the \"Schedule Table\" tab below — see depreciation, accumulated, and book value columns for each year.",
+    stageImpactTitle: "Book Value & Impact",
+    stageImpactNote: "The book value at end of life reflects the asset's remaining balance-sheet value and feeds into replacement/tax decisions.",
+  }
+};
+let LANG = "id";
+function t(key){ return (I18N[LANG] && I18N[LANG][key]) || key; }
+
+/* ============================================================
+   MACRS TABLES (IRS GDS, half-year convention — illustrative)
+============================================================ */
+const MACRS_TABLES = {
+  "3":  [33.33,44.45,14.81,7.41],
+  "5":  [20.00,32.00,19.20,11.52,11.52,5.76],
+  "7":  [14.29,24.49,17.49,12.49,8.93,8.92,8.93,4.46],
+  "10": [10.00,18.00,14.40,11.52,9.22,7.37,6.55,6.55,6.56,6.55,3.28]
+};
+
+/* ============================================================
+   PRESETS
+============================================================ */
+const PRESETS = [
+  {
+    id:"cnc_sl",
+    name:{id:"Preset 1 — Mesin CNC (Straight-Line)", en:"Preset 1 — CNC Machine (Straight-Line)"},
+    desc:{id:"Mesin CNC 3-axis untuk produksi komponen presisi. Pemakaian relatif merata dari tahun ke tahun, sehingga depresiasi garis lurus mencerminkan pola keausan yang wajar.",
+          en:"A 3-axis CNC machine for precision part production. Usage is fairly even year to year, so straight-line depreciation reasonably reflects the wear pattern."},
+    method:"SL", B:600000000, S:60000000, N:8,
+    multiplier:2, switchToSL:true,
+    totalUnits:1000000, unitsPerPeriod:null,
+    propertyClass:"5", convention:"half-year", currency:"IDR"
+  },
+  {
+    id:"robot_ddb",
+    name:{id:"Preset 2 — Sel Las Robotik (DDB + Switch-to-SL)", en:"Preset 2 — Robotic Welding Cell (DDB + Switch-to-SL)"},
+    desc:{id:"Sel las robotik dengan risiko keusangan teknologi tinggi (kontroler dan software cepat tertinggal). Depresiasi dipercepat pada tahun-tahun awal lebih mencerminkan penurunan nilai ekonomis yang nyata.",
+          en:"A robotic welding cell with high technological-obsolescence risk (controllers and software age quickly). Accelerated early-year depreciation better reflects real economic value loss."},
+    method:"DB", B:750000000, S:75000000, N:6,
+    multiplier:2, switchToSL:true,
+    totalUnits:1000000, unitsPerPeriod:null,
+    propertyClass:"5", convention:"half-year", currency:"IDR"
+  },
+  {
+    id:"injection_soyd",
+    name:{id:"Preset 3 — Mesin Injection Molding (SOYD)", en:"Preset 3 — Injection Molding Machine (SOYD)"},
+    desc:{id:"Mesin injection molding untuk produksi komponen plastik jangka menengah. SOYD memberi akselerasi yang lebih halus dibanding DDB, cocok untuk aset dengan penurunan performa bertahap.",
+          en:"An injection molding machine for mid-life plastic-component production. SOYD gives a smoother acceleration than DDB, fitting an asset whose performance declines gradually."},
+    method:"SOYD", B:450000000, S:50000000, N:5,
+    multiplier:2, switchToSL:true,
+    totalUnits:1000000, unitsPerPeriod:null,
+    propertyClass:"5", convention:"half-year", currency:"IDR"
+  },
+  {
+    id:"conveyor_uop",
+    name:{id:"Preset 4 — Conveyor / Lini Produksi (Unit-of-Production)", en:"Preset 4 — Conveyor / Production Line (Unit-of-Production)"},
+    desc:{id:"Conveyor/lini produksi yang pemakaiannya sangat bergantung pada volume produksi tahunan, bukan waktu. Unit-of-Production mengalokasikan depresiasi sesuai unit output aktual tiap tahun.",
+          en:"A conveyor/production line whose usage depends heavily on annual production volume, not time. Unit-of-Production allocates depreciation according to actual output units each year."},
+    method:"UOP", B:300000000, S:30000000, N:6,
+    multiplier:2, switchToSL:true,
+    totalUnits:1000000, unitsPerPeriod:[120000,150000,180000,200000,190000,160000],
+    propertyClass:"5", convention:"half-year", currency:"IDR"
+  },
+  {
+    id:"macrs_illustration",
+    name:{id:"Preset 5 — Mesin Impor, Anak Usaha AS (Ilustrasi MACRS)", en:"Preset 5 — Imported Machinery, US Subsidiary (MACRS Illustration)"},
+    desc:{id:"Mesin produksi milik anak usaha di Amerika Serikat. Untuk pelaporan pajak AS, perusahaan menggunakan MACRS (bukan SL/DB/SOYD/UOP) sesuai ketentuan IRS — terpisah dari pembukuan keuangan internal.",
+          en:"Production machinery owned by a US subsidiary. For US tax reporting, the company uses MACRS (not SL/DB/SOYD/UOP) per IRS rules — separate from internal financial bookkeeping."},
+    method:"MACRS", B:200000, S:20000, N:5,
+    multiplier:2, switchToSL:true,
+    totalUnits:100000, unitsPerPeriod:null,
+    propertyClass:"5", convention:"half-year", currency:"GEN"
+  },
+  {
+    id:"compare_case",
+    name:{id:"Preset 6 — Kasus Perbandingan Metode", en:"Preset 6 — Method Comparison Case"},
+    desc:{id:"Satu aset yang sama dianalisis dengan seluruh metode sekaligus, untuk melihat bagaimana pilihan metode memengaruhi pola nilai buku, laba tahunan yang dilaporkan, dan strategi pajak.",
+          en:"The same asset analyzed under every method at once, to see how the method choice affects the book-value pattern, reported annual income, and tax strategy."},
+    method:"ALL", B:500000000, S:50000000, N:5,
+    multiplier:2, switchToSL:true,
+    totalUnits:500000, unitsPerPeriod:[80000,100000,110000,100000,110000],
+    propertyClass:"5", convention:"half-year", currency:"IDR"
+  }
+];
+
+const METHOD_INFO = {
+  SL: {
+    formula: "D_t = (B − S) / N",
+    note: {id:"Depresiasi konstan setiap periode. Model paling sederhana; cocok bila keausan/manfaat aset relatif merata sepanjang umurnya.",
+           en:"Constant depreciation every period. The simplest model; fits an asset whose wear/benefit is fairly even across its life."}
+  },
+  DB: {
+    formula: "D_t = d × BV_(t−1),  d = multiplier / N",
+    note: {id:"Depresiasi terbesar di tahun-tahun awal lalu menurun. Floor mencegah nilai buku turun di bawah salvage; switch-to-SL (opsional) memastikan aset habis terdepresiasi tepat di akhir umur.",
+           en:"Largest depreciation in early years, then declining. A floor prevents book value from dropping below salvage; optional switch-to-SL ensures full depreciation exactly by end of life."}
+  },
+  SOYD: {
+    formula: "D_t = [(N − t + 1) / SOYD] × (B − S),  SOYD = N(N+1)/2",
+    note: {id:"Accelerated namun lebih halus dari DB, dan secara matematis tepat habis ke salvage di akhir umur tanpa perlu switching.",
+           en:"Accelerated but smoother than DB, and mathematically reaches salvage exactly by end of life without needing a switch."}
+  },
+  UOP: {
+    formula: "D_t = (units_t / total_units) × (B − S)",
+    note: {id:"Depresiasi mengikuti pemakaian aktual, bukan waktu. Jika unit kumulatif melebihi estimasi, sistem membatasi akumulasi pada (B−S) dan menandai estimasi perlu direvisi.",
+           en:"Depreciation follows actual usage, not time. If cumulative units exceed the estimate, the system caps accumulation at (B−S) and flags the estimate for revision."}
+  },
+  MACRS: {
+    formula: "D_t = B × MACRS_table[property_class][t]",
+    note: {id:"Metode PAJAK AS (bukan pelaporan keuangan). Salvage tidak dikurangkan dari basis; tabel persentase bersifat ilustratif.",
+           en:"A US TAX method (not financial reporting). Salvage is not subtracted from the basis; the percentage table is illustrative."}
+  },
+  ALL: {
+    formula: "SL · DB/DDB · SOYD · UOP · MACRS",
+    note: {id:"Seluruh metode dihitung sekaligus dari cost basis, salvage, dan umur yang sama untuk dibandingkan.",
+           en:"All methods are computed at once from the same cost basis, salvage, and life for comparison."}
+  }
+};
+
+/* ============================================================
+   STATE
+============================================================ */
+const state = {
+  presetId: PRESETS[0].id,
+  method: PRESETS[0].method,
+  B: PRESETS[0].B,
+  S: PRESETS[0].S,
+  N: PRESETS[0].N,
+  multiplier: PRESETS[0].multiplier,
+  switchToSL: PRESETS[0].switchToSL,
+  totalUnits: PRESETS[0].totalUnits,
+  unitsPerPeriod: PRESETS[0].unitsPerPeriod ? PRESETS[0].unitsPerPeriod.slice() : evenUnits(PRESETS[0].N, PRESETS[0].totalUnits),
+  propertyClass: PRESETS[0].propertyClass,
+  convention: PRESETS[0].convention,
+  currency: PRESETS[0].currency,
+  currentPeriod: 0,
+  playing:false,
+  playTimer:null,
+  stage:1,
+  experimentLog: []
+};
+
+function evenUnits(n, total){
+  const arr = [];
+  const base = Math.round(total/n);
+  let sum=0;
+  for(let i=0;i<n;i++){
+    if(i===n-1){ arr.push(total-sum); } else { arr.push(base); sum+=base; }
+  }
+  return arr;
+}
+
+/* ============================================================
+   CALCULATION ENGINE
+============================================================ */
+function validateInputs(){
+  const errors = [];
+  const warnings = [];
+  if(!(state.B > 0)) errors.push(LANG==="id" ? "Cost basis B harus > 0." : "Cost basis B must be > 0.");
+  if(state.S < 0) errors.push(LANG==="id" ? "Salvage S tidak boleh negatif." : "Salvage S cannot be negative.");
+  if(state.S >= state.B) warnings.push(LANG==="id" ? "Salvage S ≥ Cost Basis B — depresiasi akan nol/tidak wajar." : "Salvage S ≥ Cost Basis B — depreciation will be zero/unusual.");
+  if(!Number.isInteger(state.N) || state.N < 1) errors.push(LANG==="id" ? "Useful life N harus bilangan bulat ≥ 1." : "Useful life N must be an integer ≥ 1.");
+  if(state.method === "UOP"){
+    if(!(state.totalUnits > 0)) errors.push(LANG==="id" ? "Total estimasi unit harus > 0." : "Total estimated units must be > 0.");
+    const sumUnits = state.unitsPerPeriod.reduce((a,b)=>a+ (Number(b)||0),0);
+    if(sumUnits > state.totalUnits) warnings.push(LANG==="id" ? "Total unit aktual melebihi estimasi — akan dipangkas (ESTIMATE EXCEEDED)." : "Actual total units exceed the estimate — will be capped (ESTIMATE EXCEEDED).");
+  }
+  return {valid: errors.length===0, errors, warnings};
+}
+
+function calcSL(B,S,N){
+  const D = (B-S)/N;
+  const rows = [];
+  let BV = B;
+  let cum = 0;
+  for(let per=1;per<=N;per++){
+    cum += D;
+    BV = B - cum;
+    rows.push({t:per, dep:D, accum:cum, bv:BV, note:""});
+  }
+  return rows;
+}
+
+function calcDB(B,S,N,multiplier,switchToSL){
+  const rate = multiplier/N;
+  let BV = B;
+  let cum = 0;
+  const rows = [];
+  let switched = false;
+  let switchPeriod = null;
+  for(let per=1;per<=N;per++){
+    const dbDep = rate*BV;
+    const remainingLife = N - per + 1;
+    const slDep = remainingLife>0 ? Math.max(0,(BV-S)/remainingLife) : 0;
+    let dep, note="";
+    if(switchToSL && slDep > dbDep){
+      dep = slDep;
+      if(!switched){ switched = true; switchPeriod = per; }
+      note = per===switchPeriod ? (LANG==="id"?"Switch ke SL":"Switched to SL") : (LANG==="id"?"SL (switched)":"SL (switched)");
+    } else {
+      dep = dbDep;
+    }
+    let floored=false;
+    if(BV - dep < S - 1e-6){
+      dep = Math.max(0, BV - S);
+      floored = true;
+      note = (note ? note+"; " : "") + t("flooredNote");
+    }
+    BV = BV - dep;
+    cum += dep;
+    rows.push({t:per, dep, accum:cum, bv:BV, note, floored, switchedHere: per===switchPeriod});
+  }
+  return {rows, switched, switchPeriod};
+}
+
+function calcSOYD(B,S,N){
+  const SOYD = N*(N+1)/2;
+  let BV = B;
+  let cum = 0;
+  const rows = [];
+  for(let per=1;per<=N;per++){
+    const frac = (N-per+1)/SOYD;
+    const dep = frac*(B-S);
+    cum += dep;
+    BV = B - cum;
+    rows.push({t:per, dep, accum:cum, bv:BV, note:""});
+  }
+  return {rows, SOYD};
+}
+
+function calcUOP(B,S,N,totalUnits,unitsArr){
+  let cum = 0;
+  const rows = [];
+  let exceeded = false;
+  for(let i=0;i<N;i++){
+    const units = Number(unitsArr[i])||0;
+    let rawDep = totalUnits>0 ? (units/totalUnits)*(B-S) : 0;
+    const target = cum + rawDep;
+    let flag = false;
+    if(target > (B-S) + 1e-6){
+      rawDep = Math.max(0,(B-S)-cum);
+      flag = true;
+      exceeded = true;
+    }
+    cum += rawDep;
+    const BV = B - cum;
+    rows.push({t:i+1, dep:rawDep, accum:cum, bv:BV, note: flag ? t("estimateExceeded") : "", exceeded:flag, units});
+  }
+  return {rows, exceeded};
+}
+
+function calcMACRS(B,N,propertyClass){
+  const table = MACRS_TABLES[propertyClass] || MACRS_TABLES["5"];
+  let cum=0;
+  const rows = [];
+  const len = Math.max(N, table.length);
+  for(let i=0;i<len;i++){
+    const pct = table[i] || 0;
+    const dep = B*pct/100;
+    cum += dep;
+    rows.push({t:i+1, dep, accum:cum, bv: B-cum, note: pct? (pct.toFixed(2)+"%") : ""});
+  }
+  return rows;
+}
+
+function computeAll(){
+  const B=state.B, S=state.S, N=state.N;
+  const result = {};
+  result.SL = calcSL(B,S,N);
+  const dbRes = calcDB(B,S,N,state.multiplier,state.switchToSL);
+  result.DB = dbRes.rows; result.DBmeta = dbRes;
+  const soydRes = calcSOYD(B,S,N);
+  result.SOYD = soydRes.rows; result.SOYDmeta = soydRes;
+  const uopRes = calcUOP(B,S,N,state.totalUnits,state.unitsPerPeriod);
+  result.UOP = uopRes.rows; result.UOPmeta = uopRes;
+  result.MACRS = calcMACRS(B,N,state.propertyClass);
+  return result;
+}
+
+/* ============================================================
+   FORMATTING
+============================================================ */
+function fmtMoney(v){
+  if(v===undefined||v===null||isNaN(v)) return t("na");
+  const rounded = Math.round(v);
+  if(state.currency === "IDR"){
+    return "Rp " + rounded.toLocaleString("id-ID");
+  }
+  return rounded.toLocaleString("en-US");
+}
+function fmtNum(v,d=0){
+  if(v===undefined||v===null||isNaN(v)) return t("na");
+  return Number(v).toLocaleString(LANG==="id"?"id-ID":"en-US", {maximumFractionDigits:d});
+}
+
+/* ============================================================
+   RENDER: CONTROLS VISIBILITY
+============================================================ */
+function syncControlsFromState(){
+  document.getElementById("methodSelect").value = state.method;
+  document.getElementById("inputB").value = state.B;
+  document.getElementById("inputS").value = state.S;
+  document.getElementById("inputN").value = state.N;
+  document.getElementById("inputMultiplier").value = state.multiplier;
+  document.getElementById("inputSwitch").checked = state.switchToSL;
+  document.getElementById("inputTotalUnits").value = state.totalUnits;
+  document.getElementById("inputPropertyClass").value = state.propertyClass;
+  document.getElementById("inputConvention").value = state.convention;
+  document.getElementById("inputCurrency").value = state.currency;
+  renderUnitTable();
+  updateFieldsetVisibility();
+}
+
+function updateFieldsetVisibility(){
+  const m = state.method;
+  document.getElementById("fieldsetDB").style.display = (m==="DB"||m==="ALL") ? "" : "none";
+  document.getElementById("fieldsetUOP").style.display = (m==="UOP"||m==="ALL") ? "" : "none";
+  document.getElementById("fieldsetMACRS").style.display = (m==="MACRS"||m==="ALL") ? "" : "none";
+  document.getElementById("fieldN").style.display = (m==="MACRS") ? "" : "";
+}
+
+function renderUnitTable(){
+  const holder = document.getElementById("unitTable");
+  holder.innerHTML = "";
+  for(let i=0;i<state.N;i++){
+    const row = document.createElement("div");
+    row.className = "unit-row";
+    const label = document.createElement("span");
+    label.textContent = "t=" + (i+1);
+    const inp = document.createElement("input");
+    inp.type = "number";
+    inp.min = "0";
+    inp.value = state.unitsPerPeriod[i] !== undefined ? state.unitsPerPeriod[i] : 0;
+    inp.addEventListener("input", ()=>{
+      state.unitsPerPeriod[i] = Number(inp.value)||0;
+      renderAll();
+    });
+    row.appendChild(label);
+    row.appendChild(inp);
+    holder.appendChild(row);
+  }
+}
+
+/* ============================================================
+   CHART RENDERING (SVG)
+============================================================ */
+const METHOD_COLORS = {
+  SL:"#7bc4cf", DB:"#c96a1f", SOYD:"#e0bd80", UOP:"#3f8f5c", MACRS:"#c1453a"
+};
+const METHOD_LABELS = {
+  SL:"Straight-Line", DB:"Declining Balance/DDB", SOYD:"Sum-of-Years-Digit", UOP:"Unit-of-Production", MACRS:"MACRS"
+};
+
+function buildChartSVG(seriesList, N, B, opts){
+  opts = opts || {};
+  const scalePct = opts.scale || 100;
+  const W = 900, H = 340 * (scalePct/100);
+  const padL = 70, padR = 20, padT = 20, padB = 40;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+  const maxT = N;
+  const maxV = B * 1.05;
+
+  function x(t){ return padL + (t/maxT) * plotW; }
+  function y(v){ return padT + plotH - (v/maxV)*plotH; }
+
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Book value chart">`;
+
+  // grid
+  for(let i=0;i<=5;i++){
+    const gv = maxV*i/5;
+    svg += `<line x1="${padL}" y1="${y(gv)}" x2="${W-padR}" y2="${y(gv)}" stroke="#1e3f60" stroke-width="1"/>`;
+    svg += `<text x="${padL-8}" y="${y(gv)+4}" text-anchor="end" font-size="10" fill="#9fb0bf" font-family="ui-monospace,monospace">${fmtCompact(gv)}</text>`;
+  }
+  for(let tt=0; tt<=maxT; tt++){
+    svg += `<line x1="${x(tt)}" y1="${padT}" x2="${x(tt)}" y2="${H-padB}" stroke="#16304a" stroke-width="1"/>`;
+    svg += `<text x="${x(tt)}" y="${H-padB+16}" text-anchor="middle" font-size="10" fill="#9fb0bf" font-family="ui-monospace,monospace">${tt}</text>`;
+  }
+  svg += `<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="#5c7186">t (period)</text>`;
+
+  // salvage line
+  if(opts.S !== undefined){
+    svg += `<line x1="${padL}" y1="${y(opts.S)}" x2="${W-padR}" y2="${y(opts.S)}" stroke="#c1453a" stroke-width="1" stroke-dasharray="4,3"/>`;
+    svg += `<text x="${W-padR}" y="${y(opts.S)-4}" text-anchor="end" font-size="9" fill="#c1453a">S</text>`;
+  }
+
+  // series lines
+  seriesList.forEach(s=>{
+    let pts = `${x(0)},${y(B)}`;
+    s.rows.forEach(r=>{ pts += ` ${x(r.t)},${y(r.bv)}`; });
+    svg += `<polyline points="${pts}" fill="none" stroke="${s.color}" stroke-width="2.5"/>`;
+    s.rows.forEach(r=>{
+      const rad = r.floored || r.exceeded || r.switchedHere ? 4.5 : 2.5;
+      svg += `<circle cx="${x(r.t)}" cy="${y(r.bv)}" r="${rad}" fill="${s.color}" stroke="#0a1622" stroke-width="1"/>`;
+    });
+  });
+
+  // current period cursor
+  if(opts.cursor !== undefined && opts.cursor >= 0){
+    svg += `<line x1="${x(opts.cursor)}" y1="${padT}" x2="${x(opts.cursor)}" y2="${H-padB}" stroke="#e0bd80" stroke-width="1.5" stroke-dasharray="2,2"/>`;
+  }
+
+  svg += `</svg>`;
+  return svg;
+}
+
+function fmtCompact(v){
+  if(Math.abs(v) >= 1e9) return (v/1e9).toFixed(1)+"B";
+  if(Math.abs(v) >= 1e6) return (v/1e6).toFixed(1)+"M";
+  if(Math.abs(v) >= 1e3) return (v/1e3).toFixed(0)+"K";
+  return Math.round(v).toString();
+}
+
+function getEffectiveHorizon(calc){
+  if(state.method === "ALL"){
+    return Math.max(calc.SL.length, calc.DB.length, calc.SOYD.length, calc.UOP.length, calc.MACRS.length, state.N);
+  }
+  return Math.max(calc[state.method].length, state.N);
+}
+
+function renderChart(calc){
+  const holder = document.getElementById("chartHolder");
+  const scale = Number(document.getElementById("chartScale").value);
+  let seriesList = [];
+  if(state.method === "ALL"){
+    ["SL","DB","SOYD","UOP","MACRS"].forEach(m=>{
+      seriesList.push({rows: calc[m], color: METHOD_COLORS[m], label: METHOD_LABELS[m]});
+    });
+  } else {
+    seriesList.push({rows: calc[state.method], color: METHOD_COLORS[state.method], label: METHOD_LABELS[state.method]});
+  }
+  const horizon = getEffectiveHorizon(calc);
+  holder.innerHTML = buildChartSVG(seriesList, horizon, state.B, {S: state.method==="MACRS"?undefined:state.S, cursor: state.currentPeriod, scale});
+
+  const legend = document.getElementById("chartLegend");
+  legend.innerHTML = seriesList.map(s=>`<span><span class="dot" style="background:${s.color}"></span>${s.label}</span>`).join("");
+
+  document.getElementById("chartCaption").textContent = LANG==="id"
+    ? `Kurva nilai buku (Book Value) terhadap waktu. Garis putus merah = salvage value. Garis putus emas = periode berjalan.`
+    : `Book value curve over time. Dashed red = salvage value. Dashed gold = current period.`;
+}
+
+/* ============================================================
+   SCHEDULE TABLE
+============================================================ */
+function activeRows(calc){
+  if(state.method === "ALL") return null;
+  return calc[state.method];
+}
+
+function renderSchedule(calc){
+  const table = document.getElementById("scheduleTable");
+  const rows = activeRows(calc);
+  if(!rows){
+    table.innerHTML = `<caption style="caption-side:top;text-align:left;color:var(--steel-300);font-size:11.5px;padding-bottom:6px;">${LANG==="id"?"Pilih satu metode (bukan ALL METHODS) untuk melihat tabel jadwal detail.":"Select a single method (not ALL METHODS) to see the detailed schedule table."}</caption>`;
+    return;
+  }
+  let html = `<thead><tr>
+    <th>${t("colPeriod")}</th><th>${t("colDep")}</th><th>${t("colAccum")}</th><th>${t("colBV")}</th><th>${t("colNote")}</th>
+  </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const cur = r.t === state.currentPeriod ? " current-row" : "";
+    html += `<tr class="${cur}">
+      <td>${r.t}</td>
+      <td>${fmtMoney(r.dep)}</td>
+      <td>${fmtMoney(r.accum)}</td>
+      <td>${fmtMoney(r.bv)}</td>
+      <td class="flag">${r.note || ""}</td>
+    </tr>`;
+  });
+  html += "</tbody>";
+  table.innerHTML = html;
+}
+
+/* ============================================================
+   RESULT CARDS
+============================================================ */
+function renderCards(calc){
+  const grid = document.getElementById("cardGrid");
+  grid.innerHTML = "";
+  const rows = state.method !== "ALL" ? calc[state.method] : null;
+  const cur = rows ? (rows.find(r=>r.t===state.currentPeriod) || rows[rows.length-1] || rows[0]) : null;
+
+  function addCard(k,v,cls){
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<div class="k">${k}</div><div class="v ${cls||""}">${v}</div>`;
+    grid.appendChild(div);
+  }
+
+  if(state.method === "SL"){
+    addCard(t("statusDep"), fmtMoney((state.B-state.S)/state.N));
+    addCard(t("statusBV")+" (t="+state.currentPeriod+")", fmtMoney(cur?cur.bv:state.B));
+    addCard(LANG==="id"?"Akumulasi Depresiasi":"Accumulated Depreciation", fmtMoney(cur?cur.accum:0));
+    addCard(LANG==="id"?"Sisa Umur":"Remaining Life", (state.N-state.currentPeriod) + (LANG==="id"?" tahun":" yrs"));
+  } else if(state.method === "DB"){
+    const meta = calc.DBmeta;
+    addCard(LANG==="id"?"Rate DB":"DB Rate", (state.multiplier/state.N*100).toFixed(2)+"%");
+    addCard(t("statusDep")+" (t="+state.currentPeriod+")", fmtMoney(cur?cur.dep:0));
+    addCard(t("statusBV"), fmtMoney(cur?cur.bv:state.B));
+    addCard(t("statusSwitch"), meta.switched ? (t("switchedAt")+meta.switchPeriod) : t("no"));
+  } else if(state.method === "SOYD"){
+    const meta = calc.SOYDmeta;
+    addCard("SOYD", fmtNum(meta.SOYD));
+    addCard(t("statusDep")+" (t="+state.currentPeriod+")", fmtMoney(cur?cur.dep:0));
+    addCard(t("statusBV"), fmtMoney(cur?cur.bv:state.B));
+    addCard(LANG==="id"?"Akumulasi Depresiasi":"Accumulated Depreciation", fmtMoney(cur?cur.accum:0));
+  } else if(state.method === "UOP"){
+    const meta = calc.UOPmeta;
+    const unitsUsed = Math.min(
+      state.unitsPerPeriod.slice(0, state.currentPeriod).reduce((a,b)=>a+Number(b||0),0),
+      state.totalUnits
+    );
+    addCard(LANG==="id"?"Unit Terpakai (kumulatif)":"Units Used (cumulative)", fmtNum(unitsUsed));
+    addCard(t("statusDep")+" (t="+state.currentPeriod+")", fmtMoney(cur?cur.dep:0));
+    addCard(t("statusBV"), fmtMoney(cur?cur.bv:state.B));
+    addCard(t("statusEstimate"), meta.exceeded ? t("estimateExceeded") : t("valid"), meta.exceeded?"warn":"good");
+  } else if(state.method === "MACRS"){
+    addCard(t("propertyClass"), state.propertyClass+"-year");
+    addCard(t("convention"), state.convention);
+    addCard(t("statusDep")+" (t="+state.currentPeriod+")", fmtMoney(cur?cur.dep:0));
+    addCard(t("statusClass"), t("tax"), "warn");
+  } else if(state.method === "ALL"){
+    ["SL","DB","SOYD","UOP","MACRS"].forEach(m=>{
+      const rr = calc[m];
+      const rc = rr.find(r=>r.t===state.currentPeriod) || rr[rr.length-1];
+      addCard(METHOD_LABELS[m]+" — "+t("statusBV"), fmtMoney(rc?rc.bv:state.B));
+    });
+  }
+}
+
+/* ============================================================
+   STATUS BAR
+============================================================ */
+function renderStatusBar(calc, validation){
+  const bar = document.getElementById("statusBar");
+  let pillClass = "valid", pillText = t("valid");
+  if(!validation.valid){ pillClass="invalid"; pillText=t("invalid"); }
+  else if(validation.warnings.length){ pillClass="warning"; pillText=t("warning"); }
+
+  let floorStatus = t("no"), switchStatus = t("no"), estStatus = t("na");
+  if(state.method==="DB" || state.method==="ALL"){
+    const meta = calc.DBmeta;
+    floorStatus = meta.rows.some(r=>r.floored) ? t("yes") : t("no");
+    switchStatus = meta.switched ? (t("yes")+" ("+t("switchedAt")+meta.switchPeriod+")") : t("no");
+  }
+  if(state.method==="UOP" || state.method==="ALL"){
+    estStatus = calc.UOPmeta.exceeded ? t("estimateExceeded") : t("valid");
+  }
+
+  bar.innerHTML = `
+    <div class="item"><span class="pill ${pillClass}">${pillText}</span></div>
+    <div class="item">${t("statusModel")}: <b>${state.method}</b></div>
+    <div class="item">${t("statusPeriod")}: <b>${state.currentPeriod} / ${getEffectiveHorizon(calc)}</b></div>
+    <div class="item">${t("statusFloor")}: <b>${floorStatus}</b></div>
+    <div class="item">${t("statusSwitch")}: <b>${switchStatus}</b></div>
+    <div class="item">${t("statusEstimate")}: <b>${estStatus}</b></div>
+    <div class="item">${t("statusClass")}: <b>${state.method==="MACRS"?t("tax"):t("book")}</b></div>
+  `;
+  if(!validation.valid){
+    bar.innerHTML += `<div class="item" style="color:var(--red-500)">${t("invalidInput")} ${validation.errors.join(" ")}</div>`;
+  } else if(validation.warnings.length){
+    bar.innerHTML += `<div class="item" style="color:var(--amber-600)">${validation.warnings.join(" ")}</div>`;
+  }
+}
+
+/* ============================================================
+   COMPARISON TABLE
+============================================================ */
+function renderCompare(calc){
+  const table = document.getElementById("compareTable");
+  const methods = ["SL","DB","SOYD","UOP","MACRS"];
+  let head = `<thead><tr><th>${LANG==="id"?"Indikator":"Indicator"}</th>`;
+  methods.forEach(m=> head += `<th>${METHOD_LABELS[m]}</th>`);
+  head += "</tr></thead>";
+
+  function rowFor(labelId,labelEn, fn){
+    let row = `<tr><td class="label">${LANG==="id"?labelId:labelEn}</td>`;
+    methods.forEach(m=>{ row += `<td>${fn(m)}</td>`; });
+    row += "</tr>";
+    return row;
+  }
+
+  const totalDep = (m)=>{
+    const rows = calc[m];
+    const last = rows[rows.length-1];
+    return fmtMoney(last.accum);
+  };
+  const finalBV = (m)=>{
+    const rows = calc[m];
+    const last = rows[rows.length-1];
+    return fmtMoney(last.bv);
+  };
+  const pattern = (m)=>{
+    if(m==="SL") return LANG==="id"?"Linear / konstan":"Linear / constant";
+    if(m==="DB") return LANG==="id"?"Accelerated (menurun)":"Accelerated (decreasing)";
+    if(m==="SOYD") return LANG==="id"?"Accelerated (halus)":"Accelerated (smooth)";
+    if(m==="UOP") return LANG==="id"?"Berbasis aktivitas":"Activity-based";
+    if(m==="MACRS") return LANG==="id"?"Tax table (accelerated)":"Tax table (accelerated)";
+  };
+  const classification = (m)=> m==="MACRS" ? t("tax") : t("book");
+  const limitation = (m)=>{
+    if(m==="SL") return LANG==="id"?"Mengabaikan pola pemakaian nyata":"Ignores real usage pattern";
+    if(m==="DB") return LANG==="id"?"Perlu floor & opsi switch":"Needs floor & switch option";
+    if(m==="SOYD") return LANG==="id"?"Kurang umum di praktik":"Less common in practice";
+    if(m==="UOP") return LANG==="id"?"Butuh estimasi unit akurat":"Needs accurate unit estimate";
+    if(m==="MACRS") return LANG==="id"?"Hanya untuk pajak AS, ilustratif":"US tax only, illustrative";
+  };
+
+  let body = "<tbody>";
+  body += rowFor("Total Depresiasi","Total Depreciation", totalDep);
+  body += rowFor("Book Value Akhir (BV_N)","Final Book Value (BV_N)", finalBV);
+  body += rowFor("Pola Percepatan","Acceleration Pattern", pattern);
+  body += rowFor("Klasifikasi","Classification", classification);
+  body += rowFor("Keterbatasan","Limitation", limitation);
+  body += "</tbody>";
+
+  table.innerHTML = head + body;
+}
+
+/* ============================================================
+   SENSITIVITY
+============================================================ */
+function renderSensitivity(){
+  const varSel = document.getElementById("sensVarSelect").value;
+  const holder = document.getElementById("sensitivityChartHolder");
+  const method = state.method === "ALL" ? "SL" : state.method;
+  const points = [];
+  let range = [];
+  if(varSel === "N"){ for(let n=2;n<=15;n++) range.push(n); }
+  else if(varSel === "S"){ for(let s=0; s<=state.B*0.5; s+=state.B*0.05) range.push(Math.round(s)); }
+  else if(varSel === "B"){ for(let b=state.B*0.5; b<=state.B*1.5; b+=state.B*0.1) range.push(Math.round(b)); }
+  else if(varSel === "mult"){ for(let mm=1;mm<=3;mm+=0.25) range.push(mm); }
+
+  range.forEach(val=>{
+    let B=state.B, S=state.S, N=state.N, mult=state.multiplier;
+    if(varSel==="N") N=val; if(varSel==="S") S=val; if(varSel==="B") B=val; if(varSel==="mult") mult=val;
+    let rows;
+    if(method==="SL") rows = calcSL(B,S,N);
+    else if(method==="DB") rows = calcDB(B,S,N,mult,state.switchToSL).rows;
+    else if(method==="SOYD") rows = calcSOYD(B,S,N).rows;
+    else if(method==="UOP") rows = calcUOP(B,S,N,state.totalUnits, evenUnits(N,state.totalUnits)).rows;
+    else rows = calcMACRS(B,N,state.propertyClass);
+    const last = rows[rows.length-1];
+    points.push({x:val, y: last.bv});
+  });
+
+  const W=900,H=280,padL=70,padR=20,padT=20,padB=40;
+  const plotW=W-padL-padR, plotH=H-padT-padB;
+  const xs = points.map(p=>p.x), ys = points.map(p=>p.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(0,...ys), maxY=Math.max(...ys)*1.05 || 1;
+  function X(v){ return padL + ((v-minX)/((maxX-minX)||1))*plotW; }
+  function Y(v){ return padT + plotH - ((v-minY)/((maxY-minY)||1))*plotH; }
+  let svg = `<svg class="chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  for(let i=0;i<=5;i++){
+    const gv = minY + (maxY-minY)*i/5;
+    svg += `<line x1="${padL}" y1="${Y(gv)}" x2="${W-padR}" y2="${Y(gv)}" stroke="#1e3f60"/>`;
+    svg += `<text x="${padL-8}" y="${Y(gv)+4}" text-anchor="end" font-size="10" fill="#9fb0bf" font-family="ui-monospace,monospace">${fmtCompact(gv)}</text>`;
+  }
+  let pts = points.map(p=>`${X(p.x)},${Y(p.y)}`).join(" ");
+  svg += `<polyline points="${pts}" fill="none" stroke="#e0bd80" stroke-width="2.5"/>`;
+  points.forEach(p=> svg += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="3" fill="#e0bd80"/>`);
+  svg += `<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="10" fill="#5c7186">${varSel}</text>`;
+  svg += `</svg>`;
+  holder.innerHTML = svg;
+}
+
+/* ============================================================
+   QUIZ
+============================================================ */
+const QUIZ = [
+  {q:{id:"Pada metode Straight-Line, depresiasi tahunan D_t bersifat?", en:"In the Straight-Line method, annual depreciation D_t is?"},
+   opts:{id:["Tidak konstan","Konstan","Nol","Acak"], en:["Not constant","Constant","Zero","Random"]}, correct:1,
+   exp:{id:"D_t = (B−S)/N adalah konstan setiap periode.", en:"D_t = (B−S)/N is constant every period."}},
+  {q:{id:"Rate depresiasi pada Double Declining Balance dihitung sebagai?", en:"The depreciation rate in Double Declining Balance is computed as?"},
+   opts:{id:["1/N","2/N","N/2","(N+1)/2"], en:["1/N","2/N","N/2","(N+1)/2"]}, correct:1,
+   exp:{id:"DDB menggunakan multiplier 2, sehingga rate = 2/N.", en:"DDB uses multiplier 2, so rate = 2/N."}},
+  {q:{id:"Metode mana yang secara eksak menghasilkan total depresiasi (B−S) di akhir umur tanpa mekanisme switching?", en:"Which method exactly reaches total depreciation (B−S) by end of life without a switching mechanism?"},
+   opts:{id:["DDB","SOYD","MACRS","Tidak ada"], en:["DDB","SOYD","MACRS","None"]}, correct:1,
+   exp:{id:"SOYD secara matematis tepat habis ke salvage di t=N.", en:"SOYD mathematically reaches salvage exactly at t=N."}},
+  {q:{id:"Unit-of-Production paling sesuai untuk aset yang?", en:"Unit-of-Production best fits an asset whose?"},
+   opts:{id:["Penggunaannya konstan","Penggunaannya bervariasi mengikuti output","Tidak pernah dipakai","Hanya untuk pajak"], en:["Usage is constant","Usage varies with output","Never used","Only for tax"]}, correct:1,
+   exp:{id:"UOP mengalokasikan depresiasi berdasarkan unit aktual/estimasi penggunaan.", en:"UOP allocates depreciation based on actual/estimated usage units."}},
+  {q:{id:"MACRS terutama digunakan untuk?", en:"MACRS is primarily used for?"},
+   opts:{id:["Pelaporan keuangan","Pelaporan pajak AS","Penilaian pasar","Estimasi salvage"], en:["Financial reporting","US tax reporting","Market valuation","Salvage estimation"]}, correct:1,
+   exp:{id:"MACRS adalah metode pajak AS (IRS), bukan GAAP book depreciation.", en:"MACRS is a US (IRS) tax method, not GAAP book depreciation."}},
+  {q:{id:'"Floor" pada Declining Balance berarti?', en:'"Floor" in Declining Balance means?'},
+   opts:{id:["BV boleh negatif","BV tidak boleh turun di bawah salvage","Depresiasi dihentikan di tahun pertama","Salvage diabaikan"], en:["BV can go negative","BV cannot drop below salvage","Depreciation stops in year 1","Salvage is ignored"]}, correct:1,
+   exp:{id:"Floor memastikan BV_t tidak pernah kurang dari S.", en:"Floor ensures BV_t never falls below S."}},
+  {q:{id:"Switch-to-SL pada DDB dilakukan agar?", en:"Switch-to-SL in DDB is done so that?"},
+   opts:{id:["Depresiasi makin cepat","Aset terdepresiasi penuh sampai salvage pada akhir umur","Salvage naik","Umur bertambah"], en:["Depreciation accelerates further","The asset fully depreciates to salvage by end of life","Salvage increases","Life is extended"]}, correct:1,
+   exp:{id:"Switching memastikan BV_N = S tercapai pada akhir umur.", en:"Switching ensures BV_N = S is reached by end of life."}},
+  {q:{id:"Jika unit aktual kumulatif melebihi estimasi total unit pada Unit-of-Production, maka?", en:"If cumulative actual units exceed the total estimate in Unit-of-Production, then?"},
+   opts:{id:["Depresiasi terus bertambah tanpa batas","Depresiasi dibatasi pada (B−S) dan estimasi perlu direvisi","Aset dihapusbukukan","Salvage menjadi nol"], en:["Depreciation keeps growing without limit","Depreciation is capped at (B−S) and the estimate needs revision","The asset is written off","Salvage becomes zero"]}, correct:1,
+   exp:{id:"Sistem membatasi akumulasi depresiasi pada (B−S) dan menandai ESTIMATE EXCEEDED.", en:"The system caps accumulated depreciation at (B−S) and flags ESTIMATE EXCEEDED."}}
+];
+
+function renderQuiz(){
+  const holder = document.getElementById("quizHolder");
+  holder.innerHTML = "";
+  QUIZ.forEach((item,idx)=>{
+    const div = document.createElement("div");
+    div.className = "quiz-q";
+    const qtext = document.createElement("p");
+    qtext.className = "qtext";
+    qtext.textContent = (idx+1)+". "+item.q[LANG];
+    div.appendChild(qtext);
+    const optsWrap = document.createElement("div");
+    optsWrap.className = "quiz-opts";
+    item.opts[LANG].forEach((optText,oi)=>{
+      const b = document.createElement("button");
+      b.textContent = optText;
+      b.addEventListener("click", ()=>{
+        const buttons = optsWrap.querySelectorAll("button");
+        buttons.forEach(bb=>bb.disabled=true);
+        if(oi === item.correct){ b.classList.add("correct"); }
+        else { b.classList.add("wrong"); buttons[item.correct].classList.add("correct"); }
+        const exp = div.querySelector(".quiz-explain");
+        exp.classList.add("show");
+        exp.textContent = (oi===item.correct ? t("correctFeedback") : t("wrongFeedback")) + " " + item.exp[LANG];
+      });
+      optsWrap.appendChild(b);
+    });
+    div.appendChild(optsWrap);
+    const exp = document.createElement("p");
+    exp.className = "quiz-explain";
+    div.appendChild(exp);
+    holder.appendChild(div);
+  });
+}
+
+/* ============================================================
+   EXPERIMENT LOG
+============================================================ */
+function renderExperimentTable(){
+  const table = document.getElementById("experimentTable");
+  if(state.experimentLog.length===0){
+    table.innerHTML = `<caption style="caption-side:top;text-align:left;color:var(--steel-300);font-size:11.5px;">${t("noData")}</caption>`;
+    return;
+  }
+  let html = `<thead><tr>
+    <th>${t("trial")}</th><th>${t("timestamp")}</th><th>Method</th><th>B</th><th>S</th><th>N</th><th>${LANG==="id"?"Akum. Depresiasi":"Accum. Dep."}</th><th>BV_N</th>
+  </tr></thead><tbody>`;
+  state.experimentLog.forEach((e,i)=>{
+    html += `<tr><td>${i+1}</td><td>${e.timestamp}</td><td>${e.method}</td><td>${fmtMoney(e.B)}</td><td>${fmtMoney(e.S)}</td><td>${e.N}</td><td>${fmtMoney(e.accum)}</td><td>${fmtMoney(e.bv)}</td></tr>`;
+  });
+  html += "</tbody>";
+  table.innerHTML = html;
+}
+
+/* ============================================================
+   MAIN RENDER
+============================================================ */
+let lastCalc = null;
+function renderAll(){
+  const validation = validateInputs();
+  const calc = computeAll();
+  lastCalc = calc;
+  const horizon = getEffectiveHorizon(calc);
+  if(state.currentPeriod > horizon) state.currentPeriod = horizon;
+  renderChart(calc);
+  renderSchedule(calc);
+  renderCards(calc);
+  renderStatusBar(calc, validation);
+  renderCompare(calc);
+  renderSensitivity();
+  renderStageInfo();
+}
+
+/* ============================================================
+   PRESET / EVENT WIRING
+============================================================ */
+function populatePresetSelect(){
+  const sel = document.getElementById("presetSelect");
+  sel.innerHTML = "";
+  PRESETS.forEach(p=>{
+    const o = document.createElement("option");
+    o.value = p.id;
+    o.textContent = p.name[LANG];
+    sel.appendChild(o);
+  });
+  sel.value = state.presetId;
+}
+
+function applyPreset(id){
+  const preset = PRESETS.find(p=>p.id===id);
+  if(!preset) return;
+  state.presetId = id;
+  state.method = preset.method;
+  state.B = preset.B; state.S = preset.S; state.N = preset.N;
+  state.multiplier = preset.multiplier; state.switchToSL = preset.switchToSL;
+  state.totalUnits = preset.totalUnits;
+  state.unitsPerPeriod = preset.unitsPerPeriod ? preset.unitsPerPeriod.slice() : evenUnits(preset.N, preset.totalUnits);
+  state.propertyClass = preset.propertyClass; state.convention = preset.convention;
+  state.currency = preset.currency;
+  state.currentPeriod = 0;
+  syncControlsFromState();
+  renderAll();
+}
+
+function readControlsIntoState(){
+  state.method = document.getElementById("methodSelect").value;
+  state.B = Number(document.getElementById("inputB").value)||0;
+  state.S = Number(document.getElementById("inputS").value)||0;
+  const newN = Math.max(1, Math.round(Number(document.getElementById("inputN").value)||1));
+  if(newN !== state.N){
+    if(newN > state.unitsPerPeriod.length){
+      const avg = state.totalUnits ? Math.round(state.totalUnits/newN) : 0;
+      while(state.unitsPerPeriod.length < newN) state.unitsPerPeriod.push(avg);
+    } else {
+      state.unitsPerPeriod = state.unitsPerPeriod.slice(0,newN);
+    }
+  }
+  state.N = newN;
+  state.multiplier = Number(document.getElementById("inputMultiplier").value)||2;
+  state.switchToSL = document.getElementById("inputSwitch").checked;
+  state.totalUnits = Number(document.getElementById("inputTotalUnits").value)||1;
+  state.propertyClass = document.getElementById("inputPropertyClass").value;
+  state.convention = document.getElementById("inputConvention").value;
+  state.currency = document.getElementById("inputCurrency").value;
+  if(state.currentPeriod > state.N) state.currentPeriod = state.N;
+  updateFieldsetVisibility();
+  renderUnitTable();
+}
+
+/* ============================================================
+   ANIMATION
+============================================================ */
+function playAnim(){
+  if(state.playing) return;
+  state.playing = true;
+  const speed = Number(document.getElementById("animSpeed").value);
+  state.playTimer = setInterval(()=>{
+    const horizon = getEffectiveHorizon(lastCalc || computeAll());
+    if(state.currentPeriod >= horizon){
+      pauseAnim();
+      return;
+    }
+    state.currentPeriod++;
+    renderAll();
+  }, speed);
+}
+function pauseAnim(){
+  state.playing = false;
+  if(state.playTimer) clearInterval(state.playTimer);
+  state.playTimer = null;
+}
+function stepAnim(){
+  pauseAnim();
+  const horizon = getEffectiveHorizon(lastCalc || computeAll());
+  if(state.currentPeriod < horizon){ state.currentPeriod++; renderAll(); }
+}
+function resetAnim(){
+  pauseAnim();
+  state.currentPeriod = 0;
+  renderAll();
+}
+
+/* ============================================================
+   EXPORT / RECORD
+============================================================ */
+function exportCSV(){
+  const rows = activeRows(lastCalc);
+  if(!rows){ alert(LANG==="id" ? "Pilih satu metode untuk mengekspor jadwal." : "Select a single method to export the schedule."); return; }
+  let csv = "period,depreciation,accumulated,book_value,note\n";
+  rows.forEach(r=>{
+    csv += `${r.t},${r.dep.toFixed(2)},${r.accum.toFixed(2)},${r.bv.toFixed(2)},"${r.note||""}"\n`;
+  });
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "depreciation_schedule_"+state.method+".csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function recordExperiment(){
+  const rows = state.method !== "ALL" ? lastCalc[state.method] : lastCalc.SL;
+  const last = rows[rows.length-1];
+  state.experimentLog.push({
+    timestamp: new Date().toLocaleString(LANG==="id"?"id-ID":"en-US"),
+    method: state.method,
+    B: state.B, S: state.S, N: state.N,
+    accum: last.accum, bv: last.bv
+  });
+  renderExperimentTable();
+}
+
+/* ============================================================
+   TABS
+============================================================ */
+function wireTabs(){
+  document.querySelectorAll(".tabbtn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".tabbtn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tabpanel").forEach(p=>p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+      if(btn.dataset.tab === "quiz") renderQuiz();
+      if(btn.dataset.tab === "sensitivity") renderSensitivity();
+      if(btn.dataset.tab === "experiment") renderExperimentTable();
+    });
+  });
+}
+
+/* ============================================================
+   LANGUAGE SWITCH
+============================================================ */
+function applyLanguage(){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
+  });
+  document.getElementById("langID").classList.toggle("active", LANG==="id");
+  document.getElementById("langEN").classList.toggle("active", LANG==="en");
+  document.documentElement.lang = LANG;
+  populatePresetSelect();
+  renderAll();
+  renderQuiz();
+  renderExperimentTable();
+}
+
+function renderStageInfo(){
+  const holder = document.getElementById("stageInfo");
+  if(!holder) return;
+  const preset = PRESETS.find(p=>p.id===state.presetId) || PRESETS[0];
+  const rows = state.method !== "ALL" ? (lastCalc ? lastCalc[state.method] : null) : null;
+  const finalRow = rows ? rows[rows.length-1] : null;
+
+  if(state.stage === 1){
+    holder.innerHTML = `<b>${t("stageAssetTitle")}:</b> ${preset.desc[LANG]}`;
+  } else if(state.stage === 2){
+    const info = METHOD_INFO[state.method] || METHOD_INFO.SL;
+    holder.innerHTML = `<b>${t("stageModelTitle")}</b> — B=${fmtMoney(state.B)}, S=${fmtMoney(state.S)}, N=${state.N}
+      <span class="formula-line">${info.formula}</span>
+      ${info.note[LANG]}`;
+  } else if(state.stage === 3){
+    holder.innerHTML = `<b>${t("stageScheduleTitle")}:</b> ${t("stageScheduleNote")}`;
+  } else if(state.stage === 4){
+    const bvText = finalRow ? fmtMoney(finalRow.bv) : "";
+    holder.innerHTML = `<b>${t("stageImpactTitle")}:</b> ${t("stageImpactNote")}${finalRow ? ` <span class="formula-line">BV(N) = ${bvText}</span>` : ""}`;
+  }
+}
+
+/* ============================================================
+   STAGE FLOW
+============================================================ */
+function wireStageFlow(){
+  document.querySelectorAll(".stage-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll(".stage-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      state.stage = Number(btn.dataset.stage);
+      renderStageInfo();
+      if(state.stage === 3){
+        const tabBtn = document.querySelector(".tabbtn[data-tab='schedule']");
+        if(tabBtn) tabBtn.click();
+        const el = document.getElementById("tab-schedule");
+        if(el) el.scrollIntoView({behavior:"smooth", block:"nearest"});
+      } else if(state.stage === 4){
+        const tabBtn = document.querySelector(".tabbtn[data-tab='compare']");
+        if(tabBtn) tabBtn.click();
+        const el = document.getElementById("cardGrid");
+        if(el) el.scrollIntoView({behavior:"smooth", block:"nearest"});
+      }
+    });
+  });
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+function init(){
+  populatePresetSelect();
+  syncControlsFromState();
+  wireTabs();
+  wireStageFlow();
+
+  document.getElementById("presetSelect").addEventListener("change", (e)=> applyPreset(e.target.value));
+  document.getElementById("btnResetInputs").addEventListener("click", ()=> applyPreset(state.presetId));
+  document.getElementById("btnGenerate").addEventListener("click", ()=>{ readControlsIntoState(); renderAll(); });
+
+  ["methodSelect","inputMultiplier","inputSwitch","inputPropertyClass","inputConvention","inputCurrency","inputN"]
+    .forEach(id=>{
+      document.getElementById(id).addEventListener("change", ()=>{ readControlsIntoState(); renderAll(); });
+    });
+  ["inputB","inputS","inputTotalUnits"]
+    .forEach(id=>{
+      document.getElementById(id).addEventListener("input", ()=>{ readControlsIntoState(); renderAll(); });
+    });
+
+  document.getElementById("chartScale").addEventListener("input", ()=> renderChart(lastCalc));
+  document.getElementById("sensVarSelect").addEventListener("change", renderSensitivity);
+
+  document.getElementById("btnPlay").addEventListener("click", playAnim);
+  document.getElementById("btnPause").addEventListener("click", pauseAnim);
+  document.getElementById("btnStep").addEventListener("click", stepAnim);
+  document.getElementById("btnReset").addEventListener("click", resetAnim);
+
+  document.getElementById("btnExportCSV").addEventListener("click", exportCSV);
+  document.getElementById("btnRecord").addEventListener("click", recordExperiment);
+  document.getElementById("btnClearLog").addEventListener("click", ()=>{ state.experimentLog = []; renderExperimentTable(); });
+
+  document.getElementById("printBtn").addEventListener("click", ()=> window.print());
+
+  document.getElementById("langID").addEventListener("click", ()=>{ LANG="id"; applyLanguage(); });
+  document.getElementById("langEN").addEventListener("click", ()=>{ LANG="en"; applyLanguage(); });
+
+  renderAll();
+  renderQuiz();
+  renderExperimentTable();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Depresiasi &amp; Nilai Buku</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction</button><button class="vlEduTab" data-p="explain">Explanation</button><button class="vlEduTab" data-p="gloss">Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint</button><button class="vlEduTab" data-p="summary">Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "depreciation", "title": "Depresiasi & Nilai Buku", "objective": "Memahami depresiasi, nilai buku, dan perubahan nilai aset sepanjang umur ekonomis.", "prediction": "Pada metode straight-line tanpa perubahan estimasi, beban depresiasi tahunan akan…", "predopts": ["Tetap", "Selalu meningkat", "Selalu nol"], "predans": 0, "explain": "Depresiasi adalah alokasi nilai yang dapat didepresiasi sepanjang umur aset, bukan arus kas keluar tahunan. Nilai buku berubah mengikuti akumulasi depresiasi dan perlu dibedakan dari market value.", "terms": {"Basis": "Nilai yang menjadi dasar perhitungan depresiasi.", "Salvage Value": "Estimasi nilai sisa pada akhir umur.", "Book Value": "Basis dikurangi akumulasi depresiasi.", "Straight-Line": "Metode depresiasi dengan beban periodik konstan.", "Accumulated Depreciation": "Total depresiasi yang telah dibebankan sampai periode tertentu.", "Market Value": "Nilai pasar aktual aset; tidak harus sama dengan book value."}, "quiz": [["Book value umumnya dihitung sebagai…", ["Basis − accumulated depreciation", "Market value + tax", "Salvage × interest"], 0], ["Depresiasi secara akuntansi terutama merupakan…", ["Alokasi nilai aset", "Pembayaran kas tahunan otomatis", "Pendapatan penjualan"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Pahami kasus','Baca tujuan, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Buat prediksi','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati hasil','Perhatikan grafik, timeline, result card, dan nilai keputusan yang berubah.'],
+  ['6. Jelaskan','Gunakan Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Uji & simpulkan','Kerjakan Checkpoint Quiz lalu buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide') body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">Lanjutkan tahap</button>`;
+   if(p==='next'){let i=Math.min(S.step,steps.length-1);body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">Tandai selesai & lanjut</button><div class="vlEduCard"><h4>Petunjuk cepat</h4><p>Jika bingung, ubah hanya satu parameter, jalankan simulasi, lalu bandingkan hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Explanation/Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('guide');msg('Tahap berikutnya dibuka.')};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('next')};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>

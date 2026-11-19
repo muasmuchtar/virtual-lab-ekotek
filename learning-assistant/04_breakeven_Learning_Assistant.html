@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Virtual Lab — Analisis Break-Even</title>
+<style>
+:root{
+  --bg:#07131f;--panel:#0d1d2b;--panel2:#112638;--line:#25445f;--text:#eef7ff;--muted:#9fb6ca;
+  --cyan:#35d7ff;--blue:#4b8dff;--orange:#ffb454;--red:#ff6b6b;--green:#61e294;--white:#fff;
+  --shadow:0 14px 36px rgba(0,0,0,.26)
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:linear-gradient(180deg,#06111c,#091724 40%,#07131f);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+body{min-height:100vh}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{max-width:1540px;margin:auto;padding:14px}
+.header{display:flex;gap:12px;justify-content:space-between;align-items:center;background:rgba(13,29,43,.95);border:1px solid var(--line);border-radius:16px;padding:14px 16px;box-shadow:var(--shadow);position:sticky;top:0;z-index:20}
+.title h1{margin:0;font-size:clamp(20px,2.2vw,32px);letter-spacing:.2px}
+.title p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.head-controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.btn,.select,.input{border:1px solid var(--line);background:#0a1927;color:var(--text);border-radius:10px;padding:9px 11px}
+.btn:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,#0a6b8a,#155f9f);border-color:#2db8e6}
+.btn.warn{background:#3b2710;border-color:#87551e}
+.btn.danger{background:#3a1518;border-color:#7c3037}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.lang{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.lang button{border:0;background:#0a1927;color:var(--muted);padding:9px 12px}
+.lang button.active{background:#1679a5;color:white}
+.grid{display:grid;grid-template-columns:330px minmax(0,1fr) 330px;gap:12px;margin-top:12px}
+.panel{background:rgba(13,29,43,.94);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.panel h2{font-size:15px;margin:0;padding:12px 14px;background:rgba(17,38,56,.86);border-bottom:1px solid var(--line)}
+.panel .body{padding:12px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+.field{margin-bottom:10px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.input,.select{width:100%}
+input[type="range"]{width:100%;accent-color:var(--cyan)}
+.mode-tabs,.tabbar{display:flex;gap:6px;flex-wrap:wrap}
+.mode-tabs button,.tabbar button{flex:1;min-width:120px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{border:1px solid var(--line);background:#091a28;border-radius:12px;padding:10px}
+.kpi .k{font-size:11px;color:var(--muted)}
+.kpi .v{font-size:18px;font-weight:700;margin-top:3px}
+.kpi.good .v{color:var(--green)} .kpi.bad .v{color:var(--red)} .kpi.info .v{color:var(--cyan)}
+.status{padding:9px 11px;border-radius:10px;background:#0a1927;border:1px solid var(--line);font-size:12px}
+.status.valid{border-color:#2c8050}.status.warn{border-color:#9d6c24}.status.invalid{border-color:#9d3838}
+#currentQReadout.active{border-color:#d875ff;box-shadow:0 0 0 2px rgba(216,117,255,.12) inset}
+#currentQReadout.flash{animation:qflash .8s ease}
+@keyframes qflash{0%{transform:scale(1);background:#0a1927}45%{transform:scale(1.045);background:#452259;border-color:#d875ff}100%{transform:scale(1);background:#0a1927}}
+.btn.flash{animation:bflash .6s ease}
+@keyframes bflash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(53,215,255,.24),0 0 22px rgba(53,215,255,.32)}}
+
+.chart-wrap{position:relative;min-height:470px;height:55vh;max-height:680px;background:radial-gradient(circle at 50% 25%,rgba(53,215,255,.08),transparent 40%),#081725}
+canvas{width:100%;height:100%;display:block}
+.chart-title{position:absolute;left:14px;top:10px;font-weight:700;font-size:14px;pointer-events:none}
+.chart-summary{padding:10px 14px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.legend{position:absolute;right:12px;top:10px;background:rgba(5,17,28,.84);border:1px solid var(--line);border-radius:10px;padding:8px;font-size:11px;line-height:1.7}
+.legend span{display:inline-block;width:10px;height:3px;margin-right:6px;vertical-align:middle}
+.controls-strip{display:flex;gap:7px;flex-wrap:wrap;padding:10px;border-top:1px solid var(--line)}
+.bottom{margin-top:12px}
+.tabbar{padding:10px;border-bottom:1px solid var(--line)}
+.tabbar .btn.active{border-color:var(--cyan);background:#10354c}
+.tab{display:none;padding:14px}.tab.active{display:block}
+.calc{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:#07131f;border:1px solid var(--line);border-radius:12px;padding:12px;white-space:pre-wrap;line-height:1.55}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{border-bottom:1px solid #1d374d;padding:8px;text-align:left}
+th{color:#b9d2e6;background:#0d2232;position:sticky;top:0}
+.table-wrap{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.note{font-size:12px;color:var(--muted);line-height:1.5}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid var(--line)}
+.badge.good{color:var(--green);border-color:#2c8050}.badge.warn{color:var(--orange);border-color:#9d6c24}.badge.bad{color:#ff9b9b;border-color:#9d3838}
+.sensitivity-canvas{height:330px;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+textarea{width:100%;min-height:90px;border:1px solid var(--line);border-radius:10px;background:#081725;color:var(--text);padding:10px}
+.challenge{border:1px solid var(--line);border-radius:12px;padding:12px;background:#091a28}
+.statusbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;background:#0b1b29;border:1px solid var(--line);border-radius:12px;color:#bdd1e2;font-size:11px}
+footer{color:#7590a7;text-align:center;font-size:11px;padding:18px}
+@media(max-width:1150px){.grid{grid-template-columns:300px 1fr}.right{grid-column:1/-1}.right .body{display:grid;grid-template-columns:1fr 1fr;gap:12px}.right .body>*{align-self:start}}
+@media(max-width:760px){.app{padding:8px}.header{position:static;align-items:flex-start;flex-direction:column}.head-controls{justify-content:flex-start}.grid{grid-template-columns:1fr}.right{grid-column:auto}.right .body{display:block}.chart-wrap{height:440px;min-height:440px}.row{grid-template-columns:1fr}.kpi-grid{grid-template-columns:1fr 1fr}}
+@media print{
+ body{background:white;color:black}.app{max-width:none;padding:0}.header,.left,.controls-strip,.tabbar,.statusbar,footer{display:none!important}
+ .grid{display:block}.panel{box-shadow:none;border:1px solid #bbb;margin:0 0 12px;background:white;color:black}.right{display:block}
+ .chart-wrap{height:420px;background:white}.chart-summary,.note{color:#333}.bottom .tab{display:block!important;page-break-inside:avoid}.bottom .tab:before{content:attr(data-print-title);display:block;font-size:18px;font-weight:bold;margin-bottom:8px}
+ .input,.select,textarea{color:black;background:white}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="header">
+    <div class="title">
+      <h1 data-i18n="title">Virtual Lab — Analisis Break-Even</h1>
+      <p data-i18n="subtitle">Biaya–Volume–Profit & crossover dua alternatif proses/mesin</p>
+    </div>
+    <div class="head-controls">
+      <select id="preset" class="select" aria-label="Preset">
+        <option value="manualcnc">Preset 3 — Manual vs CNC</option>
+        <option value="cnc">Preset 1 — Single CNC Job Shop</option>
+        <option value="laser">Preset 2 — Laser Cutting</option>
+        <option value="lathe">Preset 4 — Lathe vs Turning Center</option>
+        <option value="robot">Preset 5 — Fixture vs Robot</option>
+        <option value="parallel">Preset 6 — Parallel Slopes</option>
+        <option value="identical">Preset 7 — Identical Functions</option>
+        <option value="noprofit">Preset 8 — No Profit Break-Even</option>
+      </select>
+      <button id="autoAnalyze" class="btn primary" data-i18n="auto">AUTO ANALYZE</button>
+      <button id="selfTestBtn" class="btn" data-i18n="tests">RUN SELF TESTS</button>
+      <button id="printBtn" class="btn" data-i18n="print">PRINT REPORT</button>
+      <div class="lang"><button id="idBtn" class="active">ID</button><button id="enBtn">EN</button></div>
+    </div>
+  </header>
+
+  <section class="grid">
+    <aside class="panel left">
+      <h2 data-i18n="inputs">Input & Struktur Biaya</h2>
+      <div class="body">
+        <div class="mode-tabs">
+          <button id="singleModeBtn" class="btn" data-i18n="single">Single Product</button>
+          <button id="pairModeBtn" class="btn active" data-i18n="pair">Two Alternatives</button>
+        </div>
+        <div id="singleInputs" style="display:none;margin-top:12px">
+          <div class="row">
+            <div class="field"><label>F — <span data-i18n="fixed">Biaya Tetap</span></label><input id="F" class="input" type="number" step="1"></div>
+            <div class="field"><label>v — <span data-i18n="variable">Biaya Variabel/unit</span></label><input id="v" class="input" type="number" step="0.01"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>p — <span data-i18n="price">Harga/unit</span></label><input id="p" class="input" type="number" step="0.01"></div>
+            <div class="field"><label>Qmax — <span data-i18n="capacity">Kapasitas</span></label><input id="Qmax" class="input" type="number" step="1"></div>
+          </div>
+        </div>
+        <div id="pairInputs" style="margin-top:12px">
+          <div class="status" style="margin-bottom:10px"><b>A</b> — <span id="nameA">Manual</span></div>
+          <div class="row">
+            <div class="field"><label>F_A</label><input id="FA" class="input" type="number" step="1"></div>
+            <div class="field"><label>v_A</label><input id="vA" class="input" type="number" step="0.01"></div>
+          </div>
+          <div class="field"><label>Qmax A</label><input id="capA" class="input" type="number" step="1"></div>
+          <div class="status" style="margin:4px 0 10px"><b>B</b> — <span id="nameB">CNC</span></div>
+          <div class="row">
+            <div class="field"><label>F_B</label><input id="FB" class="input" type="number" step="1"></div>
+            <div class="field"><label>v_B</label><input id="vB" class="input" type="number" step="0.01"></div>
+          </div>
+          <div class="field"><label>Qmax B</label><input id="capB" class="input" type="number" step="1"></div>
+        </div>
+
+        <div class="field">
+          <label>Q_D — <span data-i18n="demand">Demand / Volume Operasi</span>: <b id="demandLabel">2000</b></label>
+          <input id="demand" type="range" min="0" max="5000" step="10" value="2000">
+          <input id="demandNum" class="input" type="number" value="2000" style="margin-top:6px">
+        </div>
+        <div class="row">
+          <div class="field"><label data-i18n="currency">Unit uang</label><select id="currency" class="select"><option value="juta IDR">juta IDR</option><option value="IDR">IDR</option><option value="MU">MU</option></select></div>
+          <div class="field"><label data-i18n="period">Periode</label><select id="period" class="select"><option value="tahun">tahun</option><option value="bulan">bulan</option></select></div>
+        </div>
+        <div class="field"><label data-i18n="batch">Batch size</label><input id="batch" class="input" type="number" min="1" step="1" value="1"></div>
+        <div class="field"><label><input id="comparable" type="checkbox" checked> <span data-i18n="comparable">Output/kualitas layanan setara</span></label></div>
+        <button id="resetBtn" class="btn" style="width:100%" data-i18n="reset">RESET PRESET</button>
+      </div>
+    </aside>
+
+    <main class="panel center">
+      <h2 data-i18n="graph">Grafik Cost–Volume Real-Time</h2>
+      <div class="chart-wrap" id="chartWrap">
+        <canvas id="mainChart"></canvas>
+        <div class="chart-title" id="chartTitle">TC_A(Q) vs TC_B(Q)</div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="chart-summary" id="chartSummary"></div>
+      <div class="controls-strip">
+        <button id="playBtn" class="btn">▶ PLAY</button>
+        <button id="pauseBtn" class="btn">Ⅱ PAUSE</button>
+        <button id="stepBtn" class="btn" data-i18n="step">STEP VOLUME</button>
+        <button id="jumpBtn" class="btn primary" data-i18n="jump">JUMP TO CROSSOVER</button>
+        <button id="demandBtn" class="btn" data-i18n="jumpDemand">JUMP TO DEMAND</button>
+        <div id="currentQReadout" class="status" style="margin-left:auto;min-width:170px;text-align:center">
+          Current Q = <b id="currentQValue">2000</b>
+        </div>
+      </div>
+    </main>
+
+    <aside class="panel right">
+      <h2 data-i18n="results">Hasil & Keputusan</h2>
+      <div class="body">
+        <div id="modelStatus" class="status valid">VALID</div>
+        <div class="kpi-grid" style="margin-top:10px">
+          <div class="kpi info"><div class="k" id="kpi1Label">Q*</div><div class="v" id="kpi1">1500</div></div>
+          <div class="kpi"><div class="k" id="kpi2Label">TC A @ Demand</div><div class="v" id="kpi2">600</div></div>
+          <div class="kpi"><div class="k" id="kpi3Label">TC B @ Demand</div><div class="v" id="kpi3">520</div></div>
+          <div class="kpi good"><div class="k" id="kpi4Label">Decision</div><div class="v" id="kpi4">SELECT B</div></div>
+        </div>
+        <div class="status" style="margin-top:10px" id="decisionText"></div>
+        <div class="status" style="margin-top:10px" id="equationText"></div>
+        <div class="note" style="margin-top:10px" id="assumptionText"></div>
+        <div class="row" style="margin-top:12px">
+          <button id="recordBtn" class="btn primary" data-i18n="record">RECORD DATA</button>
+          <button id="exportBtn" class="btn" data-i18n="export">EXPORT CSV</button>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="panel bottom">
+    <div class="tabbar">
+      <button class="btn active" data-tab="calc" data-i18n="calculation">Perhitungan</button>
+      <button class="btn" data-tab="matrix" data-i18n="matrix">Comparison Matrix</button>
+      <button class="btn" data-tab="sensitivity" data-i18n="sensitivity">Sensitivitas</button>
+      <button class="btn" data-tab="challenge" data-i18n="challenge">Challenge</button>
+      <button class="btn" data-tab="worksheet" data-i18n="worksheet">Worksheet</button>
+      <button class="btn" data-tab="trials" data-i18n="trials">Trials</button>
+      <button class="btn" data-tab="testsTab" data-i18n="tests">Self Tests</button>
+    </div>
+    <div id="calc" class="tab active" data-print-title="Calculation"><div class="calc" id="calcText"></div></div>
+    <div id="matrix" class="tab" data-print-title="Comparison Matrix"><div class="table-wrap"><table><thead id="matrixHead"></thead><tbody id="matrixBody"></tbody></table></div></div>
+    <div id="sensitivity" class="tab" data-print-title="Sensitivity">
+      <div class="row">
+        <div><label data-i18n="sensVar">Variabel sensitivitas</label><select id="sensVar" class="select"></select></div>
+        <div><label data-i18n="sensRange">Rentang ± (%)</label><input id="sensPct" class="input" type="number" value="50" min="5" max="200"></div>
+      </div>
+      <button id="runSensBtn" class="btn primary" style="margin:10px 0" data-i18n="runSens">RUN SENSITIVITY</button>
+      <div class="sensitivity-canvas"><canvas id="sensChart"></canvas></div>
+      <div class="note" id="sensSummary" style="margin-top:8px"></div>
+    </div>
+    <div id="challenge" class="tab" data-print-title="Challenge">
+      <div class="challenge">
+        <div id="challengeQuestion"></div>
+        <div class="row" style="margin-top:10px"><input id="challengeAnswer" class="input" type="number" placeholder="Jawaban numerik"><button id="checkChallenge" class="btn primary">CHECK</button></div>
+        <div class="row" style="margin-top:8px"><button id="hintBtn" class="btn">HINT</button><button id="newChallenge" class="btn">NEW CHALLENGE</button></div>
+        <div id="challengeFeedback" class="note" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div id="worksheet" class="tab" data-print-title="Lab Worksheet">
+      <div class="row"><div><label data-i18n="nameGroup">Nama / Kelompok</label><input class="input" id="studentName"></div><div><label data-i18n="objective">Tujuan eksperimen</label><input class="input" id="objective"></div></div>
+      <label data-i18n="prediction">Prediksi dan alasan</label><textarea id="prediction"></textarea>
+      <label data-i18n="interpret">Interpretasi grafik & kapasitas</label><textarea id="interpretation"></textarea>
+      <label data-i18n="conclusion">Kesimpulan engineering</label><textarea id="conclusion"></textarea>
+    </div>
+    <div id="trials" class="tab" data-print-title="Recorded Trials"><div class="table-wrap"><table><thead><tr><th>ID</th><th>Preset</th><th>Mode</th><th>Demand</th><th>Q_BE/Q*</th><th>Status</th><th>Decision</th><th>Timestamp</th></tr></thead><tbody id="trialsBody"></tbody></table></div><button id="clearTrials" class="btn danger" style="margin-top:10px">CLEAR DATA</button></div>
+    <div id="testsTab" class="tab" data-print-title="Self Tests"><div class="calc" id="testOutput">Belum dijalankan / Not run yet.</div></div>
+  </section>
+
+  <div class="statusbar" id="statusbar"></div>
+  <footer>Offline single-file Virtual Laboratory • Break-Even Analysis • HTML5 + Canvas + JavaScript</footer>
+</div>
+
+<script>
+'use strict';
+const $=id=>document.getElementById(id);
+const S={
+ locale:'id',mode:'pair',preset:'manualcnc',trials:[],anim:null,currentQ:2000,
+ single:{F:240,v:.18,p:.30,Qmax:3000},
+ A:{name:'Manual',F:80,v:.26,Qmax:4000},B:{name:'CNC',F:320,v:.10,Qmax:4000},
+ demand:2000,batch:1,currency:'juta IDR',period:'tahun',comparable:true, challengeIndex:0,hints:0
+};
+const I18N={
+ id:{title:'Virtual Lab — Analisis Break-Even',subtitle:'Biaya–Volume–Profit & crossover dua alternatif proses/mesin',auto:'AUTO ANALYZE',tests:'RUN SELF TESTS',print:'PRINT REPORT',inputs:'Input & Struktur Biaya',single:'Single Product',pair:'Two Alternatives',fixed:'Biaya Tetap',variable:'Biaya Variabel/unit',price:'Harga/unit',capacity:'Kapasitas',demand:'Demand / Volume Operasi',currency:'Unit uang',period:'Periode',batch:'Batch size',comparable:'Output/kualitas layanan setara',reset:'RESET PRESET',graph:'Grafik Cost–Volume Real-Time',step:'STEP VOLUME',jump:'JUMP TO CROSSOVER',jumpDemand:'JUMP TO DEMAND',results:'Hasil & Keputusan',record:'RECORD DATA',export:'EXPORT CSV',calculation:'Perhitungan',matrix:'Comparison Matrix',sensitivity:'Sensitivitas',challenge:'Challenge',worksheet:'Worksheet',trials:'Trials',sensVar:'Variabel sensitivitas',sensRange:'Rentang ± (%)',runSens:'RUN SENSITIVITY',nameGroup:'Nama / Kelompok',objective:'Tujuan eksperimen',prediction:'Prediksi dan alasan',interpret:'Interpretasi grafik & kapasitas',conclusion:'Kesimpulan engineering'},
+ en:{title:'Virtual Lab — Break-Even Analysis',subtitle:'Cost–Volume–Profit & two-process/machine crossover',auto:'AUTO ANALYZE',tests:'RUN SELF TESTS',print:'PRINT REPORT',inputs:'Inputs & Cost Structure',single:'Single Product',pair:'Two Alternatives',fixed:'Fixed Cost',variable:'Variable Cost/unit',price:'Price/unit',capacity:'Capacity',demand:'Demand / Operating Volume',currency:'Currency unit',period:'Period',batch:'Batch size',comparable:'Comparable output/service quality',reset:'RESET PRESET',graph:'Real-Time Cost–Volume Graph',step:'STEP VOLUME',jump:'JUMP TO CROSSOVER',jumpDemand:'JUMP TO DEMAND',results:'Results & Decision',record:'RECORD DATA',export:'EXPORT CSV',calculation:'Calculation',matrix:'Comparison Matrix',sensitivity:'Sensitivity',challenge:'Challenge',worksheet:'Worksheet',trials:'Trials',sensVar:'Sensitivity variable',sensRange:'Range ± (%)',runSens:'RUN SENSITIVITY',nameGroup:'Name / Group',objective:'Experiment objective',prediction:'Prediction and rationale',interpret:'Graph & capacity interpretation',conclusion:'Engineering conclusion'}
+};
+const presets={
+ manualcnc:{mode:'pair',A:{name:'Manual',F:80,v:.26,Qmax:4000},B:{name:'CNC',F:320,v:.10,Qmax:4000},demand:2000},
+ cnc:{mode:'single',single:{F:240,v:.18,p:.30,Qmax:3000},demand:2200},
+ laser:{mode:'single',single:{F:360,v:.12,p:.24,Qmax:4000},demand:3200},
+ lathe:{mode:'pair',A:{name:'Conventional Lathe',F:120,v:.22,Qmax:1800},B:{name:'Turning Center',F:420,v:.08,Qmax:5000},demand:1700},
+ robot:{mode:'pair',A:{name:'Welding Fixture',F:60,v:.30,Qmax:5000},B:{name:'Welding Robot',F:510,v:.09,Qmax:5000},demand:2600},
+ parallel:{mode:'pair',A:{name:'Process A',F:100,v:.20,Qmax:4000},B:{name:'Process B',F:180,v:.20,Qmax:4000},demand:2000},
+ identical:{mode:'pair',A:{name:'Process A',F:150,v:.15,Qmax:4000},B:{name:'Process B',F:150,v:.15,Qmax:4000},demand:2000},
+ noprofit:{mode:'single',single:{F:100,v:.25,p:.20,Qmax:3000},demand:1500}
+};
+function n(v,d=3){return Number.isFinite(v)?Number(v).toLocaleString(S.locale==='id'?'id-ID':'en-US',{maximumFractionDigits:d}):'N/A'}
+function tc(o,q){return o.F+o.v*q}
+function tr(p,q){return p*q}
+function singleBE(x){
+ const cm=x.p-x.v, tol=1e-12;
+ if(Math.abs(cm)<tol){return x.F===0?{status:'ALL_VOLUME_TIE',q:0,practical:0}:{status:'NO_FINITE_BREAK_EVEN',q:null,practical:null}}
+ if(cm<0)return {status:'NO_FEASIBLE_BREAK_EVEN',q:-x.F/cm,practical:null};
+ const q=x.F/cm; return {status:q>x.Qmax?'OUTSIDE_FEASIBLE_CAPACITY':'VALID',q,practical:Math.ceil(q/S.batch)*S.batch};
+}
+function crossover(A,B){
+ const dv=A.v-B.v, df=B.F-A.F, tol=1e-12, common=Math.min(A.Qmax,B.Qmax);
+ if(Math.abs(dv)<tol){
+   if(Math.abs(A.F-B.F)<tol)return {status:'ALL_VOLUME_TIE',q:null,common};
+   return {status:'NO_CROSSOVER',q:null,common};
+ }
+ const q=df/dv;
+ return {status:q<0?'OUTSIDE_Q_DOMAIN':q>common?'OUTSIDE_COMMON_FEASIBLE_RANGE':'VALID',q,common};
+}
+function lower(A,B,q){
+ const a=tc(A,q),b=tc(B,q),d=b-a,eps=1e-9*Math.max(1,Math.abs(a),Math.abs(b));
+ return Math.abs(d)<=eps?'TIE':a<b?'A':'B'
+}
+function applyPreset(key){
+ const p=presets[key]; S.preset=key; S.mode=p.mode; if(p.single)S.single={...p.single}; if(p.A)S.A={...p.A}; if(p.B)S.B={...p.B}; S.demand=p.demand; S.currentQ=0; syncUI(); renderAll();
+}
+function syncUI(){
+ $('preset').value=S.preset;
+ $('singleInputs').style.display=S.mode==='single'?'block':'none';
+ $('pairInputs').style.display=S.mode==='pair'?'block':'none';
+ $('singleModeBtn').classList.toggle('active',S.mode==='single'); $('pairModeBtn').classList.toggle('active',S.mode==='pair');
+ for(const [id,val] of [['F',S.single.F],['v',S.single.v],['p',S.single.p],['Qmax',S.single.Qmax],['FA',S.A.F],['vA',S.A.v],['capA',S.A.Qmax],['FB',S.B.F],['vB',S.B.v],['capB',S.B.Qmax]]) $(id).value=val;
+ $('nameA').textContent=S.A.name;$('nameB').textContent=S.B.name;
+ const max=S.mode==='single'?Math.max(100,S.single.Qmax):Math.max(100,S.A.Qmax,S.B.Qmax);
+ $('demand').max=Math.ceil(max*1.15);$('demand').value=S.demand;$('demandNum').value=S.demand;$('demandLabel').textContent=n(S.demand,0);
+ $('batch').value=S.batch;$('currency').value=S.currency;$('period').value=S.period;$('comparable').checked=S.comparable;
+ $('jumpBtn').textContent=S.mode==='single'?(S.locale==='id'?'JUMP TO BREAK-EVEN':'JUMP TO BREAK-EVEN'):(S.locale==='id'?'JUMP TO CROSSOVER':'JUMP TO CROSSOVER');
+}
+function readUI(){
+ S.single={F:+$('F').value,v:+$('v').value,p:+$('p').value,Qmax:+$('Qmax').value};
+ S.A={...S.A,F:+$('FA').value,v:+$('vA').value,Qmax:+$('capA').value};S.B={...S.B,F:+$('FB').value,v:+$('vB').value,Qmax:+$('capB').value};
+ S.demand=+$('demandNum').value; S.batch=Math.max(1,+$('batch').value||1);S.currency=$('currency').value;S.period=$('period').value;S.comparable=$('comparable').checked;
+ $('demand').value=Math.min(+$('demand').max,S.demand);$('demandLabel').textContent=n(S.demand,0);
+}
+function validate(){
+ const vals=S.mode==='single'?[S.single.F,S.single.v,S.single.p,S.single.Qmax,S.demand]:[S.A.F,S.A.v,S.A.Qmax,S.B.F,S.B.v,S.B.Qmax,S.demand];
+ if(vals.some(x=>!Number.isFinite(x)))return {ok:false,msg:S.locale==='id'?'Input numerik tidak valid.':'Invalid numeric input.'};
+ if(S.mode==='single'&&(S.single.F<0||S.single.Qmax<=0))return {ok:false,msg:'F ≥ 0 dan Qmax > 0'};
+ if(S.mode==='pair'&&(S.A.F<0||S.B.F<0||S.A.Qmax<=0||S.B.Qmax<=0))return {ok:false,msg:'F ≥ 0 dan kapasitas > 0'};
+ if(S.mode==='pair'&&!S.comparable)return {ok:false,warn:true,msg:S.locale==='id'?'NOT COMPARABLE — samakan output/kualitas layanan.':'NOT COMPARABLE — align output/service quality.'};
+ return {ok:true,msg:'VALID'};
+}
+function renderAll(){
+ const v=validate(); const ms=$('modelStatus');ms.textContent=v.msg;ms.className='status '+(v.ok?'valid':v.warn?'warn':'invalid');
+ if(!v.ok){drawMain();return}
+ if(S.mode==='single')renderSingle();else renderPair();
+ drawMain();renderMatrix();renderCalc();renderStatus();populateSensVars();requestAnimationFrame(()=>drawSensitivity(false));
+}
+function renderSingle(){
+ const x=S.single,r=singleBE(x),Q=S.demand,TC=tc(x,Q),TR=tr(x.p,Q),profit=TR-TC;
+ $('kpi1Label').textContent='Q_BE';$('kpi1').textContent=r.q==null?'N/A':n(r.q,2);
+ $('kpi2Label').textContent='TC @ Demand';$('kpi2').textContent=n(TC,2);
+ $('kpi3Label').textContent='TR @ Demand';$('kpi3').textContent=n(TR,2);
+ $('kpi4Label').textContent=S.locale==='id'?'Region':'Region';
+ const dec=profit>1e-9?'PROFIT REGION':profit<-1e-9?'LOSS REGION':'BREAK-EVEN REACHED';$('kpi4').textContent=dec;
+ $('decisionText').innerHTML=`<b>${dec}</b><br>${S.locale==='id'?'Profit pada demand':'Profit at demand'} = ${n(profit,3)} ${S.currency}/${S.period}`;
+ $('equationText').innerHTML=`TC(Q) = ${n(x.F)} + ${n(x.v)}Q<br>TR(Q) = ${n(x.p)}Q<br>CM = ${n(x.p-x.v)} ${S.currency}/unit`;
+ $('assumptionText').textContent=S.locale==='id'?`Status Q_BE: ${r.status}. Kapasitas = ${n(x.Qmax,0)} unit/${S.period}. Threshold batch praktis = ${r.practical??'N/A'}.`:`Q_BE status: ${r.status}. Capacity = ${n(x.Qmax,0)} units/${S.period}. Practical batch threshold = ${r.practical??'N/A'}.`;
+}
+function renderPair(){
+ const A=S.A,B=S.B,r=crossover(A,B),Q=S.demand,a=tc(A,Q),b=tc(B,Q),win=(Q<=A.Qmax&&Q<=B.Qmax)?lower(A,B,Q):(Q<=A.Qmax?'A':Q<=B.Qmax?'B':'NONE');
+ $('kpi1Label').textContent='Q*';$('kpi1').textContent=r.q==null?'N/A':n(r.q,2);
+ $('kpi2Label').textContent=`TC ${A.name} @ Demand`;$('kpi2').textContent=n(a,2);
+ $('kpi3Label').textContent=`TC ${B.name} @ Demand`;$('kpi3').textContent=n(b,2);
+ $('kpi4Label').textContent=S.locale==='id'?'Keputusan':'Decision';
+ const dec=win==='A'?`SELECT A`:win==='B'?`SELECT B`:win==='TIE'?'ECONOMIC TIE':'NO FEASIBLE SOLUTION';$('kpi4').textContent=dec;
+ const diff=Math.abs(b-a);
+ $('decisionText').innerHTML=`<b>${dec}</b><br>${win==='A'?A.name:win==='B'?B.name:''} ${win==='A'||win==='B'?(S.locale==='id'?'lebih murah':'lower cost')+' '+n(diff,3)+' '+S.currency+'/'+S.period:''}`;
+ $('equationText').innerHTML=`TC_A(Q) = ${n(A.F)} + ${n(A.v)}Q<br>TC_B(Q) = ${n(B.F)} + ${n(B.v)}Q<br>ΔTC = TC_B − TC_A`;
+ $('assumptionText').textContent=S.locale==='id'?`Status crossover: ${r.status}. Common capacity = ${n(r.common,0)} unit/${S.period}. Perbandingan berlaku untuk output/kualitas dan basis periode yang sama.`:`Crossover status: ${r.status}. Common capacity = ${n(r.common,0)} units/${S.period}. Comparison assumes same output/quality and period basis.`;
+}
+function renderCalc(){
+ if(!validate().ok){$('calcText').textContent='Model invalid / not comparable.';return}
+ if(S.mode==='single'){
+  const x=S.single,r=singleBE(x),cm=x.p-x.v,TC=r.q==null?null:tc(x,r.q),TR=r.q==null?null:tr(x.p,r.q);
+  $('calcText').textContent=`GIVEN
+F = ${x.F} ${S.currency}/${S.period}
+v = ${x.v} ${S.currency}/unit
+p = ${x.p} ${S.currency}/unit
+Qmax = ${x.Qmax} unit/${S.period}
+
+FIND
+Q_BE
+
+UNIT / DOMAIN CHECK
+Q ≥ 0; Q ≤ ${x.Qmax}
+
+EQUATIONS
+TC(Q) = F + vQ
+TR(Q) = pQ
+π(Q) = (p − v)Q − F
+CM = p − v = ${cm}
+
+SOLUTION
+Q_BE = F/(p − v) = ${r.q==null?'N/A':r.q}
+
+RESIDUAL CHECK
+TC(Q_BE) = ${TC==null?'N/A':TC}
+TR(Q_BE) = ${TR==null?'N/A':TR}
+Residual = ${TC==null?'N/A':TC-TR}
+
+PRACTICAL BATCH THRESHOLD
+${r.practical??'N/A'}
+
+STATUS
+${r.status}`;
+ }else{
+  const A=S.A,B=S.B,r=crossover(A,B),q=r.q;
+  $('calcText').textContent=`GIVEN
+A: F_A=${A.F}, v_A=${A.v}, Qmax_A=${A.Qmax}
+B: F_B=${B.F}, v_B=${B.v}, Qmax_B=${B.Qmax}
+
+EQUATIONS
+TC_A(Q)=F_A+v_AQ
+TC_B(Q)=F_B+v_BQ
+ΔTC(Q)=(F_B−F_A)+(v_B−v_A)Q
+
+SOLVE
+Q*=(F_B−F_A)/(v_A−v_B)
+Q*=${q==null?'N/A':q}
+
+RESIDUAL CHECK
+TC_A(Q*)=${q==null?'N/A':tc(A,q)}
+TC_B(Q*)=${q==null?'N/A':tc(B,q)}
+Residual=${q==null?'N/A':tc(A,q)-tc(B,q)}
+
+REGION TEST
+At Q=${S.demand}: TC_A=${tc(A,S.demand)}, TC_B=${tc(B,S.demand)}
+Winner=${lower(A,B,S.demand)}
+
+STATUS
+${r.status}`;
+ }
+}
+function renderMatrix(){
+ if(S.mode==='single'){
+ $('matrixHead').innerHTML='<tr><th>Item</th><th>F</th><th>v</th><th>p</th><th>Qmax</th><th>TC @ demand</th><th>TR @ demand</th><th>Status</th></tr>';
+ const r=singleBE(S.single);$('matrixBody').innerHTML=`<tr><td>Single Product</td><td>${n(S.single.F)}</td><td>${n(S.single.v)}</td><td>${n(S.single.p)}</td><td>${n(S.single.Qmax,0)}</td><td>${n(tc(S.single,S.demand))}</td><td>${n(tr(S.single.p,S.demand))}</td><td>${r.status}</td></tr>`;
+ }else{
+ $('matrixHead').innerHTML='<tr><th>Alternative</th><th>Fixed Cost</th><th>Variable/unit</th><th>Capacity</th><th>TC @ demand</th><th>Feasible</th><th>Region</th></tr>';
+ const win=lower(S.A,S.B,S.demand);$('matrixBody').innerHTML=[['A',S.A],['B',S.B]].map(([id,o])=>`<tr><td>${id} — ${o.name}</td><td>${n(o.F)}</td><td>${n(o.v)}</td><td>${n(o.Qmax,0)}</td><td>${n(tc(o,S.demand))}</td><td>${S.demand<=o.Qmax?'YES':'NO'}</td><td>${win===id?'LOWER COST':win==='TIE'?'TIE':'—'}</td></tr>`).join('');
+ }
+}
+function drawAxes(ctx,w,h,maxQ,maxY){
+ const m={l:64,r:22,t:38,b:48};ctx.clearRect(0,0,w,h);ctx.fillStyle='#081725';ctx.fillRect(0,0,w,h);
+ ctx.strokeStyle='#29465e';ctx.lineWidth=1;ctx.fillStyle='#9fb6ca';ctx.font='11px Segoe UI';
+ for(let i=0;i<=5;i++){const x=m.l+(w-m.l-m.r)*i/5;ctx.beginPath();ctx.moveTo(x,m.t);ctx.lineTo(x,h-m.b);ctx.stroke();ctx.fillText(n(maxQ*i/5,0),x-12,h-m.b+20)}
+ for(let i=0;i<=5;i++){const y=h-m.b-(h-m.t-m.b)*i/5;ctx.beginPath();ctx.moveTo(m.l,y);ctx.lineTo(w-m.r,y);ctx.stroke();ctx.fillText(n(maxY*i/5,0),5,y+4)}
+ ctx.strokeStyle='#9fb6ca';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(m.l,m.t);ctx.lineTo(m.l,h-m.b);ctx.lineTo(w-m.r,h-m.b);ctx.stroke();
+ return {m,x:q=>m.l+(w-m.l-m.r)*q/maxQ,y:v=>h-m.b-(h-m.t-m.b)*v/maxY};
+}
+function line(ctx,pts,color,width=2.5,dash=[]){ctx.save();ctx.strokeStyle=color;ctx.lineWidth=width;ctx.setLineDash(dash);ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.stroke();ctx.restore()}
+function drawMain(){
+ const c=$('mainChart'),box=$('chartWrap').getBoundingClientRect(),dpr=window.devicePixelRatio||1,w=Math.max(320,box.width),h=Math.max(360,box.height);
+ c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.width=w+'px';c.style.height=h+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+ if(S.mode==='single'){
+  const x=S.single,r=singleBE(x),maxQ=Math.max(x.Qmax,S.demand,(r.q&&r.q<1.5*x.Qmax?r.q:0),100),maxY=Math.max(tc(x,maxQ),tr(x.p,maxQ),1)*1.12,a=drawAxes(ctx,w,h,maxQ,maxY);
+  const tcPts=[[a.x(0),a.y(tc(x,0))],[a.x(maxQ),a.y(tc(x,maxQ))]],trPts=[[a.x(0),a.y(0)],[a.x(maxQ),a.y(tr(x.p,maxQ))]];
+  line(ctx,tcPts,'#35d7ff');line(ctx,trPts,'#61e294');
+  if(r.q!=null&&r.q>=0&&r.q<=maxQ){const xx=a.x(r.q),yy=a.y(tc(x,r.q));line(ctx,[[xx,a.m.t],[xx,h-a.m.b]],'#ffb454',1.5,[6,5]);ctx.fillStyle='#ffb454';ctx.beginPath();ctx.arc(xx,yy,6,0,Math.PI*2);ctx.fill();ctx.fillText('Q_BE '+n(r.q,1),xx+8,yy-10)}
+  drawDemand(ctx,a,S.demand,Math.min(S.demand,maxQ),h,'#4b8dff');
+  drawOperatingMarker(ctx,a,S.currentQ,maxQ,h);
+  $('legend').innerHTML='<div><span style="background:#35d7ff"></span>TC</div><div><span style="background:#61e294"></span>TR</div><div><span style="background:#ffb454"></span>Q_BE</div><div><span style="background:#4b8dff"></span>Demand</div><div><span style="background:#d875ff"></span>Current Q</div>';
+  $('chartTitle').textContent='TC(Q) vs TR(Q)';
+  $('chartSummary').textContent=(S.locale==='id'?`Grafik menunjukkan biaya total, pendapatan total, demand, kapasitas, dan titik impas. `:`Chart shows total cost, total revenue, demand, capacity, and break-even. `)+`Q_BE=${r.q==null?'N/A':n(r.q,2)}; status=${r.status}.`;
+ }else{
+  const A=S.A,B=S.B,r=crossover(A,B),maxCap=Math.max(A.Qmax,B.Qmax,S.demand,100),maxQ=(r.q!=null&&r.q>0&&r.q<maxCap*1.35)?Math.max(maxCap,r.q*1.08):maxCap,maxY=Math.max(tc(A,maxQ),tc(B,maxQ),1)*1.12,a=drawAxes(ctx,w,h,maxQ,maxY);
+  line(ctx,[[a.x(0),a.y(tc(A,0))],[a.x(maxQ),a.y(tc(A,maxQ))]],'#35d7ff');
+  line(ctx,[[a.x(0),a.y(tc(B,0))],[a.x(maxQ),a.y(tc(B,maxQ))]],'#61e294');
+  if(r.q!=null&&r.q>=0&&r.q<=maxQ){const xx=a.x(r.q),yy=a.y(tc(A,r.q));line(ctx,[[xx,a.m.t],[xx,h-a.m.b]],'#ffb454',1.5,[6,5]);ctx.fillStyle='#ffb454';ctx.beginPath();ctx.arc(xx,yy,6,0,Math.PI*2);ctx.fill();ctx.fillText('Q* '+n(r.q,1),xx+8,yy-10)}
+  const cc=Math.min(A.Qmax,B.Qmax);line(ctx,[[a.x(cc),a.m.t],[a.x(cc),h-a.m.b]],'#ff6b6b',1.4,[3,5]);drawDemand(ctx,a,S.demand,Math.min(S.demand,maxQ),h,'#4b8dff');
+  drawOperatingMarker(ctx,a,S.currentQ,maxQ,h);
+  $('legend').innerHTML=`<div><span style="background:#35d7ff"></span>A — ${A.name}</div><div><span style="background:#61e294"></span>B — ${B.name}</div><div><span style="background:#ffb454"></span>Q*</div><div><span style="background:#ff6b6b"></span>Common Capacity</div><div><span style="background:#4b8dff"></span>Demand</div><div><span style="background:#d875ff"></span>Current Q</div>`;
+  $('chartTitle').textContent='TC_A(Q) vs TC_B(Q)';
+  $('chartSummary').textContent=(S.locale==='id'?`Crossover analitik dan region keputusan dihitung dari fungsi biaya, bukan dari posisi pixel. `:`Analytical crossover and decision regions are computed from cost functions, not pixel positions. `)+`Q*=${r.q==null?'N/A':n(r.q,2)}; status=${r.status}.`;
+ }
+}
+
+function drawOperatingMarker(ctx,a,q,maxQ,h){
+ const qp=Math.max(0,Math.min(q,maxQ)),xx=a.x(qp);
+ line(ctx,[[xx,a.m.t],[xx,h-a.m.b]],'#d875ff',2.4,[2,4]);
+ ctx.fillStyle='#d875ff';ctx.font='bold 11px Segoe UI';
+ ctx.fillText('Current Q '+n(q,0),Math.min(xx+6,(ctx.canvas.width/(window.devicePixelRatio||1))-110),a.m.t+30);
+ function dot(y,label){
+   if(!Number.isFinite(y))return;
+   const yy=a.y(y);ctx.beginPath();ctx.arc(xx,yy,6,0,Math.PI*2);ctx.fillStyle='#d875ff';ctx.fill();
+   ctx.strokeStyle='#ffffff';ctx.lineWidth=1.5;ctx.stroke();
+   ctx.fillStyle='#f3d7ff';ctx.fillText(label+' '+n(y,2),Math.min(xx+8,(ctx.canvas.width/(window.devicePixelRatio||1))-130),yy-8);
+ }
+ if(S.mode==='single'){
+   dot(tc(S.single,qp),'TC');
+   dot(tr(S.single.p,qp),'TR');
+ }else{
+   dot(tc(S.A,qp),'TC_A');
+   dot(tc(S.B,qp),'TC_B');
+ }
+}
+
+function drawDemand(ctx,a,q,qplot,h,color){const xx=a.x(qplot);line(ctx,[[xx,a.m.t],[xx,h-a.m.b]],color,1.3,[8,4]);ctx.fillStyle=color;ctx.font='11px Segoe UI';ctx.fillText('Demand '+n(q,0),Math.min(xx+5,ctx.canvas.width/(window.devicePixelRatio||1)-95),a.m.t+14)}
+function renderStatus(){
+ const extra=S.mode==='single'?singleBE(S.single):crossover(S.A,S.B);
+ $('statusbar').innerHTML=`<span>Preset: <b>${S.preset}</b></span><span>Mode: <b>${S.mode}</b></span><span>Current Q: <b>${n(S.currentQ,0)}</b></span><span>Demand: <b>${n(S.demand,0)}</b></span><span>Status: <b>${extra.status}</b></span><span>Renderer: <b>READY</b></span><span>Animation: <b>${S.anim?'PLAY':'PAUSED'}</b></span>`;
+ if($('currentQValue')) $('currentQValue').textContent=n(S.currentQ,0);
+ if($('currentQReadout')) $('currentQReadout').classList.toggle('active',!!S.anim);
+ $('playBtn').disabled=!!S.anim;
+ $('pauseBtn').disabled=!S.anim;
+}
+function setLocale(loc){S.locale=loc;document.documentElement.lang=loc;$('idBtn').classList.toggle('active',loc==='id');$('enBtn').classList.toggle('active',loc==='en');document.querySelectorAll('[data-i18n]').forEach(e=>{const k=e.dataset.i18n;if(I18N[loc][k])e.textContent=I18N[loc][k]});renderAll()}
+function bind(){
+ $('preset').onchange=e=>applyPreset(e.target.value);$('singleModeBtn').onclick=()=>{stopAnim();S.mode='single';S.currentQ=Math.min(S.currentQ,S.single.Qmax);syncUI();renderAll()};$('pairModeBtn').onclick=()=>{stopAnim();S.mode='pair';S.currentQ=Math.min(S.currentQ,Math.max(S.A.Qmax,S.B.Qmax));syncUI();renderAll()};
+ document.querySelectorAll('input,select').forEach(el=>{if(['preset','sensVar','sensPct','demand'].includes(el.id))return;el.addEventListener('input',()=>{readUI();renderAll()})});
+ $('demand').oninput=e=>{S.demand=+e.target.value;$('demandNum').value=S.demand;$('demandLabel').textContent=n(S.demand,0);renderAll()};
+ $('demandNum').oninput=e=>{S.demand=+e.target.value;$('demand').value=S.demand;renderAll()};
+ $('resetBtn').onclick=()=>{stopAnim();applyPreset(S.preset)};$('autoAnalyze').onclick=()=>{readUI();renderAll();activateTab('calc')};
+ $('idBtn').onclick=()=>setLocale('id');$('enBtn').onclick=()=>setLocale('en');$('printBtn').onclick=()=>window.print();
+ $('recordBtn').onclick=recordTrial;$('exportBtn').onclick=exportCSV;$('clearTrials').onclick=()=>{if(confirm('Clear recorded trials?')){S.trials=[];renderTrials()}};
+ $('selfTestBtn').onclick=()=>{runSelfTests();activateTab('testsTab')};
+ $('runSensBtn').onclick=()=>drawSensitivity(true);
+ $('playBtn').onclick=startAnim;
+ $('pauseBtn').onclick=stopAnim;
+ $('stepBtn').onclick=()=>stepVolume();
+ $('jumpBtn').onclick=jumpIntersection;
+ $('demandBtn').onclick=()=>jumpToDemand();
+ document.querySelectorAll('.tabbar .btn').forEach(b=>b.onclick=()=>activateTab(b.dataset.tab));
+ $('checkChallenge').onclick=checkChallenge;$('newChallenge').onclick=()=>{S.challengeIndex=(S.challengeIndex+1)%challenges.length;S.hints=0;renderChallenge()};$('hintBtn').onclick=showHint;
+ window.addEventListener('resize',()=>requestAnimationFrame(()=>{drawMain();drawSensitivity(false)}));
+ if(window.ResizeObserver){new ResizeObserver(()=>requestAnimationFrame(drawMain)).observe($('chartWrap'))}
+}
+function activateTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));document.querySelectorAll('.tabbar .btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===id));if(id==='sensitivity')requestAnimationFrame(()=>drawSensitivity(false))}
+function flashNavigation(message,buttonId){
+ const el=$('currentQReadout'),btn=$(buttonId);
+ if(el){
+   el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+   el.innerHTML=message+'<br><b>Current Q = '+n(S.currentQ,0)+'</b>';
+ }
+ if(btn){btn.classList.remove('flash');void btn.offsetWidth;btn.classList.add('flash')}
+ setTimeout(()=>{
+   if(el) el.innerHTML='Current Q = <b id="currentQValue">'+n(S.currentQ,0)+'</b>';
+   renderStatus();
+ },850);
+}
+
+function refreshOperatingMarker(){
+ if($('currentQValue')) $('currentQValue').textContent=n(S.currentQ,0);
+ drawMain();
+ renderStatus();
+}
+function startAnim(){
+ if(S.anim)return;
+ S.currentQ=0;
+ refreshOperatingMarker();
+ S.anim=setInterval(()=>{
+   const step=Math.max(1,maxAnimQ()/80);
+   S.currentQ=Math.min(maxAnimQ(),S.currentQ+step);
+   refreshOperatingMarker();
+   if(S.currentQ>=maxAnimQ())stopAnim();
+ },70);
+ renderStatus();
+}
+function stopAnim(){if(S.anim){clearInterval(S.anim);S.anim=null}renderStatus()}
+function maxAnimQ(){return S.mode==='single'?S.single.Qmax:Math.max(S.A.Qmax,S.B.Qmax)}
+function stepVolume(){
+ const step=Math.max(1,Math.round(maxAnimQ()/40));
+ S.currentQ=Math.min(maxAnimQ(),S.currentQ+step);
+ refreshOperatingMarker();
+}
+function jumpToDemand(){
+ stopAnim();
+ const start=Number.isFinite(S.currentQ)?S.currentQ:0,target=S.demand,duration=420,t0=performance.now();
+ if(Math.abs(start-target)<1e-9){
+   S.currentQ=target;refreshOperatingMarker();
+   flashNavigation(S.locale==='id'?'Sudah berada di DEMAND':'Already at DEMAND','demandBtn');
+   return;
+ }
+ function frame(now){
+   const t=Math.min(1,(now-t0)/duration),ease=1-Math.pow(1-t,3);
+   S.currentQ=start+(target-start)*ease;
+   refreshOperatingMarker();
+   if(t<1)requestAnimationFrame(frame);
+   else{
+     S.currentQ=target;refreshOperatingMarker();
+     flashNavigation(S.locale==='id'?'Dipindahkan ke DEMAND':'Moved to DEMAND','demandBtn');
+   }
+ }
+ requestAnimationFrame(frame);
+}
+
+function jumpIntersection(){
+ const r=S.mode==='single'?singleBE(S.single):crossover(S.A,S.B);
+ if(r.q!=null&&Number.isFinite(r.q)&&r.q>=0){
+   stopAnim();
+   const start=Number.isFinite(S.currentQ)?S.currentQ:0,target=r.q,duration=420,t0=performance.now();
+   function frame(now){
+     const t=Math.min(1,(now-t0)/duration),ease=1-Math.pow(1-t,3);
+     S.currentQ=start+(target-start)*ease;refreshOperatingMarker();
+     if(t<1)requestAnimationFrame(frame);
+     else{
+       S.currentQ=target;refreshOperatingMarker();
+       flashNavigation(S.locale==='id'?(S.mode==='single'?'Dipindahkan ke BREAK-EVEN':'Dipindahkan ke CROSSOVER'):(S.mode==='single'?'Moved to BREAK-EVEN':'Moved to CROSSOVER'),'jumpBtn');
+     }
+   }
+   requestAnimationFrame(frame);
+ }else{
+   flashNavigation(S.locale==='id'?'Tidak ada titik valid':'No valid intersection','jumpBtn');
+ }
+}
+function populateSensVars(){
+ const sel=$('sensVar'),old=sel.value,opts=S.mode==='single'?[['F','F'],['v','v'],['p','p']]:[['FA','F_A'],['vA','v_A'],['FB','F_B'],['vB','v_B']];
+ sel.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join('');if(opts.some(o=>o[0]===old))sel.value=old;
+}
+function sensValue(key,f){
+ if(S.mode==='single'){const x={...S.single};x[key]*=f;return singleBE(x).q}
+ const A={...S.A},B={...S.B}; if(key==='FA')A.F*=f;if(key==='vA')A.v*=f;if(key==='FB')B.F*=f;if(key==='vB')B.v*=f;return crossover(A,B).q
+}
+function drawSensitivity(updateText=true){
+ const c=$('sensChart'),box=c.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1,w=Math.max(300,box.width),h=Math.max(260,box.height);c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+ const key=$('sensVar').value|| (S.mode==='single'?'F':'FA'),pct=Math.max(5,+$('sensPct').value||50)/100,pts=[];for(let i=0;i<=40;i++){const f=1-pct+2*pct*i/40,q=sensValue(key,f);if(Number.isFinite(q)&&q>=0)pts.push({f,q})}
+ const maxY=Math.max(1,...pts.map(p=>p.q))*1.1,a=drawAxes(ctx,w,h,1+pct-(1-pct),maxY); // temporary x domain width
+ if(pts.length){const xmin=1-pct,xmax=1+pct,mp={l:64,r:22,t:38,b:48},X=f=>mp.l+(w-mp.l-mp.r)*(f-xmin)/(xmax-xmin),Y=q=>h-mp.b-(h-mp.t-mp.b)*q/maxY;line(ctx,pts.map(p=>[X(p.f),Y(p.q)]),'#35d7ff',2.5);line(ctx,[[X(1),mp.t],[X(1),h-mp.b]],'#ffb454',1.2,[5,4])}
+ if(updateText)$('sensSummary').textContent=(S.locale==='id'?'Sensitivitas dihitung ulang secara analitik untuk setiap titik; variabel lain ditahan tetap.':'Sensitivity is analytically recomputed at every point; all other variables are held constant.');
+}
+function recordTrial(){
+ const r=S.mode==='single'?singleBE(S.single):crossover(S.A,S.B),dec=$('kpi4').textContent;
+ S.trials.push({id:S.trials.length+1,preset:S.preset,mode:S.mode,demand:S.demand,q:r.q,status:r.status,decision:dec,time:new Date().toLocaleString()});renderTrials();activateTab('trials')
+}
+function renderTrials(){$('trialsBody').innerHTML=S.trials.map(t=>`<tr><td>${t.id}</td><td>${t.preset}</td><td>${t.mode}</td><td>${n(t.demand,2)}</td><td>${t.q==null?'N/A':n(t.q,3)}</td><td>${t.status}</td><td>${t.decision}</td><td>${t.time}</td></tr>`).join('')}
+function csvEsc(x){x=String(x??'');if(/^[=+\-@]/.test(x))x="'"+x;return '"'+x.replaceAll('"','""')+'"'}
+function exportCSV(){
+ const rows=[['trial_id','preset','mode','demand','break_even_or_crossover','status','decision','timestamp'],...S.trials.map(t=>[t.id,t.preset,t.mode,t.demand,t.q??'N/A',t.status,t.decision,t.time])];
+ if(rows.length===1){recordTrial();return exportCSV()}
+ const blob=new Blob(['\ufeff'+rows.map(r=>r.map(csvEsc).join(',')).join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='break_even_trials.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)
+}
+function runSelfTests(){
+ const tests=[]; const add=(name,actual,expected,tol=1e-9)=>tests.push({name,actual,expected,pass:typeof expected==='string'?actual===expected:Math.abs(actual-expected)<=tol*Math.max(1,Math.abs(expected))});
+ add('T01 Q_BE',singleBE({F:100,v:4,p:9,Qmax:1e9}).q,20);add('T01 TC',tc({F:100,v:4},20),180);add('T02 F=0',singleBE({F:0,v:4,p:9,Qmax:1e9}).q,0);
+ add('T03 p=v',singleBE({F:100,v:5,p:5,Qmax:1e9}).status,'NO_FINITE_BREAK_EVEN');add('T04 all tie',singleBE({F:0,v:5,p:5,Qmax:1e9}).status,'ALL_VOLUME_TIE');
+ add('T05 p<v',singleBE({F:100,v:6,p:5,Qmax:1e9}).status,'NO_FEASIBLE_BREAK_EVEN');
+ add('T06 crossover',crossover({F:80,v:.26,Qmax:1e9},{F:320,v:.10,Qmax:1e9}).q,1500,1e-10);
+ add('T06 equality',tc({F:80,v:.26},1500),470,1e-10);
+ add('T07 parallel',crossover({F:100,v:.20,Qmax:1e9},{F:180,v:.20,Qmax:1e9}).status,'NO_CROSSOVER');
+ add('T08 identical',crossover({F:150,v:.15,Qmax:1e9},{F:150,v:.15,Qmax:1e9}).status,'ALL_VOLUME_TIE');
+ add('T09 negative',crossover({F:300,v:.10,Qmax:1e9},{F:100,v:.20,Qmax:1e9}).q,-2000,1e-10);
+ add('T10 cap',singleBE({F:100,v:0,p:.05,Qmax:1500}).status,'OUTSIDE_FEASIBLE_CAPACITY');
+ const pass=tests.filter(t=>t.pass).length;$('testOutput').textContent=`${pass}/${tests.length} PASS\n\n`+tests.map(t=>`${t.pass?'PASS':'FAIL'}  ${t.name}\n  actual: ${t.actual}\n  expected: ${t.expected}`).join('\n\n')
+}
+const challenges=[
+ {q:'F=100, v=4, p=9. Berapa Q_BE?',a:20,h:['Cari CM=p−v.','Gunakan Q_BE=F/CM.','100/(9−4).']},
+ {q:'Manual F=80, v=.26 dan CNC F=320, v=.10. Berapa Q*?',a:1500,h:['Samakan TC_A dan TC_B.','Q*=(F_B−F_A)/(v_A−v_B).','(320−80)/(.26−.10).']},
+ {q:'F=240, v=.18, p=.30. Berapa Q_BE?',a:2000,h:['Hitung margin kontribusi.','CM=.30−.18=.12.','240/.12.']},
+ {q:'A: F=60,v=.30; B: F=510,v=.09. Berapa crossover?',a:2142.857142857,h:['Gunakan selisih fixed cost.','Bagi dengan selisih slope.','450/.21.']}
+];
+function renderChallenge(){const c=challenges[S.challengeIndex];$('challengeQuestion').innerHTML=`<b>${S.locale==='id'?'Tantangan':'Challenge'} ${S.challengeIndex+1}</b><br>${c.q}`;$('challengeAnswer').value='';$('challengeFeedback').textContent=''}
+function checkChallenge(){const c=challenges[S.challengeIndex],a=+$('challengeAnswer').value,tol=1e-4*Math.max(1,Math.abs(c.a));$('challengeFeedback').textContent=Math.abs(a-c.a)<=tol?(S.locale==='id'?'Benar. Periksa juga satuan dan domain.':'Correct. Also check units and domain.'):(S.locale==='id'?'Belum tepat. Gunakan hint bila perlu.':'Not yet. Use a hint if needed.')}
+function showHint(){const c=challenges[S.challengeIndex];S.hints=Math.min(c.h.length,S.hints+1);$('challengeFeedback').textContent=c.h.slice(0,S.hints).join(' → ')}
+bind();applyPreset('manualcnc');renderTrials();renderChallenge();setLocale('id');
+</script>
+
+<style id="vlEduStyle">
+#vlEduDock{position:fixed;right:16px;bottom:16px;z-index:2147483000;font-family:Inter,Segoe UI,Arial,sans-serif;color:#eef7ff}
+#vlEduOpen{border:1px solid #43d3ff;background:linear-gradient(135deg,#0d7199,#245da8);color:white;border-radius:999px;padding:11px 16px;font-weight:800;box-shadow:0 10px 28px #0008;cursor:pointer}
+#vlEduPanel{position:fixed;right:16px;bottom:68px;width:min(430px,calc(100vw - 24px));max-height:min(76vh,760px);display:none;flex-direction:column;background:#081827;border:1px solid #315b78;border-radius:15px;box-shadow:0 22px 60px #000b;overflow:hidden}
+#vlEduPanel.open{display:flex} #vlEduHead{padding:12px 14px;background:#0d2940;border-bottom:1px solid #31516d;display:flex;justify-content:space-between;gap:10px;align-items:center}
+#vlEduHead b{font-size:14px} #vlEduHead small{display:block;color:#9fc2d9;margin-top:2px} #vlEduClose{border:0;background:transparent;color:#fff;font-size:20px;cursor:pointer}
+#vlEduTabs{display:flex;gap:4px;overflow:auto;padding:8px;background:#071522;border-bottom:1px solid #233f58} .vlEduTab{white-space:nowrap;border:1px solid #2d4d67;background:#0b1d2e;color:#bcd0df;border-radius:8px;padding:6px 8px;font-size:11px;cursor:pointer} .vlEduTab.on{background:#0c6688;color:#fff;border-color:#37c9f5}
+#vlEduBody{padding:12px;overflow:auto} .vlEduPane{display:none} .vlEduPane.on{display:block} .vlEduCard{background:#0b2032;border:1px solid #294964;border-radius:10px;padding:10px;margin:8px 0} .vlEduCard h4{margin:0 0 6px;color:#bcefff;font-size:13px} .vlEduCard p,.vlEduCard li{font-size:12px;line-height:1.48;color:#d2e2ee} .vlEduStep{padding:8px 9px;margin:6px 0;border-left:3px solid #3bc9f3;background:#0a1d2d;border-radius:6px;font-size:12px} .vlEduStep.done{border-left-color:#54df9a;opacity:.8}
+.vlEduBtn{border:1px solid #37617d;background:#102a40;color:#eef7ff;border-radius:8px;padding:7px 9px;cursor:pointer;font-size:12px} .vlEduBtn.primary{background:#0b7398;border-color:#34c9f4} .vlEduBtn.good{background:#155b41;border-color:#3aa779}
+.vlEduOpt{display:block;width:100%;text-align:left;margin:6px 0} .vlEduFeedback{font-size:12px;margin-top:8px;padding:8px;border-radius:8px;background:#071522;color:#cce4f3} .vlEduTerm{border-bottom:1px solid #21405a;padding:8px 2px;cursor:pointer} .vlEduTerm b{color:#8ee6ff} .vlEduDef{display:none;color:#cadbe7;font-size:12px;margin-top:4px} .vlEduTerm.open .vlEduDef{display:block}
+#vlEduCoach{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:2147482999;max-width:min(720px,90vw);background:#0b2438;border:1px solid #38c6ef;border-radius:12px;padding:10px 14px;box-shadow:0 12px 32px #0009;color:#eaf8ff;font:12px/1.45 Inter,Segoe UI,Arial,sans-serif;display:none} #vlEduCoach.show{display:block}
+.vlEduProgress{height:8px;background:#06121d;border:1px solid #294861;border-radius:999px;overflow:hidden} .vlEduProgress>div{height:100%;background:linear-gradient(90deg,#27bde7,#51de9b);width:0%;transition:.2s}
+@media(max-width:600px){#vlEduDock{right:8px;bottom:8px}#vlEduPanel{right:6px;bottom:58px;width:calc(100vw - 12px);max-height:82vh}#vlEduOpen{padding:9px 12px;font-size:12px}}
+@media print{#vlEduDock,#vlEduPanel,#vlEduCoach{display:none!important}}
+</style>
+<div id="vlEduDock"><button id="vlEduOpen" type="button">🎓 Learning Assistant</button></div>
+<div id="vlEduPanel" role="dialog" aria-label="Learning Assistant">
+ <div id="vlEduHead"><div><b>Learning Assistant</b><small>Analisis Break-Even</small></div><button id="vlEduClose" type="button">×</button></div>
+ <div id="vlEduTabs">
+  <button class="vlEduTab on" data-p="guide">Guided Learning</button><button class="vlEduTab" data-p="next">Apa yang harus saya lakukan?</button><button class="vlEduTab" data-p="predict">Prediction</button><button class="vlEduTab" data-p="explain">Explanation</button><button class="vlEduTab" data-p="gloss">Glossary</button><button class="vlEduTab" data-p="quiz">Checkpoint</button><button class="vlEduTab" data-p="summary">Summary</button>
+ </div>
+ <div id="vlEduBody"></div>
+</div><div id="vlEduCoach"></div>
+<script id="vlEduScript">
+(function(){
+ const C={"key": "breakeven", "title": "Analisis Break-Even", "objective": "Menentukan titik impas volume dan crossover dua alternatif proses/mesin.", "prediction": "Jika biaya tetap sebuah mesin meningkat sementara biaya variabel/unit tetap, apa yang terjadi pada BEP volume tunggal?", "predopts": ["Cenderung meningkat", "Cenderung menurun", "Tidak berubah"], "predans": 0, "explain": "Break-even adalah titik saat dua besaran ekonomi sama. Pada single product, revenue = total cost. Pada dua alternatif, total cost A = total cost B. Di kiri/kanan titik tersebut alternatif ekonomis dapat berubah.", "terms": {"F": "Fixed Cost — biaya tetap yang tidak berubah terhadap volume pada rentang relevan.", "v": "Variable Cost per unit.", "p": "Selling price per unit.", "Q": "Volume produksi/penjualan.", "BEP": "Break-Even Point — titik saat profit = 0 atau dua alternatif sama biaya.", "Crossover": "Volume ketika total cost dua alternatif sama."}, "quiz": [["Pada single product, BEP tercapai ketika…", ["Total revenue = total cost", "Fixed cost = 0", "Variable cost = 0"], 0], ["Crossover dua mesin menunjukkan…", ["Volume saat biaya total keduanya sama", "Volume maksimum mesin", "Harga jual optimum"], 0]]};
+ const S={step:0,pred:null,quiz:{},runs:0,opened:false};
+ const steps=[
+  ['1. Pahami kasus','Baca tujuan, preset, dan arti parameter sebelum mengubah angka.'],
+  ['2. Buat prediksi','Jawab Prediction Before Run sebelum menjalankan simulasi pertama.'],
+  ['3. Atur parameter','Ubah satu atau dua parameter penting agar hubungan sebab–akibat mudah diamati.'],
+  ['4. Jalankan simulasi','Gunakan tombol Play/Run/Analyze/Recalculate pada modul.'],
+  ['5. Amati hasil','Perhatikan grafik, timeline, result card, dan nilai keputusan yang berubah.'],
+  ['6. Jelaskan','Gunakan Contextual Explanation dan hubungkan hasil dengan konsep ekonomi teknik.'],
+  ['7. Uji & simpulkan','Kerjakan Checkpoint Quiz lalu buka Learning Summary.']
+ ];
+ const $=s=>document.querySelector(s), body=$('#vlEduBody'), panel=$('#vlEduPanel'), coach=$('#vlEduCoach');
+ function esc(x){return String(x).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
+ function progress(){let q=Object.keys(S.quiz).length, done=Math.min(7,(S.step>0?1:0)+(S.pred!==null?1:0)+(S.runs>0?2:0)+q); return Math.round(done/7*100)}
+ function msg(t){coach.textContent=t;coach.classList.add('show');clearTimeout(msg.t);msg.t=setTimeout(()=>coach.classList.remove('show'),5200)}
+ function openPane(p){panel.classList.add('open');document.querySelectorAll('.vlEduTab').forEach(x=>x.classList.toggle('on',x.dataset.p===p));render(p);S.opened=true}
+ function render(p){
+   if(p==='guide') body.innerHTML=`<div class="vlEduCard"><h4>Tujuan Belajar</h4><p>${esc(C.objective)}</p><div class="vlEduProgress"><div style="width:${progress()}%"></div></div><p>Progress pembelajaran: <b>${progress()}%</b></p></div>`+steps.map((x,i)=>`<div class="vlEduStep ${i<S.step?'done':''}"><b>${x[0]}</b><br>${x[1]}</div>`).join('')+`<button class="vlEduBtn primary" id="vlEduAdvance">Lanjutkan tahap</button>`;
+   if(p==='next'){let i=Math.min(S.step,steps.length-1);body.innerHTML=`<div class="vlEduCard"><h4>${steps[i][0]}</h4><p>${steps[i][1]}</p></div><button class="vlEduBtn primary" id="vlEduDoNext">Tandai selesai & lanjut</button><div class="vlEduCard"><h4>Petunjuk cepat</h4><p>Jika bingung, ubah hanya satu parameter, jalankan simulasi, lalu bandingkan hasil sebelum dan sesudah perubahan.</p></div>`}
+   if(p==='predict') body.innerHTML=`<div class="vlEduCard"><h4>Prediction Before Run</h4><p>${esc(C.prediction)}</p>${C.predopts.map((o,i)=>`<button class="vlEduBtn vlEduOpt" data-pred="${i}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlPredFb">${S.pred===null?'Pilih prediksi sebelum eksperimen pertama.':(S.pred===C.predans?'Prediksi Anda sesuai dengan hubungan konsep dasar.':'Prediksi Anda belum sesuai. Jalankan simulasi dan amati mengapa hasilnya berbeda.')}</div></div>`;
+   if(p==='explain') body.innerHTML=`<div class="vlEduCard"><h4>Contextual Explanation</h4><p>${esc(C.explain)}</p></div><div class="vlEduCard"><h4>Cara membaca hasil saat ini</h4><p>1) identifikasi input yang Anda ubah; 2) lihat output yang paling terdampak; 3) tentukan arah perubahan; 4) hubungkan dengan rumus/konsep; 5) tulis implikasi keputusan engineering.</p></div>`;
+   if(p==='gloss') body.innerHTML=`<div class="vlEduCard"><h4>Interactive Glossary</h4><p>Klik istilah untuk membuka penjelasan.</p>${Object.entries(C.terms).map(([k,v])=>`<div class="vlEduTerm"><b>${esc(k)}</b><div class="vlEduDef">${esc(v)}</div></div>`).join('')}</div>`;
+   if(p==='quiz') body.innerHTML=C.quiz.map((q,qi)=>`<div class="vlEduCard"><h4>Checkpoint ${qi+1}</h4><p>${esc(q[0])}</p>${q[1].map((o,oi)=>`<button class="vlEduBtn vlEduOpt" data-q="${qi}" data-o="${oi}">${esc(o)}</button>`).join('')}<div class="vlEduFeedback" id="vlQ${qi}">${S.quiz[qi]===undefined?'Pilih satu jawaban.':(S.quiz[qi]===q[2]?'Tepat. Anda dapat melanjutkan ke konsep berikutnya.':'Belum tepat. Buka Explanation/Glossary lalu coba lagi.')}</div></div>`).join('');
+   if(p==='summary'){let qc=C.quiz.length,qr=Object.values(S.quiz).filter((v,i)=>v===C.quiz[i][2]).length;body.innerHTML=`<div class="vlEduCard"><h4>Learning Summary</h4><p><b>Modul:</b> ${esc(C.title)}</p><p><b>Tujuan:</b> ${esc(C.objective)}</p><p>Prediksi: <b>${S.pred===null?'belum dijawab':(S.pred===C.predans?'sesuai':'perlu ditinjau')}</b><br>Eksperimen terdeteksi: <b>${S.runs}</b><br>Checkpoint benar: <b>${qr}/${qc}</b><br>Progress: <b>${progress()}%</b></p></div><div class="vlEduCard"><h4>Refleksi</h4><p>Sebelum keluar dari modul, jelaskan dengan kalimat Anda sendiri: parameter apa yang paling berpengaruh, mengapa output berubah, dan apa implikasinya pada keputusan engineering.</p></div>`}
+   bind();
+ }
+ function bind(){
+   const a=$('#vlEduAdvance'); if(a)a.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('guide');msg('Tahap berikutnya dibuka.')};
+   const n=$('#vlEduDoNext'); if(n)n.onclick=()=>{S.step=Math.min(steps.length,S.step+1);render('next')};
+   document.querySelectorAll('[data-pred]').forEach(b=>b.onclick=()=>{S.pred=+b.dataset.pred;S.step=Math.max(S.step,2);render('predict')});
+   document.querySelectorAll('.vlEduTerm').forEach(t=>t.onclick=()=>t.classList.toggle('open'));
+   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{S.quiz[+b.dataset.q]=+b.dataset.o;S.step=Math.max(S.step,6);render('quiz')});
+ }
+ $('#vlEduOpen').onclick=()=>openPane('guide'); $('#vlEduClose').onclick=()=>panel.classList.remove('open');
+ document.querySelectorAll('.vlEduTab').forEach(b=>b.onclick=()=>openPane(b.dataset.p));
+ document.addEventListener('click',e=>{
+   const b=e.target.closest('button'); if(!b||b.closest('#vlEduPanel')||b.id==='vlEduOpen')return;
+   const tx=(b.textContent||'').trim().toUpperCase();
+   if(/PLAY|AUTO RUN|AUTO ANALYZE|AUTO EVALUATE|GENERATE ANALYSIS|RECALCULATE|COMPARE|SOLVE YTM|RUN SENSITIVITY|BUILD TORNADO|BUILD SPIDER/.test(tx)){
+      if(S.pred===null && S.runs===0){e.preventDefault();e.stopImmediatePropagation();openPane('predict');msg('Sebelum menjalankan eksperimen pertama, buat prediksi terlebih dahulu. Setelah memilih, tekan tombol simulasi lagi.');return false;}
+      S.runs++; S.step=Math.max(S.step,4); msg('Eksperimen terdeteksi. Sekarang amati grafik/result card dan buka Contextual Explanation.');
+   }
+ },true);
+ setTimeout(()=>msg('Learning Assistant aktif. Mulai dari Guided Learning untuk mengikuti alur praktikum.'),900);
+})();
+</script>
+</body>
+</html>
